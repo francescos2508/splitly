@@ -15,16 +15,50 @@ export default function Index() {
 }
  */
 
-import { supabase } from "@/src/lib/supabase";
-import { View, Text } from "react-native";
+import { colors } from '@/src/constants/colors';
+import { sp } from '@/src/constants/spacing';
+import { router } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+
 
 export default function Index() {
 
-  console.log(supabase);
+  // console.log(supabase);
 
   return (
-    <View>
-      <Text>Splitly</Text>
+    <View style={{flex: 1, justifyContent: "center", alignItems:"center"}}>
+      <View style={styles.body}>
+        <Text style={styles.welcome}>Welcome to Splitly</Text>
+        <Pressable  style={styles.btn} onPress={() => router.push('/groups')}>
+          <Text style={styles.btnText}>Continue</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  welcome: {
+    fontSize: 28,
+    fontWeight: 700,
+    marginBottom: sp[2]},
+  body:{
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: sp[1],
+    width: "100%",
+  },
+  btn: {
+    width: "100%",
+    paddingVertical: 14,
+    alignItems: "center",
+    borderRadius: 10,
+    marginBottom: 12,
+    backgroundColor: colors['primary'],
+  },
+  btnText: {
+    color: colors['white'],
+    fontSize: 16,
+    fontWeight: "600",
+  }
+})

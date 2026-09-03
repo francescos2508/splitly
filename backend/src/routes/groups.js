@@ -4,101 +4,201 @@ const router = express.Router();
 const supabase = require("../config/supabase");
 
 const {
-  generateInviteCode,
-  generateMemberToken,
-  generateRecoveryCode,
+    generateInviteCode,
+    generateMemberToken,
+    generateRecoveryCode,
 } = require("../utils/generateCode");
 
 const generateAvatarColor = () => { return '#000000' }
 
 router.post("/", async (req, res) => {
-  const { groupName, userName } = req.body;
+    const {groupName} = req.body;
+    let {userName} = req.body;
+    try {
+        // check memberToken
+        const authHeader = req.headers.authorization;
+        let memberToken = null, recoveryCode = null;
 
-  if (!groupName || !userName) {
-    return res.status(400).json({
-      error: "groupName and userName are required",
-    });
-  }
+        if (authHeader && authHeader.startsWith('Bearer ')) memberToken = authHeader.split(' ')[1];
+        console.log(memberToken);
+        if (memberToken) {
+            const { data: existingMember, error: memberError } = await supabase
+                .from('group_members')
+                .select('member_token, name, recovery_code')
+                .eq('member_token', memberToken)
+                .limit(1)
+                .maybeSingle();
 
-  try {
-    let inviteCode;
-    let exists = true;
+            if (memberError) throw memberError;
+            if (!existingMember) {
+                return res.status(401).json({
+                    error: "Invalid member token"
+                });
+            }
+            recoveryCode = existingMember.recovery_code;
+            userName = existingMember.name;
+        }
 
-    while (exists) {
-        inviteCode = generateInviteCode();
+        if (!memberToken) memberToken = generateMemberToken();
+        if (!recoveryCode) recoveryCode = generateRecoveryCode();
 
-        const { data } = await supabase
+        if (!groupName || !userName) {
+            return res.status(400).json({
+                error: "groupName and userName are required",
+            });
+        }
+
+        let inviteCode;
+        let exists = true;
+
+        while (exists) {
+            inviteCode = generateInviteCode();
+
+            const { data } = await supabase
+                .from("groups")
+                .select("id")
+                .eq("invite_code", inviteCode)
+                .maybeSingle();
+
+            exists = !!data;
+        }
+
+        // crea gruppo
+        const { data: group, error: groupError } = await supabase
             .from("groups")
-            .select("id")
-            .eq("invite_code", inviteCode)
+            .insert({
+                name: groupName,
+                invite_code: inviteCode,
+            })
+            .select()
             .single();
 
-        exists = !!data;
+        if (groupError) throw groupError;
+
+
+        // crea membro proprietario
+        const { data: member, error: memberError } = await supabase
+            .from("group_members")
+            .insert({
+                group_id: group.id,
+                name: userName,
+                member_token: memberToken,
+                recovery_code: recoveryCode,
+                is_owner: true,
+                avatar_color: "#0044ff",
+            })
+            .select()
+            .single();
+
+        if (memberError) throw memberError;
+
+
+        // log attività
+        await supabase
+            .from("activity_log")
+            .insert({
+                group_id: group.id,
+                member_id: member.id,
+                event_type: "group_created",
+                entity_type: "group",
+                entity_id: group.id,
+                description: "Group created",
+            });
+
+
+        res.status(201).json({
+            group,
+            member,
+        });
+
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: "Internal server error",
+        });
     }
+});
 
-    // 1. crea gruppo
-    const { data: group, error: groupError } = await supabase
-      .from("groups")
-      .insert({
-        name: groupName,
-        invite_code: inviteCode,
-      })
-      .select()
-      .single();
+// my groups
+router.get("/me", async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
 
-    if (groupError) throw groupError;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({
+                error: "Missing authentication token",
+            });
+        }
 
+        const memberToken = authHeader.split(" ")[1];
+        if (memberToken.length < 1) return res.json([]);
 
-    // 2. crea membro proprietario
-    const { data: member, error: memberError } = await supabase
-      .from("group_members")
-      .insert({
-        group_id: group.id,
-        name: userName,
-        member_token: generateMemberToken(),
-        recovery_code: generateRecoveryCode(),
-        is_owner: true,
-        avatar_color: "#0044ff",
-      })
-      .select()
-      .single();
+        const { data: groupMembers, error: memberError } = await supabase
+            .from("group_members")
+            .select(`
+                group_id,
+                groups (
+                    id,
+                    name,
+                    currency,
+                    group_members (count)
+                )
+            `)
+            .eq("member_token", memberToken)
+            .eq("is_active", true);
 
-    if (memberError) throw memberError;
+        if (memberError) throw memberError;
 
+        if (!groupMembers || groupMembers.length === 0) {
+            return res.json([]);
+        }
 
-    // 3. log attività
-    await supabase
-      .from("activity_log")
-      .insert({
-        group_id: group.id,
-        member_id: member.id,
-        event_type: "group_created",
-        entity_type: "group",
-        entity_id: group.id,
-        description: "Group created",
-      });
+        const groups = groupMembers.map((g) => g.groups);
 
+        return res.json(groups);
 
-    res.status(201).json({
-      group,
-      member,
-    });
+    } catch (error) {
+        console.error(error);
 
+        return res.status(500).json({
+            error: "Internal server error",
+        });
+    }
+});
 
-  } catch (error) {
-    console.error(error);
+router.get('/:groupId', async (req, res) => {
+    const { groupId } = req.params;
 
-    res.status(500).json({
-      error: "Internal server error",
-    });
-  }
+    try {
+        const { data: group, error } = await supabase
+            .from('groups')
+            .select(`*, group_members (id, name, avatar_color)`)
+            .eq('id', groupId)
+            .single();
+        if (error || !group) {
+            return res.status(404).json({
+                error: "Group not found",
+            });
+        }
+
+        res.json(group);
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Internal server error'
+        })
+    }
 });
 
 router.get('/:inviteCode', async (req, res) => {
     const { inviteCode } = req.params;
 
     try {
-        const {data: group, error} = await supabase
+        const { data: group, error } = await supabase
             .from('groups')
             .select(`*, group_members (id, name, avatar_color)`)
             .eq('invite_code', inviteCode)
@@ -110,7 +210,7 @@ router.get('/:inviteCode', async (req, res) => {
         }
 
         res.json(group);
-        
+
     } catch (error) {
         console.error(error);
 
@@ -131,7 +231,7 @@ router.post('/:inviteCode/join', async (req, res) => {
     }
 
     try {
-        const {data: group, error: groupError} = await supabase
+        const { data: group, error: groupError } = await supabase
             .from('groups')
             .select('*')
             .eq('invite_code', inviteCode)
@@ -144,7 +244,7 @@ router.post('/:inviteCode/join', async (req, res) => {
         }
 
         // crea membro in group_members
-        const {data: member, error: memberError} = await supabase
+        const { data: member, error: memberError } = await supabase
             .from('group_members')
             .insert({
                 group_id: group.id,
@@ -179,10 +279,10 @@ router.post('/:inviteCode/join', async (req, res) => {
             });
 
 
-            res.status(201).json({
-                group,
-                member,
-            });
+        res.status(201).json({
+            group,
+            member,
+        });
     } catch (error) {
         console.error(error);
 
@@ -196,7 +296,7 @@ router.get('/:groupId/expenses', async (req, res) => {
     const { groupId } = req.params;
 
     try {
-        const {data: expenses, error: expensesError} = await supabase
+        const { data: expenses, error: expensesError } = await supabase
             .from('expenses')
             .select(`
                 *,
@@ -209,8 +309,8 @@ router.get('/:groupId/expenses', async (req, res) => {
                     )
                 )`)
             .eq('group_id', groupId)
-            .order('created_at', {ascending: false});
-            
+            .order('created_at', { ascending: false });
+
         if (expensesError) throw error;
 
         res.json(expenses);
@@ -225,7 +325,7 @@ router.get('/:groupId/expenses', async (req, res) => {
 });
 
 router.get('/:groupId/balances', async (req, res) => {
-    const {groupId} = req.params;
+    const { groupId } = req.params;
     try {
         const { data: members, error: membersError } = await supabase
             .from('group_members')
@@ -254,36 +354,36 @@ router.get('/:groupId/balances', async (req, res) => {
             .eq('group_id', groupId);
 
         if (paymentsError) throw paymentsError;
-        
+
         const balances = new Map();
-        members.forEach( m => { balances.set(m.id, 0) });
-        
-        for (let i=0; i < expenses.length; i++) {
+        members.forEach(m => { balances.set(m.id, 0) });
+
+        for (let i = 0; i < expenses.length; i++) {
             let exp = expenses[i];
             let oldBalance = balances.get(exp.paid_by_member_id);
             balances.set(exp.paid_by_member_id, oldBalance + exp.amount);
-            for (let j=0; j<exp.expense_participants.length; j++) {
+            for (let j = 0; j < exp.expense_participants.length; j++) {
                 let part = exp.expense_participants[j];
                 let oldBalance = balances.get(part.member_id);
                 balances.set(part.member_id, oldBalance - part.share_amount);
             }
         }
 
-        for (let i=0; i < payments.length; i++) {
+        for (let i = 0; i < payments.length; i++) {
             let paym = payments[i];
             let oldBalanceFrom = balances.get(paym.from_member_id);
             let oldBalanceTo = balances.get(paym.to_member_id);
             balances.set(paym.from_member_id, oldBalanceFrom + paym.amount);
             balances.set(paym.to_member_id, oldBalanceTo - paym.amount);
         }
-        
+
         const result = members.map(member => ({
             id: member.id,
             name: member.name,
             avatar_color: member.avatar_color,
             balance: balances.get(member.id)
         }));
-        
+
         res.json(result);
     } catch (error) {
         console.error(error);
@@ -293,8 +393,28 @@ router.get('/:groupId/balances', async (req, res) => {
     }
 });
 
-router.patch('/:groupId', async (req, res) => {
+router.get('/:groupId/activity', async (req, res) => {
     const {groupId} = req.params;
+
+    try {
+        const {data: activity, error: activityError} = await supabase
+            .from('activity_log')
+            .select('*')
+            .eq('group_id', groupId);
+
+        if (activityError) throw activityError;
+
+        res.json(activity);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            error: 'Internal server error'
+        })
+    }
+});
+
+router.patch('/:groupId', async (req, res) => {
+    const { groupId } = req.params;
     const {
         name,
         currency,
@@ -302,8 +422,8 @@ router.patch('/:groupId', async (req, res) => {
     } = req.body;
 
     try {
-        
-        const {data: group, error: groupError} = await supabase
+
+        const { data: group, error: groupError } = await supabase
             .from('groups')
             .update({
                 name,
@@ -313,7 +433,7 @@ router.patch('/:groupId', async (req, res) => {
             .eq('id', groupId)
             .select()
             .single();
-        
+
         if (groupError) {
             if (groupError.code === 'PGRST116') {
                 return res.status(404).json({
@@ -349,7 +469,7 @@ router.patch('/:groupId', async (req, res) => {
 });
 
 router.patch('/:groupId/members/:memberId/leave', async (req, res) => {
-    const {groupId, memberId} = req.params;
+    const { groupId, memberId } = req.params;
 
     try {
         // autorizzazione
@@ -364,7 +484,7 @@ router.patch('/:groupId/members/:memberId/leave', async (req, res) => {
         const memberToken = authHeader.split(" ")[1];
 
         //check memberToken
-        const {data: currentMember, error: currentMemberError} = await supabase
+        const { data: currentMember, error: currentMemberError } = await supabase
             .from('group_members')
             .select('*')
             .eq('member_token', memberToken)
@@ -390,40 +510,40 @@ router.patch('/:groupId/members/:memberId/leave', async (req, res) => {
         }
 
         // verifica group esiste
-        const {data: group, error: groupError} = await supabase
+        const { data: group, error: groupError } = await supabase
             .from('groups')
             .select('id, name')
             .eq('id', groupId)
             .single();
 
         if (groupError || !group) {
-            return res.status(404).json({error: 'Group not found'});
-        } 
+            return res.status(404).json({ error: 'Group not found' });
+        }
 
-       /*  // verifica membro del gruppo
-        const {data: member, error: memberError} = await supabase
+        /*  // verifica membro del gruppo
+         const {data: member, error: memberError} = await supabase
+             .from('group_members')
+             .select('*')
+             .eq('id', memberId)
+             .eq('group_id', groupId)
+             .single();
+ 
+         if (memberError || !member) {
+             return res.status(404).json({error: 'Member is not part of the group'});
+         }  */
+
+        const { error: deleteError } = await supabase
             .from('group_members')
-            .select('*')
-            .eq('id', memberId)
-            .eq('group_id', groupId)
-            .single();
-
-        if (memberError || !member) {
-            return res.status(404).json({error: 'Member is not part of the group'});
-        }  */
-
-        const {error: deleteError} = await supabase
-            .from('group_members')
-            .update({is_active: false})
+            .update({ is_active: false })
             .eq('group_id', groupId)
             .eq('id', memberId)
             .select()
             .single();
 
-        if(deleteError) throw deleteError;
+        if (deleteError) throw deleteError;
 
         // activity log
-        const {error: activityError} = await supabase
+        const { error: activityError } = await supabase
             .from('activity_log')
             .insert({
                 group_id: groupId,
@@ -449,7 +569,7 @@ router.patch('/:groupId/members/:memberId/leave', async (req, res) => {
 });
 
 router.patch('/:groupId/members/:memberId/remove', async (req, res) => {
-    const {groupId, memberId} = req.params;
+    const { groupId, memberId } = req.params;
 
     try {
         // autorizzazione
@@ -464,7 +584,7 @@ router.patch('/:groupId/members/:memberId/remove', async (req, res) => {
         const memberToken = authHeader.split(" ")[1];
 
         //check memberToken
-        const {data: currentMember, error: currentMemberError} = await supabase
+        const { data: currentMember, error: currentMemberError } = await supabase
             .from('group_members')
             .select('*')
             .eq('member_token', memberToken)
@@ -490,18 +610,18 @@ router.patch('/:groupId/members/:memberId/remove', async (req, res) => {
         }
 
         // verifica group esiste
-        const {data: group, error: groupError} = await supabase
+        const { data: group, error: groupError } = await supabase
             .from('groups')
             .select('id, name')
             .eq('id', groupId)
             .single();
 
         if (groupError || !group) {
-            return res.status(404).json({error: 'Group not found'});
-        } 
+            return res.status(404).json({ error: 'Group not found' });
+        }
 
         // verifica membro da elliminare fa parte del gruppo
-        const {data: member, error: memberError} = await supabase
+        const { data: member, error: memberError } = await supabase
             .from('group_members')
             .select('id, name, is_owner')
             .eq('id', memberId)
@@ -509,21 +629,21 @@ router.patch('/:groupId/members/:memberId/remove', async (req, res) => {
             .single();
 
         if (memberError || !member) {
-            return res.status(404).json({error: 'Member is not part of the group'});
-        } 
+            return res.status(404).json({ error: 'Member is not part of the group' });
+        }
 
-        const {error: deleteError} = await supabase
+        const { error: deleteError } = await supabase
             .from('group_members')
-            .update({is_active: false})
+            .update({ is_active: false })
             .eq('group_id', groupId)
             .eq('id', memberId)
             .select()
             .single();
 
-        if(deleteError) throw deleteError;
+        if (deleteError) throw deleteError;
 
         // activity log
-        const {error: activityError} = await supabase
+        const { error: activityError } = await supabase
             .from('activity_log')
             .insert({
                 group_id: groupId,
@@ -549,8 +669,8 @@ router.patch('/:groupId/members/:memberId/remove', async (req, res) => {
 });
 
 router.patch('/:groupId/me', async (req, res) => {
-    const {groupId} = req.params;
-    const {updatedName, updatedAvatar_color} = req.body;
+    const { groupId } = req.params;
+    const { updatedName, updatedAvatar_color } = req.body;
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -561,21 +681,21 @@ router.patch('/:groupId/me', async (req, res) => {
 
     const memberToken = authHeader.split(" ")[1];
     try {
-        const {data: member, error: memberError} = await supabase
+        const { data: member, error: memberError } = await supabase
             .from('group_members')
             .select('*')
             .eq('member_token', memberToken)
             .eq('group_id', groupId)
             .single();
-        
+
         if (!member || memberError) {
-            return res.status(404).json({error: 'Member not found'});
+            return res.status(404).json({ error: 'Member not found' });
         }
 
         // update
-        const {data: updatedMember, error: updatedMemberError} = await supabase
+        const { data: updatedMember, error: updatedMemberError } = await supabase
             .from('group_members')
-            .update({name: updatedName, avatar_color: updatedAvatar_color})
+            .update({ name: updatedName, avatar_color: updatedAvatar_color })
             .eq('id', member.id)
             .select()
             .single();
