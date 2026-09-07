@@ -9,6 +9,7 @@ router.post('/', async (req, res) => {
         paidByMemberId,
         description,
         amount,
+        category,
         splitType,
         participants,
     } = req.body;
@@ -112,6 +113,7 @@ router.post('/', async (req, res) => {
                 group_id: groupId,
                 paid_by_member_id: paidByMemberId,
                 description: description,
+                category: category,
                 amount: amount,
                 split_type: splitType
             })

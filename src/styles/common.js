@@ -1,6 +1,5 @@
 // common style
-import { colors } from "@/src/constants/colors";
-import { sp } from "@/src/constants/spacing";
+import { colors, sp } from "@/src/constants/constants";
 import { StyleSheet } from "react-native";
 
 export const commonStyle = StyleSheet.create({
@@ -29,7 +28,7 @@ export const commonStyle = StyleSheet.create({
         width: "100%",
         paddingVertical: 14,
         alignItems: "center",
-        borderRadius: 10,
+        borderRadius: 20,
         marginBottom: 12,
         backgroundColor: colors['primary'],
     },
@@ -43,7 +42,7 @@ export const commonStyle = StyleSheet.create({
         paddingVertical: 14,
     },
     btn2Text: {
-        color: colors.textSecondary,
+        color: colors.primary,
         fontSize: 16,
     },
     footer: {
@@ -56,14 +55,16 @@ export const commonStyle = StyleSheet.create({
     label: {
         fontSize: 15,
         fontWeight: "600",
-        marginBottom: sp[1],
+        // marginBottom: sp['half'],
+        marginBottom: sp['half'],
     },
     input: {
-        height: 50,
+        height: 40,
+        width: '100%',
         borderWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.input,
-        borderRadius: 10,
+        borderRadius: 20,
         paddingHorizontal: sp[1],
         marginBottom: sp[1],
         color: colors.text,

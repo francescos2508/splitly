@@ -1,8 +1,9 @@
 import { commonStyle } from '@/src/styles/common';
 import { router } from 'expo-router';
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createGroup } from '../../src/api/groups';
+import AppInput from '../../src/components/AppInput';
 import SelectInput from '../../src/components/SelectInput';
 import { saveMemberToken } from '../../src/storage/auth';
 
@@ -25,7 +26,7 @@ export default function CreateGroup() {
             </View>
             <View style={commonStyle.body}>
                 <Text style={commonStyle.label}>Group name</Text>
-                <TextInput
+                <AppInput
                     style={commonStyle.input}
                     placeholder='Group name'
                     value={groupname}
@@ -33,7 +34,7 @@ export default function CreateGroup() {
                 />
                 <Text style={commonStyle.label}>Your name</Text>
                 
-                <TextInput
+                <AppInput
                     style={commonStyle.input}
                     placeholder='Your name'
                     value={username}

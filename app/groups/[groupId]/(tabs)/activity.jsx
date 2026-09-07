@@ -1,0 +1,62 @@
+import { commonStyle } from '@/src/styles/common';
+import { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from "react-native";
+import { useGroup } from '../../../../backend/src/context/GroupContext';
+import { getGroupActivity } from '../../../../src/api/groups';
+
+
+export default function Activity() {
+    const {group, members, balances, activity, setActivity} = useGroup();
+    const [loading, setLoading] = useState(true);
+    
+
+
+    useEffect(() => {
+        async function loadGroup(gid) {
+            try {
+                const activity = await getGroupActivity(gid);
+                console.log(activity)
+                setActivity(activity);
+
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadGroup(group.id);
+    }, []);
+
+    if (loading) {
+        return <View style={commonStyle.container}><Text>Loading...</Text></View>
+    }
+    return (
+            /*   <View>
+                  <Text>Group ID: {groupId}</Text>
+              </View> */
+    
+            <View style={commonStyle.container}>
+                <View style={commonStyle.header}>
+                    {/* <Text style={commonStyle.title}>{group?.name || 'Error'}</Text> */}
+                </View>
+                <View style={commonStyle.body}>
+                    <Text>Activity</Text>
+                    
+                    {activity.map((act) => {
+                        const memb = members.find(x => x.id === act.member_id);
+                        console.log(memb);
+
+                        return (
+                            <View style={styles.cardExpense} key={act.id}>
+                                <Text>{act.description} | User: {memb?.name || ''}</Text>
+                            </View>
+                        );
+                    })}
+                </View>
+            </View>
+        )
+}
+
+const styles = StyleSheet.create({
+    
+});

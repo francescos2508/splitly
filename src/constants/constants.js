@@ -1,4 +1,25 @@
-const lightColors = {
+export const sp = {
+    1: 16,
+    2: 32,
+    3: 48,
+    4: 64,
+    5: 80,
+    6: 96,
+    7: 112,
+    8: 128,
+    9: 144,
+    10: 160,
+
+
+
+
+    half: 8
+}
+
+export const currencies = {EUR: '€', USD: '$', GBP: '£', CHF: '$$'};
+
+
+const lightColors2 = {
     primary: "#2563EB",
     primaryPressed: "#1D4ED8",
     accent: "#14B8A6",
@@ -20,6 +41,37 @@ const lightColors = {
     icon: "#475569",
     overlay: "rgba(15, 23, 42, 0.5)",
     white: '#ffffff',
+};
+
+const lightColors = {
+    // Brand
+    primary: '#6FAF8F',
+    primaryDark: '#3F765C',
+    primaryLight: '#DDEFE5',
+    accent: "#6FAF8F",
+
+    // Backgrounds
+    background: '#F7FBF8',
+    surface: '#FFFFFF',
+
+    // Text
+    text: '#263B32',
+    textSecondary: '#718078',
+    border: '#DCE8E1',
+
+    // Status
+    success: '#78B89A',
+    successBackground: '#E8F5EC',
+
+    danger: '#E99A9A',
+    dangerBackground: '#FBEAEA',
+
+    warning: '#EBCB75',
+    warningBackground: '#FFF7DF',
+
+    info: '#82B6D1',
+    infoBackground: '#EAF5FA',
+    white: '#FFFFFF'
 };
 
 const darkColors = {

@@ -15,8 +15,7 @@ export default function Index() {
 }
  */
 
-import { colors } from '@/src/constants/colors';
-import { sp } from '@/src/constants/spacing';
+import { colors, sp } from '@/src/constants/constants';
 import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -52,7 +51,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 14,
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: 20,
     marginBottom: 12,
     backgroundColor: colors['primary'],
   },

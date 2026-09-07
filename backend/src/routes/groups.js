@@ -668,6 +668,38 @@ router.patch('/:groupId/members/:memberId/remove', async (req, res) => {
 
 });
 
+// get member (me)
+router.get('/:groupId/me', async (req, res) => {
+    const {groupId} = req.params;
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({
+            error: "Missing authentication token"
+        });
+    }
+
+    const memberToken = authHeader.split(" ")[1];
+    try {
+        const {data: member, error: memberError} = await supabase
+            .from('group_members')
+            .select('*')
+            .eq('member_token', memberToken)
+            .eq('group_id', groupId)
+            .single();
+        
+        if (!member || memberError) {
+            return res.status(404).json({error: 'Member not found'});
+        }
+        return res.status(200).json(member);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            error: "Internal server error"
+        });
+    }
+})
+
+// update member (me)
 router.patch('/:groupId/me', async (req, res) => {
     const { groupId } = req.params;
     const { updatedName, updatedAvatar_color } = req.body;

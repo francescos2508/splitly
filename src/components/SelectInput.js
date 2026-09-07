@@ -8,8 +8,8 @@ import {
     View,
 } from "react-native";
 
-import { colors } from "@/src/constants/colors";
-import { sp } from "@/src/constants/spacing";
+import { colors, sp } from "@/src/constants/constants";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SelectInput({
     label,
@@ -46,7 +46,10 @@ export default function SelectInput({
                     {selectedOption?.label || placeholder}
                 </Text>
 
-                <Text style={styles.arrow}>▼</Text>
+                {/* <Text style={styles.arrow}>▼</Text> */}
+                <Text style={styles.arrow}>
+                    <Ionicons name='chevron-down' size={20} color={colors.textSecondary}/>
+                </Text>
             </Pressable>
 
             <Modal
@@ -87,16 +90,16 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 15,
         fontWeight: "600",
-        marginBottom: sp[1],
+        marginBottom: sp['half'],
         color: colors.text,
     },
 
     input: {
-        height: 50,
+        height: 40,
         borderWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.input,
-        borderRadius: 10,
+        borderRadius: 20,
         paddingHorizontal: sp[1],
         marginBottom: sp[1],
         flexDirection: "row",
@@ -114,7 +117,7 @@ const styles = StyleSheet.create({
     },
 
     arrow: {
-        fontSize: 20,
+        fontSize: 15,
         color: colors.textSecondary,
     },
 
@@ -127,7 +130,7 @@ const styles = StyleSheet.create({
 
     modal: {
         backgroundColor: colors.surface,
-        borderRadius: 14,
+        borderRadius: 20,
         paddingVertical: sp[2],
         maxHeight: "60%",
     },

@@ -1,5 +1,5 @@
-import { colors } from '@/src/constants/colors';
-import { sp } from '@/src/constants/spacing';
+import { colors, sp } from '@/src/constants/constants';
+import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import {
@@ -25,24 +25,16 @@ export default function DateInput({value, label, onChange}) {
                     {date.toLocaleDateString("en-GB")}
                 </Text>
 
-                <Text style={styles.arrow}>›</Text>
+                {/* <Text style={styles.arrow}>›</Text> */}
+                <Text style={styles.arrow}>
+                    <Ionicons name='calendar-outline' size={20} color={colors.textSecondary}/>
+                </Text>
             </Pressable>
 
-            {/* {showPicker && (
-                <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="inline"
-                    onChange={onChange || ((event, selectedDate) => {
-                        setShowPicker(false);
-                        if (selectedDate) setDate(selectedDate);
-                    })}
-                />
-            )} */}
             <Modal visible={showPicker} transparent animationType="fade"
                 onRequestClose={() => setShowPicker(false)}
             >
-                <View style={styles.modalOverlay}>
+                <Pressable style={styles.modalOverlay} onPress={() => setShowPicker(false)}>
                     <View style={styles.modal}>
                         <Text style={styles.modalTitle}>Select date</Text>
 
@@ -50,9 +42,12 @@ export default function DateInput({value, label, onChange}) {
                             value={date}
                             mode="date"
                             display="inline"
-                            onChange={onChange || ((event, selectedDate) => {
+                            onChange={((event, selectedDate) => {
                                 setShowPicker(false);
-                                if (selectedDate) setDate(selectedDate);
+                                if (selectedDate) {
+                                    setDate(selectedDate);
+                                    onChange?.(selectedDate);
+                                }
                             })}
                         />
 
@@ -63,7 +58,7 @@ export default function DateInput({value, label, onChange}) {
                             <Text style={styles.doneButtonText}>Done</Text>
                         </Pressable>
                     </View>
-                </View>
+                </Pressable>
             </Modal>
         </View>
     );
@@ -73,15 +68,16 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 15,
         fontWeight: "600",
-        marginBottom: sp[1],
+        marginBottom: sp['half'],
     },
 
     input: {
-        height: 50,
+        height: 40,
+        width: '100%',
         borderWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.input,
-        borderRadius: 10,
+        borderRadius: 20,
         paddingHorizontal: sp[1],
         flexDirection: "row",
         alignItems: "center",
@@ -102,7 +98,7 @@ const styles = StyleSheet.create({
 
     modalOverlay: {
         flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
         justifyContent: "center",
         alignItems: "center",
         paddingHorizontal: 20,
@@ -111,7 +107,7 @@ const styles = StyleSheet.create({
     modal: {
         width: "100%",
         backgroundColor: colors['textSecondary'],
-        borderRadius: 16,
+        borderRadius: 20,
         padding: 20,
     },
 
@@ -125,7 +121,7 @@ const styles = StyleSheet.create({
     doneButton: {
         marginTop: 16,
         backgroundColor: colors.primary,
-        borderRadius: 10,
+        borderRadius: 20,
         paddingVertical: 14,
         alignItems: "center",
     },

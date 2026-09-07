@@ -1,7 +1,7 @@
 //My groups
 
 import { getMyGroups } from '@/src/api/groups';
-import { sp } from '@/src/constants/spacing';
+import { sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { router } from "expo-router";
 import { useEffect, useState } from 'react';
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     
     groupCard: {
         padding: sp[2],
-        borderRadius: 12,
+        borderRadius: 20,
         marginBottom: sp[1],
     },
     groupName: {

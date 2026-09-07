@@ -1,5 +1,25 @@
-const API_URL = "http://192.168.0.20:3000";
+const API_URL = "http://192.168.0.15:3000";
 import { getMemberToken } from "../storage/auth";
+
+
+export async function loadCurrentMember(groupId) {
+    const myToken = await getMemberToken();
+    var authstr = 'Bearer '+myToken;
+    if (!myToken) authstr = '';
+    console.log("Calling API:", `${API_URL}/groups/${groupId}/me`);
+    const response = await fetch(`${API_URL}/groups/${groupId}/me`, {
+        method: "GET",
+        headers: {
+            Authorization: authstr,
+        },
+    });
+
+    console.log("Response received:", response.status);
+    const result = await response.json();
+
+    if (!response.ok) throw new Error(result.error || "Failed to get member");
+    return result;
+}
 
 export async function createGroup(data) {
     const myToken = await getMemberToken();
@@ -19,11 +39,30 @@ export async function createGroup(data) {
     console.log("Response received:", response.status);
     const result = await response.json();
 
-    if (!response.ok) {
-        throw new Error(result.error || "Failed to create group");
-    }
-
+    if (!response.ok) throw new Error(result.error || "Failed to create group");
     return result;
+}
+
+export async function joinGroup(inviteCode, username) {
+    if (!inviteCode || !username) {
+        alert('Missing required fields');
+        return;
+    }
+    console.log("Calling API:", `${API_URL}/groups/:inviteCode/join`);
+    const response = await fetch(`${API_URL}/groups/${inviteCode}/join`, {
+        method: 'POST',
+        body: JSON.stringify({userName: username}),
+        headers: {
+            "Content-Type": "application/json",
+        }
+    });
+
+    console.log("Response received:", response.status);
+    const result = await response.json();
+
+    if (!response.ok) throw new Error(result.error || "Failed to join group");
+    return result;
+    
 }
 
 // get a specific group and the members
@@ -59,6 +98,7 @@ export async function getGroupExpenses(id) {
     console.log('Response received: ', resp.status);
     const res = await resp.json();
     if (!resp.ok)  throw new Error(res.error || 'Failed to get group expenses');
+    if (res) res.sort((a, b) => new Date(a.expense_date) - new Date(b.expense_date))
     return res;
 }
 
@@ -111,15 +151,9 @@ export async function createExpense(groupId, newExpense) {
         },
         body: JSON.stringify(expense)
     });
-    console.log("status:", response.status);
-console.log("url:", response.url);
-const text = await response.text();
-console.log("response:", text);
-    // const data = await response.json();
-    // if (!response.ok) throw new Error(data.error || "Failed to create the new expense");
-    // return data;
-    
-    /// totest
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Failed to create the new expense");
+    return data;
 }
 
 // update expense
