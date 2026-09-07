@@ -109,6 +109,7 @@ export default function Group() {
                             </View>
                         );
                     })}
+                    <Pressable style={commonStyle.btn2}><Text style={commonStyle.btn2Text}>View All</Text></Pressable>
                 </View>
 
 

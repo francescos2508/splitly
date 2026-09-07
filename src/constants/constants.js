@@ -100,3 +100,26 @@ const darkColors = {
 };
 const DarkMode = false;
 export const colors = DarkMode ? darkColors : lightColors;
+
+export const AVATAR_COLORS = {
+    1: '#E63946',  // Red
+    2: '#4361EE',  // Blue
+    3: '#2A9D8F',  // Teal
+    4: '#F4D35E',  // Yellow
+    5: '#9B5DE5',  // Purple
+    6: '#F77F00',  // Orange
+    7: '#06D6A0',  // Emerald
+    8: '#F72585',  // Magenta
+    9: '#118AB2',  // Ocean blue
+    10: '#8AC926', // Lime
+    11: '#6C584C', // Brown
+    12: '#FF595E', // Coral
+    13: '#8338EC', // Violet
+    14: '#00B4D8', // Cyan
+    15: '#FFCA3A', // Gold
+    16: '#1982C4', // Azure
+    17: '#52B788', // Green
+    18: '#C77DFF', // Lavender
+    19: '#FF70A6', // Pink
+    20: '#6D6875', // Slate
+};
