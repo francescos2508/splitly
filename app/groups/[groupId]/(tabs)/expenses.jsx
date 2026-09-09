@@ -1,26 +1,21 @@
 import { colors, currencies, sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { parseDate } from '@/src/utils/utils';
-import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useGroup } from '../../../../backend/src/context/GroupContext';
 
 
 export default function Expenses() {
-    const { groupId } = useLocalSearchParams();
     const {group, expenses, members} = useGroup();
 
     console.log(members);
     return (
-            /*   <View>
-                  <Text>Group ID: {groupId}</Text>
-              </View> */
     
             <View style={commonStyle.container}>
                 <View style={commonStyle.header}>
-                    {/* <Text style={commonStyle.title}>{group?.name || 'Error'}</Text> */}
+                    <Text style={commonStyle.title}>{group?.name || 'Error'}</Text>
                 </View>
-                <View style={commonStyle.body}>
+                <ScrollView style={commonStyle.body}>
                     <Text>Expenses</Text>
                     
                     {expenses.map((expense) => {
@@ -35,7 +30,7 @@ export default function Expenses() {
                         );
                     })}
                     
-                </View>
+                </ScrollView>
             </View>
         )
 }

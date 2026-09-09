@@ -2,8 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const supabase = require("../config/supabase");
+const { authenticateMember } = require("../middleware/authenticateMember");
+const { authorizeGroup, getMemberOfGroup } = require("../middleware/authorizeGroup");
 
-router.post('/', async (req, res) => {
+
+router.use(authenticateMember);
+
+router.post('/', authorizeGroup, async (req, res) => {
     const { 
         groupId,
         paidByMemberId,
@@ -128,24 +133,24 @@ router.post('/', async (req, res) => {
 
         if (participantsError) throw participantsError;
 
-
-        res.status(201).json({
-            expense,
-            participants: expenseParticipants,
-        });
-
         const {data: activityLog, error: activityError } = await supabase
             .from("activity_log")
             .insert({
                 group_id: groupId,
-                member_id: paidByMemberId,
+                actor_id: req.member.id,
                 event_type: "expense_created",
                 entity_type: "expense",
                 entity_id: expense.id,
-                description: `${description} (€${amount}) created`,
+                description: `Expense ${description} (€${amount}) created`,
             });
 
         if (activityError) throw activityError;
+
+        
+        res.status(201).json({
+            expense,
+            participants: expenseParticipants,
+        });
 
     } catch (error) {
         console.error(error);
@@ -188,6 +193,15 @@ router.patch('/:expenseId', async (req, res) => {
                 error: "Expense not found"
             });
         }
+
+        const member = await getMemberOfGroup(req.member_token, expense.group_id);
+        if (!member) {
+            return res.status(403).json({
+                error: "You are not a member of this group"
+            });
+        }
+        req.member = member;
+
 
         // members del gruppo
         const { data: members, error: membersError } = await supabase
@@ -288,7 +302,7 @@ router.patch('/:expenseId', async (req, res) => {
             .from("activity_log")
             .insert({
                 group_id: expense.group_id,
-                member_id: paidByMemberId,
+                actor_id: req.member.id,
                 event_type: "expense_updated",
                 entity_type: "expense",
                 entity_id: expenseId,
@@ -323,6 +337,14 @@ router.delete('/:expenseId', async (req, res) => {
             });
         }
 
+        const member = await getMemberOfGroup(req.member_token, expense.group_id);
+        if (!member) {
+            return res.status(403).json({
+                error: "You are not a member of this group"
+            });
+        }
+        req.member = member;
+
         // cancelliamo expense
         const { error: deleteError } = await supabase
             .from("expenses")
@@ -336,7 +358,7 @@ router.delete('/:expenseId', async (req, res) => {
             .from("activity_log")
             .insert({
                 group_id: expense.group_id,
-                member_id: expense.paid_by_member_id,
+                actor_id: req.member.id,
                 event_type: "expense_deleted",
                 entity_type: "expense",
                 entity_id: expenseId,
@@ -355,4 +377,5 @@ router.delete('/:expenseId', async (req, res) => {
         });
     }
 });
+
 module.exports = router;

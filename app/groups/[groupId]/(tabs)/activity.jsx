@@ -2,7 +2,7 @@ import { commonStyle } from '@/src/styles/common';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from "react-native";
 import { useGroup } from '../../../../backend/src/context/GroupContext';
-import { getGroupActivity } from '../../../../src/api/groups';
+import { getGroupActivity } from '../../../../src/api/api';
 
 
 export default function Activity() {
@@ -43,7 +43,7 @@ export default function Activity() {
                     <Text>Activity</Text>
                     
                     {activity.map((act) => {
-                        const memb = members.find(x => x.id === act.member_id);
+                        const memb = members.find(x => x.id === act.actor_id);
                         console.log(memb);
 
                         return (

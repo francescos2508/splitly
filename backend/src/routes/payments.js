@@ -2,8 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const supabase = require("../config/supabase");
+const { authenticateMember } = require("../middleware/authenticateMember");
+const { authorizeGroup } = require("../middleware/authorizeGroup");
 
-router.post('/', async (req, res) => {
+router.use(authenticateMember);
+
+
+router.post('/', authorizeGroup, async (req, res) => {
     const {
         groupId,
         fromMemberId,
@@ -12,13 +17,13 @@ router.post('/', async (req, res) => {
         note
     } = req.body;
 
-    try {
-        if (!groupId || !fromMemberId || !toMemberId || amount == null) {
-            return res.status(400).json({
-                error: "Missing required fields"
-            });
-        }
+    if (!groupId || !fromMemberId || !toMemberId || amount == null) {
+        return res.status(400).json({
+            error: "Missing required fields"
+        });
+    }
 
+    try {
         if (fromMemberId === toMemberId) {
             return res.status(400).json({ error: 'Payment from and to the same member' })
         }
@@ -73,7 +78,7 @@ router.post('/', async (req, res) => {
             .from("activity_log")
             .insert({
                 group_id: groupId,
-                member_id: fromMemberId,
+                actor_id: req.member.id,
                 event_type: "payment_created",
                 entity_type: "payment",
                 entity_id: payment.id,

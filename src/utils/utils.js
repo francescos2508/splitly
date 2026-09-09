@@ -8,3 +8,37 @@ export function parseDate(date) {
 
     return `${day}/${month}/${year}`;
 }
+
+export function calculatePayments(balances) {
+    const creditors = balances
+        .filter(x => x.balance > 0)
+        .map(x => ({...x}))
+        .sort((a, b) => b.balance - a.balance);
+    const debtors = balances
+        .filter(x => x.balance < 0)
+        .map(x => ({...x, balance: -x.balance}))
+        .sort((a, b) => b.balance - a.balance);
+
+    const payments = [];
+    let i=0, j=0;
+
+    while (i<debtors.length && j<creditors.length) {
+        const debtor = debtors[i], creditor = creditors[j];
+        // let's take the minimum amount and create the payment from debtor to creditor
+        const amount = Math.min(debtor.balance, creditor.balance);
+        payments.push({
+            from: debtor.id,
+            fromName: debtor.name,
+            to: creditor.id,
+            toName: creditor.name,
+            amount: amount
+        });
+        // update new balances after the payment
+        debtor.balance -= amount;
+        creditor.balance -= amount;
+        // we see which one is gone to 0 and proceed with next creditor/debtor
+        if (debtor.balance === 0) i++;
+        if (creditor.balance === 0) j++;
+    }
+    return payments;
+}

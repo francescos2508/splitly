@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getGroup, loadCurrentMember } from "../../../src/api/groups";
+import { getGroup, loadCurrentMember } from "../../../src/api/api";
 
 const GroupContext = createContext(null);
 
@@ -11,21 +11,14 @@ export function GroupProvider({ children, groupId }) {
     const [activity, setActivity] = useState([]);
     const [currentMember, setCurrentMember] = useState(null);
 
-    const getCurrentMember = async () => {
-        if (currentMember) return currentMember;
-        const member = await loadCurrentMember(groupId);
-        setCurrentMember(member);
-        return member; 
-    }
-
     useEffect(() => {
         if (!groupId) return;
 
         const loadGroupData = async () => {
             try {
                 const [groupData, member] = await Promise.all([
-                    await getGroup(groupId),
-                    await loadCurrentMember(groupId),
+                    getGroup(groupId),
+                    loadCurrentMember(groupId),
                 ]);
 
                 setGroup(groupData);
@@ -42,6 +35,7 @@ export function GroupProvider({ children, groupId }) {
     return (
         <GroupContext.Provider
             value={{
+                groupId,
                 group,
                 members,
                 expenses,

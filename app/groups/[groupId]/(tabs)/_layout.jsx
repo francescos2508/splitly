@@ -14,8 +14,8 @@ export default function GroupLayout() {
                     name="index"
                     options={{
                         title: "Overview",
-                        tabBarIcon: ({color, size}) => (
-                            <Ionicons name='home-outline' color={color} size={size} />
+                        tabBarIcon: ({color, size, focused}) => (
+                            <Ionicons name={focused ? 'speedometer' : 'speedometer-outline'} color={color} size={size} />
                         ),
                     }}
                 />
@@ -24,8 +24,8 @@ export default function GroupLayout() {
                     name="expenses"
                     options={{
                         title: "Expenses",
-                        tabBarIcon: ({color, size}) => (
-                            <Ionicons name='receipt' color={color} size={size} />
+                        tabBarIcon: ({color, size, focused}) => (
+                            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} color={color} size={size} />
                         ),
                     }}
                 />
@@ -34,8 +34,8 @@ export default function GroupLayout() {
                     name="balances"
                     options={{
                         title: "Balances",
-                        tabBarIcon: ({color, size}) => (
-                            <Ionicons name='swap-horizontal-outline' color={color} size={size} />
+                        tabBarIcon: ({color, size, focused}) => (
+                            <Ionicons name={focused ? 'wallet' : 'wallet-outline'} color={color} size={size} />
                         ),
                     }}
                 />
@@ -44,8 +44,8 @@ export default function GroupLayout() {
                     name="activity"
                     options={{
                         title: "Activity",
-                        tabBarIcon: ({color, size}) => (
-                            <Ionicons name='time-outline' color={color} size={size} />
+                        tabBarIcon: ({color, size, focused}) => (
+                            <Ionicons name={focused ? 'time' : 'time-outline'} color={color} size={size} />
                         ),
                     }}
                 />

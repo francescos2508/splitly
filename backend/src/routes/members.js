@@ -2,23 +2,18 @@ const express = require("express");
 const router = express.Router();
 
 const supabase = require("../config/supabase");
+const { authenticateMember } = require("../middleware/authenticateMember");
+
+router.use(authenticateMember);
 
 router.patch('/me', async (req, res) => {
     const {updatedName, updatedAvatar_color} = req.body;
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({
-            error: "Missing authentication token"
-        });
-    }
-
-    const memberToken = authHeader.split(" ")[1];
     try {
         const {data: member, error: memberError} = await supabase
             .from('group_members')
             .select('*')
-            .eq('member_token', memberToken)
+            .eq('id', req.member.id)
             .single();
         
         if (!member || memberError) {
@@ -29,7 +24,7 @@ router.patch('/me', async (req, res) => {
         const {data: updatedMember, error: updatedMemberError} = await supabase
             .from('group_members')
             .update({name: updatedName, avatar_color: updatedAvatar_color})
-            .eq('member_token', memberToken)
+            .eq('id', req.member.id)
             .select()
             .single();
 

@@ -1,11 +1,11 @@
 import { useGroup } from '@/backend/src/context/GroupContext';
-import { getGroupActivity, getGroupBalances, getGroupExpenses } from '@/src/api/groups';
+import { getGroupActivity, getGroupBalances, getGroupExpenses } from '@/src/api/api';
 import { colors, currencies, sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { parseDate } from '../../../../src/utils/utils';
 
 export default function Group() {
@@ -22,7 +22,7 @@ export default function Group() {
         setCurrentMember,
     } = useGroup();
 
-    const myBalance = balances.find(
+    const myBalance = balances?.find(
         balance => balance.id === currentMember?.id
     );
 
@@ -30,9 +30,7 @@ export default function Group() {
         useCallback(() => {
             async function loadGroup(gid) {
                 try {
-                    // const gr = await getGroup(gid);
-                    // setGroup(gr);
-                    // setMembers(gr.group_members);
+                    
 
                     const balances = await getGroupBalances(gid);
                     setBalances(balances);
@@ -66,7 +64,7 @@ export default function Group() {
                 <Text style={commonStyle.title}>{group?.name || 'Error'}</Text>
                 <Ionicons style={styles.settings} name="settings-outline" size={24} color={colors.text} />
             </View>
-            <View style={commonStyle.body}>
+            <ScrollView style={commonStyle.body}>
                 {/* <Text>Created: {parseDate(group?.created_at)}</Text>
                 <Text>Invite code: {group?.invite_code}</Text> */}
 
@@ -83,17 +81,23 @@ export default function Group() {
 
                 {/* all balances */}
                 <View style={styles.bodyBalance}>
-                    <Text style={styles.sectionTitle}>Balances: </Text>
-                    {balances.map((balance) => (
-                        <Pressable key={balance.id} >
-                            <View style={styles.cardBalance}>
-                                <View style={[styles.avatar, {backgroundColor: balance.avatar_color}]}>
-                                    <Text style={styles.avatarInits}>{balance.name.charAt(0)}</Text>
+                    <Text style={styles.sectionTitle}>Balances </Text>
+                    {balances.map((balance) => {
+                        const positive = balance.balance >= 0;
+                        return (
+                            <Pressable key={balance.id} >
+                                <View style={styles.cardBalance}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <View style={[styles.avatar, {backgroundColor: balance.avatar_color}]}>
+                                            <Text style={styles.avatarInits}>{balance.name.charAt(0)}</Text>
+                                        </View>
+                                        <Text>{balance.name}</Text>
+                                    </View>
+                                    <Text style={[styles.balanceTxt, {color: positive ? colors.success : colors.danger}]}>{positive && '+'}{balance.balance} {currencies[group?.currency]}</Text>
                                 </View>
-                                <Text style={styles.balanceTxt}>{balance.name} | {balance.balance} {currencies[group?.currency]}</Text>
-                            </View>
-                        </Pressable>
-                    ))}
+                            </Pressable>
+                        )
+                    })}
                 </View>
 
                 {/* expenses */}
@@ -119,7 +123,7 @@ export default function Group() {
                     <Text style={commonStyle.btnText}>Add expense</Text>
                 </Pressable>
                 
-            </View>
+            </ScrollView>
         </View>
     )
 }
@@ -131,6 +135,7 @@ const styles = StyleSheet.create({
         width: sp[2],
         justifyContent: "center",
         alignItems: "center",
+        marginRight: sp.half
     },
     bodyBalance: {
         marginVertical: sp[1],
@@ -142,6 +147,7 @@ const styles = StyleSheet.create({
         marginBottom: sp.half,
         backgroundColor: colors.white,
         borderRadius: 20,
+        justifyContent: 'space-between'
     },
     avatarInits: {
         color: colors.white,
@@ -150,9 +156,12 @@ const styles = StyleSheet.create({
         fontSize: 18,
         textAlign: 'center',
         marginBottom: sp.half,
+        fontWeight: 700,
     },
     balanceTxt: {
-        marginHorizontal: sp['half']
+        marginHorizontal: sp['half'],
+        fontWeight: 700,
+        fontSize: 16,
     },
     myBalance: {
         alignItems: 'center',

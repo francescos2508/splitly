@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { joinGroup } from "../../src/api/groups";
+import { joinGroup } from "../../src/api/api";
 import AppInput from "../../src/components/AppInput";
 import { saveMemberToken } from "../../src/storage/auth";
 import { commonStyle } from "../../src/styles/common";

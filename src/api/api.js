@@ -1,44 +1,44 @@
 const API_URL = "http://192.168.0.15:3000";
 import { getMemberToken } from "../storage/auth";
 
+async function apiFetch(endpoint, options = {}) {
+    const token = await getMemberToken();
+    console.log(token);
+    const headers = { ...options.headers, };
+
+    if (token) headers.Authorization = `Bearer ${token}`;
+    console.log("AUTH HEADER:", headers.Authorization);
+
+    return fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        headers,
+    });
+}
 
 export async function loadCurrentMember(groupId) {
-    const myToken = await getMemberToken();
-    var authstr = 'Bearer '+myToken;
-    if (!myToken) authstr = '';
     console.log("Calling API:", `${API_URL}/groups/${groupId}/me`);
-    const response = await fetch(`${API_URL}/groups/${groupId}/me`, {
+    const response = await apiFetch(`/groups/${groupId}/me`, {
         method: "GET",
-        headers: {
-            Authorization: authstr,
-        },
     });
 
     console.log("Response received:", response.status);
     const result = await response.json();
-
     if (!response.ok) throw new Error(result.error || "Failed to get member");
     return result;
 }
 
 export async function createGroup(data) {
-    const myToken = await getMemberToken();
-    var authstr = 'Bearer '+myToken;
-    if (!myToken) authstr = '';
     console.log("Calling API:", `${API_URL}/groups`);
-    const response = await fetch(`${API_URL}/groups/`, {
+    const response = await apiFetch(`/groups/`, {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
             "Content-Type": "application/json",
-            Authorization: authstr,
-            // ...options.headers,
         },
     });
 
     console.log("Response received:", response.status);
     const result = await response.json();
-
     if (!response.ok) throw new Error(result.error || "Failed to create group");
     return result;
 }
@@ -59,7 +59,6 @@ export async function joinGroup(inviteCode, username) {
 
     console.log("Response received:", response.status);
     const result = await response.json();
-
     if (!response.ok) throw new Error(result.error || "Failed to join group");
     return result;
     
@@ -68,7 +67,7 @@ export async function joinGroup(inviteCode, username) {
 // get a specific group and the members
 export async function getGroup(id) {
     console.log('Getting group ID: '+id);
-    const resp = await fetch(`${API_URL}/groups/${id}`, {
+    const resp = await apiFetch(`/groups/${id}`, {
         method: 'GET',
     });
     console.log('Response received: ', resp.status);
@@ -80,7 +79,11 @@ export async function getGroup(id) {
 // get a specific group balances
 export async function getGroupBalances(id) {
     console.log('Getting group ID: '+id);
-    const resp = await fetch(`${API_URL}/groups/${id}/balances`, {
+    if (!id) {
+        console.trace("getGroupBalances called without groupId");
+        return [];
+    }
+    const resp = await apiFetch(`/groups/${id}/balances`, {
         method: 'GET',
     });
     console.log('Response received: ', resp.status);
@@ -92,7 +95,7 @@ export async function getGroupBalances(id) {
 // get a specific group expenses
 export async function getGroupExpenses(id) {
     console.log('Getting group ID: '+id);
-    const resp = await fetch(`${API_URL}/groups/${id}/expenses`, {
+    const resp = await apiFetch(`/groups/${id}/expenses`, {
         method: 'GET',
     });
     console.log('Response received: ', resp.status);
@@ -105,7 +108,7 @@ export async function getGroupExpenses(id) {
 // get a specific group activity
 export async function getGroupActivity(id) {
     console.log('Getting group ID: '+id);
-    const resp = await fetch(`${API_URL}/groups/${id}/activity`, {
+    const resp = await apiFetch(`/groups/${id}/activity`, {
         method: 'GET',
     });
     console.log('Response received: ', resp.status);
@@ -116,18 +119,11 @@ export async function getGroupActivity(id) {
 
 // get all groups where i am a member
 export async function getMyGroups() {
-    const myToken = await getMemberToken();
-    if (!myToken) return [];
-
-    const response = await fetch(`${API_URL}/groups/me`, {
+    const response = await apiFetch(`/groups/me`, {
         method: "GET",
-        headers: {
-            Authorization: 'Bearer '+myToken
-        },
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Failed to fetch groups");
-    
     return data;
 }
 
@@ -144,7 +140,7 @@ export async function createExpense(groupId, newExpense) {
             participants: newExpense.participants,
         };
         console.log(JSON.stringify(expense));
-    const response = await fetch(`${API_URL}/expenses/`, {
+    const response = await apiFetch(`/expenses/`, {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",
@@ -158,8 +154,12 @@ export async function createExpense(groupId, newExpense) {
 
 // update expense
 export async function updateExpense(expenseId, newExpense) {
-    const response = await fetch(`${API_URL}/expenses/${expenseId}`, {
+    const response = await apiFetch(`/expenses/${expenseId}`, {
         method: 'PATCH',
+        headers: {
+            "Content-Type": "application/json",
+        },
+
         body: JSON.stringify({
             // groupId: groupId,
             paidByMemberId: newExpense.paid_by,
@@ -171,6 +171,6 @@ export async function updateExpense(expenseId, newExpense) {
         })
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Failed to create the new expense");
+    if (!response.ok) throw new Error(data.error || "Failed to update the expense");
     return data;
 }

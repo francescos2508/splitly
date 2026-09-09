@@ -7,7 +7,7 @@ export const commonStyle = StyleSheet.create({
         flex: 1,
         paddingBottom: sp[1],
         paddingTop: sp[5],
-        paddingHorizontal: sp[1]
+        // paddingHorizontal: sp[1]
     },
     header: {
         // backgroundColor: colors['primary'],
@@ -22,7 +22,8 @@ export const commonStyle = StyleSheet.create({
         fontWeight: "700",
     },
     body: {
-        flex: 1
+        flex: 1,
+        paddingHorizontal: sp[1]
     },
     btn: {
         width: "100%",
@@ -44,6 +45,19 @@ export const commonStyle = StyleSheet.create({
     btn2Text: {
         color: colors.primary,
         fontSize: 16,
+    },
+    inlineBtn: {
+        borderWidth: 1,
+        borderColor: colors.primary,
+        borderRadius: 20,
+        paddingVertical: sp.half,
+        paddingHorizontal: sp[1],
+        alignSelf: 'flex-end',
+        marginTop: sp.half
+    },
+    inlineBtnText: {
+        fontWeight: 600,
+        color: colors.primary,
     },
     footer: {
         marginTop: 'auto',

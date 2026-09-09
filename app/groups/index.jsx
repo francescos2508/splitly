@@ -1,6 +1,6 @@
 //My groups
 
-import { getMyGroups } from '@/src/api/groups';
+import { getMyGroups } from '@/src/api/api';
 import { sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { router } from "expo-router";

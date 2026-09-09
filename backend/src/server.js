@@ -10,16 +10,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* const {
-  generateInviteCode,
-  generateMemberToken,
-  generateRecoveryCode,
-} = require("./utils/generateCode");
-
-console.log(generateInviteCode());
-console.log(generateMemberToken());
-console.log(generateRecoveryCode()); */
-
 app.get("/", (req, res) => {
   res.json({
     message: "Splitly backend running"

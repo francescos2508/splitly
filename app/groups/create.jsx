@@ -2,7 +2,7 @@ import { commonStyle } from '@/src/styles/common';
 import { router } from 'expo-router';
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { createGroup } from '../../src/api/groups';
+import { createGroup } from '../../src/api/api';
 import AppInput from '../../src/components/AppInput';
 import SelectInput from '../../src/components/SelectInput';
 import { saveMemberToken } from '../../src/storage/auth';
