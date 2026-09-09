@@ -1,3 +1,4 @@
+import Loader from '@/src/components/Loader';
 import { commonStyle } from '@/src/styles/common';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from "react-native";
@@ -28,7 +29,7 @@ export default function Activity() {
     }, []);
 
     if (loading) {
-        return <View style={commonStyle.container}><Text>Loading...</Text></View>
+        return (<Loader />);
     }
     return (
             /*   <View>

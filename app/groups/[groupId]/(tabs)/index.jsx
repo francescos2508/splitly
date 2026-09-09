@@ -1,5 +1,6 @@
 import { useGroup } from '@/backend/src/context/GroupContext';
 import { getGroupActivity, getGroupBalances, getGroupExpenses } from '@/src/api/api';
+import Loader from '@/src/components/Loader';
 import { colors, currencies, sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { Ionicons } from '@expo/vector-icons';
@@ -52,9 +53,7 @@ export default function Group() {
     
     if (loading) {
         return (
-            <View style={commonStyle.container}>
-                <Text>Loading...</Text>
-            </View>
+            <Loader />
         );
     }
 

@@ -29,7 +29,7 @@ export default function Index() {
       ]),
 
       // Pause
-      Animated.delay(500),
+      Animated.delay(200),
 
       Animated.parallel([
         Animated.timing(contentOpacity, {

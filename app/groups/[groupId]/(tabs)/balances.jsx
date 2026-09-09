@@ -1,3 +1,4 @@
+import Loader from '@/src/components/Loader';
 import { colors, currencies, sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { useFocusEffect } from "expo-router";
@@ -44,7 +45,7 @@ export default function Members() {
         }, [groupId])
     );
 
-    if (loading) return <View style={commonStyle.container}><Text>Loading...</Text></View>;
+    if (loading) return (<Loader />);
 
     return (
             <View style={commonStyle.container}>
