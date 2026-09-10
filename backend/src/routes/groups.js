@@ -7,11 +7,12 @@ const {
     generateInviteCode,
     generateMemberToken,
     generateRecoveryCode,
-} = require("../utils/generateCode");
+} = require("../utils/utils");
 
 const generateAvatarColor = () => { return '#000000' }
 const { authenticateMember } = require("../middleware/authenticateMember");
 const { authorizeGroup } = require("../middleware/authorizeGroup");
+const { calculateBalance } = require('../utils/utils');
 
 // create group, you could be authenticated or not, if you are we use same member_token and username
 router.post("/", async (req, res) => {
@@ -23,7 +24,6 @@ router.post("/", async (req, res) => {
         let memberToken = null, recoveryCode = null;
 
         if (authHeader && authHeader.startsWith('Bearer ')) memberToken = authHeader.split(' ')[1];
-        console.log(memberToken);
         if (memberToken && memberToken !== 'undefined') {
             const { data: existingMember, error: memberError } = await supabase
                 .from('group_members')
@@ -203,10 +203,11 @@ router.use(authenticateMember);
 // my groups
 router.get("/me", async (req, res) => {
     try {
-        const { data: groups, error: groupsError } = await supabase
+        const { data: memberships, error: groupsError } = await supabase
             .from("group_members")
             .select(`
                 group_id,
+                id,
                 groups (
                     id,
                     name,
@@ -219,10 +220,38 @@ router.get("/me", async (req, res) => {
 
         if (groupsError) throw groupsError;
 
-        if (!groups || groups.length === 0) {
+        if (!memberships || memberships.length === 0) {
             return res.json([]);
         }
-        const resGroups = groups.map((g) => g.groups);
+        // const groups = memberships.map((g) => g.groups);
+        const groupIds = memberships.map(m => m.group_id);
+
+        // calculate balances for the groups
+        const {data: expenses, error: expensesError} = await supabase
+            .from("expenses")   
+            .select(`
+                *,
+                expense_participants (
+                    member_id,
+                    share_amount
+                )`)
+            .in("group_id", groupIds);   
+        if (expensesError) throw expensesError;
+            
+        const {data: payments, error: paymentsError} = await supabase
+            .from("payments")
+            .select('*')
+            .in("group_id", groupIds);
+        if (paymentsError) throw paymentsError;
+
+        const resGroups = memberships.map(membership => {
+            const groupExpenses = expenses.filter(x => x.group_id === membership.group_id);
+            const groupPayments = payments.filter(x => x.group_id === membership.group_id);
+            const balance = calculateBalance(membership.id, groupExpenses, groupPayments);
+            return { ...membership.groups, balance }
+        })
+
+        // const resGroups = groups;
         return res.json(resGroups);
 
     } catch (error) {
@@ -322,34 +351,37 @@ router.get('/:groupId/balances', authorizeGroup, async (req, res) => {
 
         if (paymentsError) throw paymentsError;
 
-        const balances = new Map();
-        members.forEach(m => { balances.set(m.id, 0) });
+        // const balances = new Map();
+        // members.forEach(m => { balances.set(m.id, 0) });
 
-        for (let i = 0; i < expenses.length; i++) {
-            let exp = expenses[i];
-            let oldBalance = balances.get(exp.paid_by_member_id);
-            balances.set(exp.paid_by_member_id, oldBalance + exp.amount);
-            for (let j = 0; j < exp.expense_participants.length; j++) {
-                let part = exp.expense_participants[j];
-                let oldBalance = balances.get(part.member_id);
-                balances.set(part.member_id, oldBalance - part.share_amount);
-            }
-        }
+        // for (let i = 0; i < expenses.length; i++) {
+        //     let exp = expenses[i];
+        //     let oldBalance = balances.get(exp.paid_by_member_id);
+        //     balances.set(exp.paid_by_member_id, oldBalance + exp.amount);
+        //     for (let j = 0; j < exp.expense_participants.length; j++) {
+        //         let part = exp.expense_participants[j];
+        //         let oldBalance = balances.get(part.member_id);
+        //         balances.set(part.member_id, oldBalance - part.share_amount);
+        //     }
+        // }
 
-        for (let i = 0; i < payments.length; i++) {
-            let paym = payments[i];
-            let oldBalanceFrom = balances.get(paym.from_member_id);
-            let oldBalanceTo = balances.get(paym.to_member_id);
-            balances.set(paym.from_member_id, oldBalanceFrom + paym.amount);
-            balances.set(paym.to_member_id, oldBalanceTo - paym.amount);
-        }
+        // for (let i = 0; i < payments.length; i++) {
+        //     let paym = payments[i];
+        //     let oldBalanceFrom = balances.get(paym.from_member_id);
+        //     let oldBalanceTo = balances.get(paym.to_member_id);
+        //     balances.set(paym.from_member_id, oldBalanceFrom + paym.amount);
+        //     balances.set(paym.to_member_id, oldBalanceTo - paym.amount);
+        // }
 
+        
         const result = members.map(member => ({
             id: member.id,
             name: member.name,
             avatar_color: member.avatar_color,
-            balance: balances.get(member.id)
+            // balance: balances.get(member.id)
+            balance: calculateBalance(member.id, expenses, payments)
         }));
+
 
         res.json(result);
     } catch (error) {

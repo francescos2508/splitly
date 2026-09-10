@@ -31,8 +31,6 @@ export default function Group() {
         useCallback(() => {
             async function loadGroup(gid) {
                 try {
-                    
-
                     const balances = await getGroupBalances(gid);
                     setBalances(balances);
                     
@@ -72,7 +70,7 @@ export default function Group() {
                     <Text style={styles.myBalanceTitle}>Your balance {currentMember?.name}</Text>
                     {myBalance && 
                         <Text style={styles.myBalanceText}>
-                            {myBalance.balance >= 0 && '+ '}
+                            {myBalance.balance >= 0 && '+'}
                             {myBalance.balance} {currencies[group.currency]}
                         </Text>
                     }

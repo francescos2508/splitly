@@ -57,7 +57,6 @@ export default function CreateGroup() {
                     onPress={async () => {
                         try {
                             const data = await createGroup({ groupName: groupname, userName: username, currency: currency })
-                            console.log(JSON.stringify(data));
                             await saveMemberToken(data.member.member_token);
                             router.replace('/groups/' + data.group.id);
                         } catch (error) {

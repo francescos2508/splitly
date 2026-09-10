@@ -3,7 +3,6 @@ import { getMemberToken } from "../storage/auth";
 
 async function apiFetch(endpoint, options = {}) {
     const token = await getMemberToken();
-    console.log(token);
     const headers = { ...options.headers, };
 
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -66,7 +65,7 @@ export async function joinGroup(inviteCode, username) {
 
 // get a specific group and the members
 export async function getGroup(id) {
-    console.log('Getting group ID: '+id);
+    console.log("Calling API:", `${API_URL}/groups/${id}`);
     const resp = await apiFetch(`/groups/${id}`, {
         method: 'GET',
     });
@@ -78,7 +77,7 @@ export async function getGroup(id) {
 
 // get a specific group balances
 export async function getGroupBalances(id) {
-    console.log('Getting group ID: '+id);
+    console.log("Calling API:", `${API_URL}/groups/${id}/balances`);
     if (!id) {
         console.trace("getGroupBalances called without groupId");
         return [];
@@ -94,7 +93,7 @@ export async function getGroupBalances(id) {
 
 // get a specific group expenses
 export async function getGroupExpenses(id) {
-    console.log('Getting group ID: '+id);
+    console.log("Calling API:", `${API_URL}/groups/${id}/expenses`);
     const resp = await apiFetch(`/groups/${id}/expenses`, {
         method: 'GET',
     });
@@ -107,7 +106,7 @@ export async function getGroupExpenses(id) {
 
 // get a specific group activity
 export async function getGroupActivity(id) {
-    console.log('Getting group ID: '+id);
+    console.log("Calling API:", `${API_URL}/groups/${id}/activity`);
     const resp = await apiFetch(`/groups/${id}/activity`, {
         method: 'GET',
     });
@@ -119,9 +118,11 @@ export async function getGroupActivity(id) {
 
 // get all groups where i am a member
 export async function getMyGroups() {
+    console.log("Calling API:", `${API_URL}/groups/me`);
     const response = await apiFetch(`/groups/me`, {
         method: "GET",
     });
+    console.log('Response received: ', response.status);
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Failed to fetch groups");
     return data;
@@ -139,14 +140,15 @@ export async function createExpense(groupId, newExpense) {
             expense_date: newExpense.expense_date,
             participants: newExpense.participants,
         };
-        console.log(JSON.stringify(expense));
-    const response = await apiFetch(`/expenses/`, {
+    console.log("Calling API:", `${API_URL}/expenses`);
+    const response = await apiFetch(`/expenses`, {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(expense)
     });
+    console.log('Response received: ', response.status);
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Failed to create the new expense");
     return data;
@@ -154,6 +156,7 @@ export async function createExpense(groupId, newExpense) {
 
 // update expense
 export async function updateExpense(expenseId, newExpense) {
+    console.log("Calling API:", `${API_URL}/expenses/${expenseId}`);
     const response = await apiFetch(`/expenses/${expenseId}`, {
         method: 'PATCH',
         headers: {
@@ -170,6 +173,7 @@ export async function updateExpense(expenseId, newExpense) {
             participants: newExpense.participants,
         })
     });
+    console.log('Response received: ', response.status);
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Failed to update the expense");
     return data;

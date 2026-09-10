@@ -15,7 +15,6 @@ export default function JoinGroup() {
     const handleJoin = async () => {
         try {
             const res = await joinGroup(inviteCode, username);
-            console.log(JSON.stringify(res));
             await saveMemberToken(res.member.member_token);
             if (res && res.group) router.replace(`/groups/${res.group.id}`)
         } catch (error) {

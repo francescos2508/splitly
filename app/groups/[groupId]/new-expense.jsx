@@ -59,15 +59,11 @@ export default function NewExpense() {
     }, [members]);
 
     const handleSaveExpense = async function () {
-        // console.log("expense:", expense);
         if (isEditing) {
             const res = await updateExpense(expenseId, newExpense);
-            console.log(res);
             if (res?.expense) router.back();
         } else {
             const res = await createExpense(groupId, newExpense);
-            console.log(res);
-            // if (res?.expense) router.replace(`/groups/${groupId}/expenses`);
             if (res?.expense) router.back();
         }
     }

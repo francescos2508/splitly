@@ -11,24 +11,23 @@ async function authenticateMember(req, res, next) {
         }
 
         const token = authHeader.split(" ")[1];
-        console.log('authenticateMember token: '+token);
-
+        
         const { data: member, error } = await supabase
-            .from("group_members")
-            .select("id, group_id, name, member_token, is_owner, is_active")
-            .eq("member_token", token)
-            .eq("is_active", true)
-            .limit(1)
-            .maybeSingle();
-
-            console.log(member);
+        .from("group_members")
+        .select("id, group_id, name, member_token, is_owner, is_active")
+        .eq("member_token", token)
+        .eq("is_active", true)
+        .limit(1)
+        .maybeSingle();
+        
         // doesn't exist a member with that token
         if (error || !member) {
             return res.status(401).json({
                 error: "Invalid authentication token"
             });
         }
-
+        console.log('Authenticated member with token: '+member.member_token);
+        
         req.member_token = member.member_token;
 
         next();

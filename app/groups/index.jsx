@@ -2,21 +2,28 @@
 
 import { getMyGroups } from '@/src/api/api';
 import Loader from '@/src/components/Loader';
-import { sp } from '@/src/constants/constants';
+import { colors, currencies, sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 
 export default function myGroups() {
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [bigBalance, setBigBalance] = useState({});
     useEffect(() => {
         async function loadGroups() {
             try {
                 const myGroups = await getMyGroups();
-                setGroups(myGroups);
+                const orderedGroups = myGroups.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+                orderedGroups.forEach(x => {
+                    if (!bigBalance[x.currency]) bigBalance[x.currency] = 0;
+                    setBigBalance({...bigBalance, [x.currency]: bigBalance[x.currency] + x.balance});
+                });
+                setGroups(orderedGroups);
             } catch (error) {
                 alert(error.message);
             } finally {
@@ -35,10 +42,18 @@ export default function myGroups() {
     return (
         <View style={commonStyle.container}>
             <View style={commonStyle.header}>
-                <Text style={commonStyle.title}>My Groups</Text>
-                <Text style={commonStyle.title}>Profile</Text>
+                <Text style={commonStyle.title}>Your Groups</Text>
+                {/* <Text style={commonStyle.title}>Profile</Text> */}
             </View>
             <View style={commonStyle.body}>
+                {Object.entries(bigBalance).map(([name, balance]) => {
+                    return (
+                        <Text>Balance of all groups: {balance >= 0 && '+'}{balance} {currencies[name]}</Text>                        
+                    );
+                })}
+                {Object.keys(bigBalance).length > 1 && (
+                    <Text style={{fontSize: 12}}>Balances are calculated separately for each currency.</Text>
+                )}
                 { groups.length === 0 ? (
                     <View style={styles.emptyBody}>
                         <Text style={styles.emptyTitle}>No groups yet</Text>
@@ -53,13 +68,19 @@ export default function myGroups() {
                         </View>
                     </View>
                 ): (
-                    <View>
+                    <ScrollView>
                         {groups.map((group) => (
                             <Pressable key={group.id} style={styles.groupCard} onPress={() => router.push(`/groups/${group.id}`)}>
-                                <Text style={styles.groupName}>{group.name || 'Error 404 no name found'}</Text>
-                                <Text style={styles.groupInfo}>
-                                    {group.currency || 'EUR'} | {group.group_members[0]?.count || '**'} members
-                                </Text>
+                                <View >
+                                    <Text style={styles.groupName}>{group.name || 'Untitled'}</Text>
+                                    <Text style={styles.groupInfo}>
+                                        {group.currency || 'EUR'} | {group.group_members[0]?.count || '**'} members
+                                    </Text>
+                                    <Text style={styles.groupBalance}>{group.balance >= 0 && '+'}{group.balance} {currencies[group.currency]}</Text>
+                                </View>
+                                <View>
+                                    <Ionicons name='chevron-forward' size={20} color={colors.primary} />
+                                </View>
                             </Pressable>
                         ))}
                         <View style={commonStyle.footer}>
@@ -70,7 +91,7 @@ export default function myGroups() {
                                 <Text style={commonStyle.btn2Text}>Join group</Text>
                             </Pressable>
                         </View>
-                    </View>
+                    </ScrollView>
                 )}
             </View>
         </View>
@@ -96,9 +117,14 @@ const styles = StyleSheet.create({
     },
     
     groupCard: {
-        padding: sp[2],
-        borderRadius: 20,
+        padding: sp[1],
+        // borderRadius: 20,
         marginBottom: sp[1],
+        borderLeftWidth: 2,
+        borderLeftColor: colors.primary,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
     },
     groupName: {
         fontSize: 18,
