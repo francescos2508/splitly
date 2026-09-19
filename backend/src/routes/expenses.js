@@ -4,6 +4,7 @@ const router = express.Router();
 const supabase = require("../config/supabase");
 const { authenticateMember } = require("../middleware/authenticateMember");
 const { authorizeGroup, getMemberOfGroup } = require("../middleware/authorizeGroup");
+const { calculateExpenseParticipants } = require("../utils/utils");
 
 
 router.use(authenticateMember);
@@ -17,9 +18,10 @@ router.post('/', authorizeGroup, async (req, res) => {
         category,
         splitType,
         participants,
+        expense_date
     } = req.body;
 
-    if (!groupId || !paidByMemberId || ! description || !amount || !participants) {
+    if (!groupId || !paidByMemberId || !description || !amount || !participants) {
         return res.status(400).json({
             error: 'Missing required fields'
         });
@@ -37,13 +39,14 @@ router.post('/', authorizeGroup, async (req, res) => {
         // no participant duplicates
         const checkDuplicates = new Set(participants.map(item => item.memberId));
         if (checkDuplicates.size !== participants.length) {
-            return res.status(400).json({ error: 'Duplicate participants are not allowed è'})
+            return res.status(400).json({ error: 'Duplicate participants are not allowed'})
         }
         // check gruppo esiste
         const { data: group, error: groupError } = await supabase
             .from('groups')
             .select('id')
             .eq('id', groupId)
+            .eq('is_active', true)
             .single();
 
         if (groupError || !group) {
@@ -58,6 +61,7 @@ router.post('/', authorizeGroup, async (req, res) => {
             .select('id')
             .eq('id', paidByMemberId)
             .eq('group_id', groupId)
+            .eq('is_active', true)
             .single();
 
         if (payerError || !payer) {
@@ -72,6 +76,7 @@ router.post('/', authorizeGroup, async (req, res) => {
             .from('group_members')
             .select('id')
             .eq('group_id', groupId)
+            .eq('is_active', true)
             .in('id', participantIds);
         
         if (membersError) throw membersError;
@@ -82,35 +87,15 @@ router.post('/', authorizeGroup, async (req, res) => {
             })
         }
 
-        let expenseParticipants = [];
-
-        // equal
-        if (splitType === 'equal') {
-            const share = Number((amount / participants.length).toFixed(2));
-
-            expenseParticipants = participants.map(item => ({
-                member_id: item.memberId,
-                share_amount: share
-            }));
-        } else if (splitType === 'custom') {
-            expenseParticipants = participants.map(item => ({
-                member_id: item.memberId,
-                share_amount: item.shareAmount
-            }));
-
-            const total = expenseParticipants.reduce( (sum, item) => sum + Number(item.share_amount), 0);
-
-            if (Number(total.toFixed(2)) !== Number(amount)) {
-                return res.status(400).json({
-                    error: 'Participants amount does not match expense amount'
-                })
-            }
-        }  else {
-            return res.status(400).json({
-                error: "Invalid split type",
-            });
+        let expenseParticipants;
+        try {
+            expenseParticipants = calculateExpenseParticipants(amount, splitType, participants);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
         }
 
+        // uniform date
+        const fmtDate = new Date(expense_date).toLocaleDateString('en-CA');
         // crea expense
         const {data: expense, error: expenseError} = await supabase
             .from('expenses')
@@ -120,7 +105,8 @@ router.post('/', authorizeGroup, async (req, res) => {
                 description: description,
                 category: category,
                 amount: amount,
-                split_type: splitType
+                split_type: splitType,
+                expense_date: fmtDate,
             })
             .select()
             .single();
@@ -133,7 +119,7 @@ router.post('/', authorizeGroup, async (req, res) => {
 
         if (participantsError) throw participantsError;
 
-        const {data: activityLog, error: activityError } = await supabase
+        const { error: activityError } = await supabase
             .from("activity_log")
             .insert({
                 group_id: groupId,
@@ -170,10 +156,18 @@ router.patch('/:expenseId', async (req, res) => {
         category,
         paidByMemberId,
         splitType,
-        participants
+        participants,
+        expense_date,
     } = req.body;
 
     try {
+        // check consistent data passed by client
+        if (!description || !amount || !paidByMemberId || !splitType || !participants) {
+            return res.status(400).json({
+                error: 'Missing required fields'
+            });
+        }
+
         // altri controlli
         if (amount <= 0) {
             return res.status(400).json({ error: 'Amount must be higher than 0' })
@@ -182,10 +176,17 @@ router.patch('/:expenseId', async (req, res) => {
             return res.status(400).json({ error: 'At least one participant is required' })
         }
 
+        // no participant duplicates
+        const checkDuplicates = new Set(participants.map(item => item.memberId));
+        if (checkDuplicates.size !== participants.length) {
+            return res.status(400).json({ error: 'Duplicate participants are not allowed'})
+        }
+
         const { data: expense, error: expenseError } = await supabase
             .from("expenses")
             .select("*")
             .eq("id", expenseId)
+            .eq('is_active', true)
             .single();
 
         if (expenseError || !expense) {
@@ -207,6 +208,7 @@ router.patch('/:expenseId', async (req, res) => {
         const { data: members, error: membersError } = await supabase
             .from("group_members")
             .select("id")
+            .eq('is_active', true)
             .eq("group_id", expense.group_id);
 
         if (membersError) throw membersError;
@@ -232,35 +234,15 @@ router.patch('/:expenseId', async (req, res) => {
             });
         }
 
-        let expenseParticipants = [];
-
-        // equal
-        if (splitType === 'equal') {
-            const share = Number((amount / participants.length).toFixed(2));
-
-            expenseParticipants = participants.map(item => ({
-                member_id: item.memberId,
-                share_amount: share
-            }));
-        } else if (splitType === 'custom') {
-            expenseParticipants = participants.map(item => ({
-                member_id: item.memberId,
-                share_amount: item.shareAmount
-            }));
-
-            const total = expenseParticipants.reduce( (sum, item) => sum + Number(item.share_amount), 0);
-
-            if (Number(total.toFixed(2)) !== Number(amount)) {
-                return res.status(400).json({
-                    error: 'Participants amount does not match expense amount'
-                })
-            }
-        }  else {
-            return res.status(400).json({
-                error: "Invalid split type",
-            });
+        let expenseParticipants;
+        try {
+            expenseParticipants = calculateExpenseParticipants(amount, splitType, participants);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
         }
 
+        // uniform date
+        const fmtDate = new Date(expense_date).toLocaleDateString('en-CA');
         // modifica expense
         const {data: newExpense, error: newExpenseError }= await supabase
             .from("expenses")
@@ -270,9 +252,11 @@ router.patch('/:expenseId', async (req, res) => {
                 category,
                 paid_by_member_id: paidByMemberId,
                 split_type: splitType,
+                expense_date: fmtDate,
                 updated_at: new Date().toISOString()
             })
             .eq("id", expenseId)
+            .eq('is_active', true)
             .select()
             .single();
 
@@ -291,6 +275,7 @@ router.patch('/:expenseId', async (req, res) => {
             expense_id: expenseId
         }));
 
+        // inserisco nuovi expense_participants
         const { error: participantsError } = await supabase
             .from("expense_participants")
             .insert(expenseParticipants);
@@ -320,7 +305,7 @@ router.patch('/:expenseId', async (req, res) => {
     }
 });
 
-router.delete('/:expenseId', async (req, res) => {
+router.patch('/:expenseId/remove', async (req, res) => {
     const { expenseId } = req.params;
 
     try {
@@ -329,6 +314,7 @@ router.delete('/:expenseId', async (req, res) => {
             .from('expenses')
             .select('*')
             .eq('id', expenseId)
+            .eq('is_active', true)
             .single();
 
         if (expenseError || !expense) {
@@ -348,8 +334,9 @@ router.delete('/:expenseId', async (req, res) => {
         // cancelliamo expense
         const { error: deleteError } = await supabase
             .from("expenses")
-            .delete()
-            .eq("id", expenseId);
+            .update({ is_active: false })
+            .eq("id", expenseId)
+            .eq("is_active", true);
 
         if (deleteError) throw deleteError;
 

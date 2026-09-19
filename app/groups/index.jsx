@@ -8,22 +8,34 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { fmtNum } from '../../src/utils/utils';
 
 
 export default function myGroups() {
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     const [bigBalance, setBigBalance] = useState({});
+    const [balanceBg, setBalanceBg] = useState(colors.primary);
     useEffect(() => {
         async function loadGroups() {
             try {
                 const myGroups = await getMyGroups();
                 const orderedGroups = myGroups.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-                orderedGroups.forEach(x => {
-                    if (!bigBalance[x.currency]) bigBalance[x.currency] = 0;
-                    setBigBalance({...bigBalance, [x.currency]: bigBalance[x.currency] + x.balance});
+                const balances = {};
+                orderedGroups.forEach(g => {
+                    if (!balances[g.currency]) balances[g.currency] = 0;
+                    balances[g.currency] += Number(g.balance);
                 });
+                setBigBalance(balances);
                 setGroups(orderedGroups);
+
+                const currenciesList = Object.keys(balances);
+                console.log(currenciesList);
+                if (currenciesList.length !== 1) setBalanceBg(colors.primary);
+                if (currenciesList.length === 1) {
+                    const bal = balances[currenciesList[0]];
+                    (bal > 0) ? setBalanceBg(colors.positive) : (bal < 0) ? setBalanceBg(colors.negative) : setBalanceBg(colors.primary);
+                }
             } catch (error) {
                 alert(error.message);
             } finally {
@@ -45,54 +57,60 @@ export default function myGroups() {
                 <Text style={commonStyle.title}>Your Groups</Text>
                 {/* <Text style={commonStyle.title}>Profile</Text> */}
             </View>
-            <View style={commonStyle.body}>
-                {Object.entries(bigBalance).map(([name, balance]) => {
-                    return (
-                        <Text>Balance of all groups: {balance >= 0 && '+'}{balance} {currencies[name]}</Text>                        
-                    );
-                })}
-                {Object.keys(bigBalance).length > 1 && (
-                    <Text style={{fontSize: 12}}>Balances are calculated separately for each currency.</Text>
-                )}
-                { groups.length === 0 ? (
+
+            {groups.length === 0 ? (
+                <ScrollView style={commonStyle.body}>
                     <View style={styles.emptyBody}>
                         <Text style={styles.emptyTitle}>No groups yet</Text>
                         <Text style={styles.emptyText}>Create a group or join one to start splitting expenses.</Text>
-                        <View style={commonStyle.footer}>
-                            <Pressable style={commonStyle.btn} onPress={() => router.push('/groups/create')}>
-                                <Text style={commonStyle.btnText}>Create group</Text>
-                            </Pressable>
-                            <Pressable style={commonStyle.btn2} onPress={() => router.push('/groups/join')}>
-                                <Text style={commonStyle.btn2Text}>Join group</Text>
-                            </Pressable>
-                        </View>
                     </View>
-                ): (
-                    <ScrollView>
+                </ScrollView>
+            ) : (
+                <ScrollView style={commonStyle.body}>
+                    <View style={[styles.myBalance, { backgroundColor: balanceBg }]}>
+                        {Object.entries(bigBalance).map(([name, balance]) => {
+                            return (
+                                <View key={name}>
+                                    {/* <Text key={name}>Balance of all groups: {balance >= 0 && '+'}{balance} {currencies[name]}</Text>  */}
+                                    <Text style={styles.myBalanceTitle}>Overall balance </Text>
+                                    <Text style={styles.myBalanceText}>
+                                        {balance >= 0 && '+'}{fmtNum(balance)} {currencies[name]}
+                                    </Text>
+                                </View>
+                            );
+                        })}
+                        {Object.keys(bigBalance).length > 1 && (
+                            <Text style={{ fontSize: 12, color: colors.white }}>Balances are calculated separately for each currency.</Text>
+                        )}
+                    </View>
+                    <View>
                         {groups.map((group) => (
                             <Pressable key={group.id} style={styles.groupCard} onPress={() => router.push(`/groups/${group.id}`)}>
                                 <View >
                                     <Text style={styles.groupName}>{group.name || 'Untitled'}</Text>
                                     <Text style={styles.groupInfo}>
-                                        {group.currency || 'EUR'} | {group.group_members[0]?.count || '**'} members
+                                        {group.currency || 'EUR'} | {group.count || '**'} members
                                     </Text>
-                                    <Text style={styles.groupBalance}>{group.balance >= 0 && '+'}{group.balance} {currencies[group.currency]}</Text>
+                                    <Text style={[styles.groupBalance, { color: group.balance >= 0 ? colors.positive : colors.negative }]}>
+                                        {group.balance >= 0 && '+'}{fmtNum(group.balance)} {currencies[group.currency]}
+                                    </Text>
                                 </View>
                                 <View>
                                     <Ionicons name='chevron-forward' size={20} color={colors.primary} />
                                 </View>
                             </Pressable>
                         ))}
-                        <View style={commonStyle.footer}>
-                            <Pressable style={commonStyle.btn} onPress={() => router.push('/groups/create')}>
-                                <Text style={commonStyle.btnText}>Create group</Text>
-                            </Pressable>
-                            <Pressable style={commonStyle.btn2} onPress={() => router.push('/groups/join')}>
-                                <Text style={commonStyle.btn2Text}>Join group</Text>
-                            </Pressable>
-                        </View>
-                    </ScrollView>
-                )}
+
+                    </View>
+                </ScrollView>
+            )}
+            <View style={commonStyle.footer}>
+                <Pressable style={commonStyle.btn} onPress={() => router.push('/groups/create')}>
+                    <Text style={commonStyle.btnText}>Create group</Text>
+                </Pressable>
+                <Pressable style={commonStyle.btn2} onPress={() => router.push('/groups/join')}>
+                    <Text style={commonStyle.btn2Text}>Join group</Text>
+                </Pressable>
             </View>
         </View>
     );
@@ -115,7 +133,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: sp[2],
     },
-    
+
     groupCard: {
         padding: sp[1],
         // borderRadius: 20,
@@ -133,5 +151,25 @@ const styles = StyleSheet.create({
     },
     groupInfo: {
         fontSize: 14,
+    },
+    myBalance: {
+        alignItems: 'center',
+        padding: sp[1],
+        backgroundColor: colors.primary,
+        borderRadius: 20,
+        marginBottom: sp[1],
+    },
+    myBalanceTitle: {
+        color: colors.white,
+        fontSize: 16,
+    },
+    myBalanceText: {
+        color: colors.white,
+        fontSize: 30,
+        fontWeight: 700,
+    },
+    groupBalance: {
+        fontWeight: 600,
+        fontSize: 16
     },
 });

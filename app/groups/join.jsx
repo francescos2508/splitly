@@ -3,25 +3,32 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { joinGroup } from "../../src/api/api";
 import AppInput from "../../src/components/AppInput";
+import Loader from "../../src/components/Loader";
 import { saveMemberToken } from "../../src/storage/auth";
 import { commonStyle } from "../../src/styles/common";
 
 
 
 export default function JoinGroup() {
-    const [inviteCode, setInviteCode] = useState(null);
-    const [username, setUsername] = useState(null);
+    const [inviteCode, setInviteCode] = useState('');
+    const [username, setUsername] = useState('');
+    const [loading, setLoading] = useState(null);
 
     const handleJoin = async () => {
         try {
+            setLoading(true);
             const res = await joinGroup(inviteCode, username);
-            await saveMemberToken(res.member.member_token);
+            if (res && res.member) await saveMemberToken(res?.member.member_token);
+            setLoading(false);
             if (res && res.group) router.replace(`/groups/${res.group.id}`)
         } catch (error) {
-            console.error(error);
-            alert(error);
+            // console.error(error);
+            alert(error.message);
+            setLoading(false);
         }
     }
+
+    if (loading) return (<Loader />);
 
     return (
         <View style={commonStyle.container}>

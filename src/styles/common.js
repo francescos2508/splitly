@@ -8,6 +8,7 @@ export const commonStyle = StyleSheet.create({
         paddingBottom: sp[1],
         paddingTop: sp[5],
         // paddingHorizontal: sp[1]
+        backgroundColor: colors.background
     },
     header: {
         // backgroundColor: colors['primary'],
@@ -15,6 +16,7 @@ export const commonStyle = StyleSheet.create({
         justifyContent: 'space-evenly',
         alignItems: "center",
         marginBottom: sp[2],
+        paddingHorizontal: sp[1],
     },
     title: {
         // color: colors['text'],
@@ -62,6 +64,8 @@ export const commonStyle = StyleSheet.create({
     footer: {
         marginTop: 'auto',
         width: '100%',
+        paddingHorizontal: sp[1],
+        paddingTop: sp.half,
         // flex: 1,
         // justifyContent: "center",
         // alignItems: "center",
@@ -83,4 +87,16 @@ export const commonStyle = StyleSheet.create({
         marginBottom: sp[1],
         color: colors.text,
     },
+    sectionTitle: {
+        fontSize: 18,
+        // textAlign: 'center',
+        marginTop: sp.half,
+        marginBottom: sp.half,
+        fontWeight: 700,
+    },
+    rowBasic: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    }
 })

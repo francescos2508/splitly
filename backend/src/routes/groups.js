@@ -9,10 +9,34 @@ const {
     generateRecoveryCode,
 } = require("../utils/utils");
 
-const generateAvatarColor = () => { return '#000000' }
 const { authenticateMember } = require("../middleware/authenticateMember");
 const { authorizeGroup } = require("../middleware/authorizeGroup");
 const { calculateBalance } = require('../utils/utils');
+const AVATAR_COLORS = [
+    '#2A9D8F',  // Teal
+    '#9B5DE5',  // Purple
+    '#F77F00',  // Orange
+    '#F72585',  // Magenta
+    '#118AB2',  // Ocean blue
+    '#8AC926', // Lime
+    '#FF595E', // Coral
+    '#00B4D8', // Cyan
+    '#FFCA3A', // Gold
+    '#52B788', // Green
+
+    // discarded ↓
+    // '#E63946',  // Red
+    // '#4361EE',  // Blue
+    // '#F4D35E',  // Yellow
+    // '#06D6A0',  // Emerald
+    // '#6C584C', // Brown
+    // '#8338EC', // Violet
+    // '#1982C4', // Azure
+    // '#C77DFF', // Lavender
+    // '#FF70A6', // Pink
+    // '#6D6875', // Slate
+];
+const generateAvatarColor = () => { return AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]; };
 
 // create group, you could be authenticated or not, if you are we use same member_token and username
 router.post("/", async (req, res) => {
@@ -39,7 +63,7 @@ router.post("/", async (req, res) => {
                 });
             }
             recoveryCode = existingMember.recovery_code;
-            userName = existingMember.name;
+            // userName = existingMember.name;
         }
 
         if (!memberToken) memberToken = generateMemberToken();
@@ -47,7 +71,7 @@ router.post("/", async (req, res) => {
 
         if (!groupName || !userName) {
             return res.status(400).json({
-                error: "groupName and userName are required",
+                error: "Group name and user name are required",
             });
         }
 
@@ -88,7 +112,7 @@ router.post("/", async (req, res) => {
                 member_token: memberToken,
                 recovery_code: recoveryCode,
                 is_owner: true,
-                avatar_color: "#0044ff",
+                avatar_color: generateAvatarColor(),
             })
             .select()
             .single();
@@ -140,6 +164,7 @@ router.post('/:inviteCode/join', async (req, res) => {
             .from('groups')
             .select('*')
             .eq('invite_code', inviteCode)
+            .eq('is_active', true)
             .single();
 
         if (groupError || !group) {
@@ -197,26 +222,30 @@ router.post('/:inviteCode/join', async (req, res) => {
     }
 });
 
-// from here until the end of the file the requests must be authenticated, before no
-router.use(authenticateMember);
-
-// my groups
+// my groups, empty if not authenticated
 router.get("/me", async (req, res) => {
+    // check memberToken
+    const authHeader = req.headers.authorization;
+    let memberToken = null;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) memberToken = authHeader.split(' ')[1];
+    if (!memberToken) return res.json([]);
+
     try {
         const { data: memberships, error: groupsError } = await supabase
             .from("group_members")
             .select(`
                 group_id,
                 id,
-                groups (
+                groups!inner (
                     id,
                     name,
-                    currency,
-                    group_members (count)
+                    currency
                 )
             `)
-            .eq("member_token", req.member_token)
-            .eq("is_active", true);
+            .eq("member_token", memberToken)
+            .eq("is_active", true)
+            .eq("groups.is_active", true);
 
         if (groupsError) throw groupsError;
 
@@ -225,6 +254,15 @@ router.get("/me", async (req, res) => {
         }
         // const groups = memberships.map((g) => g.groups);
         const groupIds = memberships.map(m => m.group_id);
+
+        // counting members
+        const { data: members, error: membersError } = await supabase
+            .from("group_members")
+            .select("group_id")
+            .in("group_id", groupIds)
+            .eq("is_active", true);
+
+        if (membersError) throw membersError;
 
         // calculate balances for the groups
         const {data: expenses, error: expensesError} = await supabase
@@ -235,7 +273,8 @@ router.get("/me", async (req, res) => {
                     member_id,
                     share_amount
                 )`)
-            .in("group_id", groupIds);   
+            .in("group_id", groupIds)   
+            .eq('is_active', true);
         if (expensesError) throw expensesError;
             
         const {data: payments, error: paymentsError} = await supabase
@@ -248,7 +287,8 @@ router.get("/me", async (req, res) => {
             const groupExpenses = expenses.filter(x => x.group_id === membership.group_id);
             const groupPayments = payments.filter(x => x.group_id === membership.group_id);
             const balance = calculateBalance(membership.id, groupExpenses, groupPayments);
-            return { ...membership.groups, balance }
+            const memberCount = members.filter(m => m.group_id === membership.group_id).length;
+            return { ...membership.groups, balance, count: memberCount}
         })
 
         // const resGroups = groups;
@@ -263,14 +303,20 @@ router.get("/me", async (req, res) => {
     }
 });
 
+// from here until the end of the file the requests must be authenticated, before no
+router.use(authenticateMember);
+
+
 // return specific group and members
 router.get('/:groupId', authorizeGroup, async (req, res) => {
     const { groupId } = req.params;
     try {
         const { data: group, error } = await supabase
             .from('groups')
-            .select(`*, group_members (id, name, avatar_color)`)
+            .select(`*, group_members (id, name, avatar_color, is_owner)`)
             .eq('id', groupId)
+            .eq('is_active', true)
+            .eq('group_members.is_active', true)
             .single();
 
         if (error || !group) {
@@ -306,6 +352,7 @@ router.get('/:groupId/expenses', authorizeGroup, async (req, res) => {
                     )
                 )`)
             .eq('group_id', groupId)
+            .eq('is_active', true)
             .order('created_at', { ascending: false });
 
         if (expensesError) throw expensesError;
@@ -326,6 +373,7 @@ router.get('/:groupId/balances', authorizeGroup, async (req, res) => {
         const { data: members, error: membersError } = await supabase
             .from('group_members')
             .select('*')
+            .eq('is_active', true)
             .eq('group_id', groupId);
 
         if (membersError || members.length === 0) {
@@ -340,6 +388,7 @@ router.get('/:groupId/balances', authorizeGroup, async (req, res) => {
             *,
             expense_participants (member_id, share_amount)`
             )
+            .eq('is_active', true)
             .eq('group_id', groupId);
 
         if (expensesError) throw expensesError;
@@ -350,29 +399,6 @@ router.get('/:groupId/balances', authorizeGroup, async (req, res) => {
             .eq('group_id', groupId);
 
         if (paymentsError) throw paymentsError;
-
-        // const balances = new Map();
-        // members.forEach(m => { balances.set(m.id, 0) });
-
-        // for (let i = 0; i < expenses.length; i++) {
-        //     let exp = expenses[i];
-        //     let oldBalance = balances.get(exp.paid_by_member_id);
-        //     balances.set(exp.paid_by_member_id, oldBalance + exp.amount);
-        //     for (let j = 0; j < exp.expense_participants.length; j++) {
-        //         let part = exp.expense_participants[j];
-        //         let oldBalance = balances.get(part.member_id);
-        //         balances.set(part.member_id, oldBalance - part.share_amount);
-        //     }
-        // }
-
-        // for (let i = 0; i < payments.length; i++) {
-        //     let paym = payments[i];
-        //     let oldBalanceFrom = balances.get(paym.from_member_id);
-        //     let oldBalanceTo = balances.get(paym.to_member_id);
-        //     balances.set(paym.from_member_id, oldBalanceFrom + paym.amount);
-        //     balances.set(paym.to_member_id, oldBalanceTo - paym.amount);
-        // }
-
         
         const result = members.map(member => ({
             id: member.id,
@@ -430,6 +456,7 @@ router.patch('/:groupId', authorizeGroup, async (req, res) => {
                 // invite_code: inviteCode
             })
             .eq('id', groupId)
+            .eq('is_active', true)
             .select()
             .single();
 
@@ -488,6 +515,7 @@ router.patch('/:groupId/members/:memberId/leave', authorizeGroup, async (req, re
         const { data: group, error: groupError } = await supabase
             .from('groups')
             .select('id, name')
+            .eq('is_active', true)
             .eq('id', groupId)
             .single();
 
@@ -550,18 +578,20 @@ router.patch('/:groupId/members/:memberId/remove', authorizeGroup, async (req, r
             .from('groups')
             .select('id, name')
             .eq('id', groupId)
+            .eq('is_active', true)
             .single();
 
         if (groupError || !group) {
             return res.status(404).json({ error: 'Group not found' });
         }
 
-        // verifica membro da elliminare fa parte del gruppo
+        // verifica membro da eliminare fa parte del gruppo
         const { data: member, error: memberError } = await supabase
             .from('group_members')
             .select('id, name, is_owner')
             .eq('id', memberId)
             .eq('group_id', groupId)
+            .eq('is_active', true)
             .single();
 
         if (memberError || !member) {
@@ -612,6 +642,7 @@ router.get('/:groupId/me', authorizeGroup, async (req, res) => {
             .select('*')
             .eq('id', req.member.id)
             .eq('group_id', groupId)
+            .eq('is_active', true)
             .single();
         
         if (!member || memberError) {
@@ -637,6 +668,8 @@ router.patch('/:groupId/me', authorizeGroup, async (req, res) => {
             .from('group_members')
             .update({ name: updatedName, avatar_color: updatedAvatar_color })
             .eq('id', req.member.id)
+            .eq('group_id', groupId)
+            .eq('is_active', true)
             .select()
             .single();
 

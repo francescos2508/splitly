@@ -1,4 +1,3 @@
-import { createExpense } from "@/src/api/api";
 import DateInput from "@/src/components/DateInput";
 import SelectInput from "@/src/components/SelectInput";
 import { colors, sp } from '@/src/constants/constants';
@@ -8,13 +7,13 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import { useGroup } from "../../../backend/src/context/GroupContext";
-import { updateExpense } from "../../../src/api/api";
+import { createExpense, updateExpense } from "../../../src/api/api";
 import AppInput from "../../../src/components/AppInput";
 
 
 
 export default function NewExpense() {
-    const { members } = useGroup();
+    const { members, loading, setLoading } = useGroup();
     const { groupId, expenseId } = useLocalSearchParams();
     const isEditing = !!expenseId;
     const [showParticipants, setShowParticipants] = useState(false);
@@ -32,6 +31,23 @@ export default function NewExpense() {
             { label: 'Generic', value: 'Generic' },
             { label: 'Food', value: 'Food' },
             { label: 'Home', value: 'Home' },
+            { label: 'Groceries', value: 'Groceries' },
+            { label: 'Bills & Utilities', value: 'Bills & Utilities' },
+            { label: 'Transport', value: 'Transport' },
+            { label: 'Travel', value: 'Travel' },
+            { label: 'Entertainment', value: 'Entertainment' },
+            { label: 'Shopping', value: 'Shopping' },
+            { label: 'Health', value: 'Health' },
+            { label: 'Sports', value: 'Sports' },
+            { label: 'Subscriptions', value: 'Subscriptions' },
+            { label: 'Gifts', value: 'Gifts' },
+            { label: 'Work', value: 'Work' },
+            { label: 'Education', value: 'Education' },
+            { label: 'Pets', value: 'Pets' },
+            { label: 'Personal Care', value: 'Personal Care' },
+            { label: 'Services', value: 'Services' },
+            { label: 'Fees & Charges', value: 'Fees & Charges' },
+            { label: 'Other', value: 'Other' },
         ],
         splitType: [
             { label: 'equal', value: 'equal' },
@@ -39,6 +55,7 @@ export default function NewExpense() {
         ],
         paidBy: []
     });
+
     const updExpense = (field, val) => {
         setNewExpense((prev) => ({ ...prev, [field]: val }));
     }
@@ -59,12 +76,22 @@ export default function NewExpense() {
     }, [members]);
 
     const handleSaveExpense = async function () {
-        if (isEditing) {
-            const res = await updateExpense(expenseId, newExpense);
-            if (res?.expense) router.back();
-        } else {
-            const res = await createExpense(groupId, newExpense);
-            if (res?.expense) router.back();
+        if (loading) return;
+        setLoading(true);
+
+        try {
+            if (isEditing) {
+                const res = await updateExpense(expenseId, newExpense);
+                if (res?.expense) router.back();
+            } else {
+                const res = await createExpense(groupId, newExpense);
+                if (res?.expense) router.back();
+            }
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        } finally {
+            setLoading(false);
         }
     }
     const toggleParticipant = function (mid) {
@@ -146,18 +173,6 @@ export default function NewExpense() {
                         onChange={(value) => updExpense('split_type', value)}
                     />
 
-                    {/* <View style={styles.bodyParticipants}>
-                    <Text style={commonStyle.label}>Split between:</Text>
-                    {members.map((member) => {
-                        const selected = newExpense.participants.some(p => p.memberId === member.id);
-                        return (<Pressable style={styles.cardParticipant} key={member.id} onPress={() => toggleParticipant(member.id)}>
-                                <Ionicons name={selected ? "checkbox" : "square-outline"} size={24} color={colors['accent']} />
-                                <Text>{member.name}</Text>
-                            </Pressable>
-                        )
-                    })}
-                </View> */}
-
                     <Text style={commonStyle.label}>Split between</Text>
                     <View style={styles.bodyParticipants}>
                         <Pressable onPress={() => setShowParticipants(true)}>
@@ -172,7 +187,6 @@ export default function NewExpense() {
                                     : ' '+newExpense.participants.length+'/'+members.length+' members'}
                             </Text>
                         </Pressable>
-                        {/* <Ionicons name='pencil' size={20} color={colors.textSecondary} /> */}
 
                         <Modal
                             visible={showParticipants}
@@ -207,10 +221,12 @@ export default function NewExpense() {
 
 
 
-                    <Pressable style={commonStyle.btn} onPress={handleSaveExpense} >
+                </ScrollView>
+                <View style={commonStyle.footer}>
+                    <Pressable disabled={loading} style={commonStyle.btn} onPress={handleSaveExpense} >
                         <Text style={commonStyle.btnText}>{isEditing ? "Save changes" : "Add expense"}</Text>
                     </Pressable>
-                </ScrollView>
+                </View>
             </View>
         </TouchableWithoutFeedback>
     )

@@ -28,9 +28,9 @@ export function calculatePayments(balances) {
         const amount = Math.min(debtor.balance, creditor.balance);
         payments.push({
             from: debtor.id,
-            fromName: debtor.name,
+            fromMember : debtor,
             to: creditor.id,
-            toName: creditor.name,
+            toMember : creditor,
             amount: amount
         });
         // update new balances after the payment
@@ -41,4 +41,14 @@ export function calculatePayments(balances) {
         if (creditor.balance === 0) j++;
     }
     return payments;
+}
+
+export function getInits(str) {
+    const parts = str.split(' ');
+    if (parts.length === 1) return parts[0].charAt(0);
+    if (parts.length > 1) return parts[0].charAt(0)+parts[1].charAt(0);
+}
+
+export function fmtNum(num) {
+    return Number(num).toFixed(2).replace('.', ',');
 }

@@ -43,10 +43,7 @@ export async function createGroup(data) {
 }
 
 export async function joinGroup(inviteCode, username) {
-    if (!inviteCode || !username) {
-        alert('Missing required fields');
-        return;
-    }
+    inviteCode = inviteCode.toUpperCase();
     console.log("Calling API:", `${API_URL}/groups/:inviteCode/join`);
     const response = await fetch(`${API_URL}/groups/${inviteCode}/join`, {
         method: 'POST',
@@ -100,7 +97,8 @@ export async function getGroupExpenses(id) {
     console.log('Response received: ', resp.status);
     const res = await resp.json();
     if (!resp.ok)  throw new Error(res.error || 'Failed to get group expenses');
-    if (res) res.sort((a, b) => new Date(a.expense_date) - new Date(b.expense_date))
+    if (res) res.sort((a, b) => new Date(b.expense_date) - new Date(a.expense_date));
+    console.log(res.map(x => {return {expense_date: x.expense_date}}));
     return res;
 }
 

@@ -1,7 +1,7 @@
 import { colors } from '@/src/constants/constants';
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useLocalSearchParams } from "expo-router";
-import { GroupProvider } from "../../../../backend/src/context/GroupContext";
+import { GroupProvider, useGroup } from "../../../../backend/src/context/GroupContext";
 
 export default function GroupLayout() {
     const { groupId } = useLocalSearchParams();
@@ -9,8 +9,30 @@ export default function GroupLayout() {
     return (
         <GroupProvider groupId={groupId}>
 
-            <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: colors['primary'], tabBarInactiveTintColor: colors['textMuted'],}}>
-                <Tabs.Screen
+            <GroupTabs />
+        </GroupProvider>
+    );
+}
+
+function GroupTabs() {
+    const { loading } = useGroup();
+
+    return (
+        <Tabs
+            screenOptions={{
+                headerShown: false,
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.textMuted,
+            }}
+            screenListeners={{
+                tabPress: (e) => {
+                    if (loading) {
+                        e.preventDefault();
+                    }
+                },
+            }}
+        >
+            <Tabs.Screen
                     name="index"
                     options={{
                         title: "Overview",
@@ -49,15 +71,6 @@ export default function GroupLayout() {
                         ),
                     }}
                 />
-
-                {/* hidden routes  */}
-                {/* <Tabs.Screen
-                    name="new-expense"
-                    options={{
-                        href: null,
-                    }}
-                /> */}
-            </Tabs>
-        </GroupProvider>
+        </Tabs>
     );
 }

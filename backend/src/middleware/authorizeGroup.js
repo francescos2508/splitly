@@ -8,10 +8,21 @@ function isMemberOfGroup(member, groupId) {
 async function getMemberOfGroup(memberToken, groupId) {
     const { data: member, error } = await supabase
         .from("group_members")
-        .select("id, group_id, name, member_token, is_owner, is_active")
+        .select(`
+            id,
+            group_id,
+            name,
+            member_token,
+            is_owner,
+            is_active,
+            groups!inner (
+                is_active
+            )`
+        )
         .eq("member_token", memberToken)
         .eq("group_id", groupId)
         .eq("is_active", true)
+        .eq("groups.is_active", true)
         .single();
 
     if (error || !member) {
@@ -37,4 +48,4 @@ async function authorizeGroup(req, res, next) {
     next();
 }
 
-module.exports = { authorizeGroup, isMemberOfGroup };
+module.exports = { authorizeGroup, isMemberOfGroup, getMemberOfGroup };

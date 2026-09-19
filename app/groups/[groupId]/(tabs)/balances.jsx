@@ -1,22 +1,24 @@
+import { getGroupBalances } from '@/src/api/api';
+import Avatar from '@/src/components/Avatar';
 import Loader from '@/src/components/Loader';
 import { colors, currencies, sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
+import { calculatePayments, fmtNum, getInits } from '@/src/utils/utils';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useGroup } from '../../../../backend/src/context/GroupContext';
-import { getGroupBalances } from '../../../../src/api/api';
-import { calculatePayments } from '../../../../src/utils/utils';
 
 
 export default function Members() {
-    const {groupId, group, balances, members, currentMember, setBalances} = useGroup();
+    const {groupId, group, balances, members, currentMember, loading, setLoading, setBalances} = useGroup();
     const [payments, setPayments] = useState([]);
     const [myBalance, setMyBalance] = useState(null);
     const [myPayments, setMyPayments] = useState([]);
     const [otherPayments, setOtherPayments] = useState([]);
     const groupCurrency = group ? currencies[group.currency] : '';
-    const [loading, setLoading] = useState(true);
+    const myBalanceColor = myBalance?.balance > 0 ? colors.positive : myBalance?.balance < 0 ? colors.negative : colors.primary;
     const reloadPayments = async (gid) => {
         setLoading(true);
         // updated balances to now
@@ -26,10 +28,10 @@ export default function Members() {
         const updPayments = calculatePayments(updBalances);
         setPayments(updPayments);
 
-        const myPaym = updPayments.filter(x => x.from === currentMember.id || x.to === currentMember.id);
+        const myPaym = updPayments.filter(x => x.from === currentMember?.id || x.to === currentMember?.id);
         setMyPayments(myPaym);
 
-        const otherPaym = updPayments.filter(x => x.from !== currentMember.id && x.to !== currentMember.id);
+        const otherPaym = updPayments.filter(x => x.from !== currentMember?.id && x.to !== currentMember?.id);
         setOtherPayments(otherPaym);
 
         const myBal = updBalances?.find(
@@ -53,8 +55,7 @@ export default function Members() {
                     <Text style={commonStyle.title}>{group?.name || 'Error'}</Text>
                 </View>
                 <ScrollView style={commonStyle.body}>
-                    <View style={styles.myBalance}>
-                        {/* <Text style={styles.myBalanceTitle}>Your balance {currentMember?.name}</Text> */}
+                    <View style={[styles.myBalance, {backgroundColor: myBalanceColor}]}>
                         {myBalance && 
                             <Text style={styles.myBalanceText2}>
                                 {(myBalance.balance > 0) ? 'You are owed '
@@ -63,68 +64,60 @@ export default function Members() {
                             </Text>
                         }
                         <Text style={styles.myBalanceText}>
-                            {myBalance?.balance >= 0 ? '+' : '-'}
-                            {myBalance?.balance+' '+groupCurrency}
+                            {myBalance?.balance >= 0 ? '+' : ''}
+                            {fmtNum(myBalance?.balance)+' '+groupCurrency}
                         </Text>
                     </View>
-                        <Text style={styles.sectionTitle}>My payments</Text>
+
+                    <Text style={commonStyle.sectionTitle}>My payments</Text>
                     <View style={styles.myPayments}>
-                        {myPayments?.map((payment) => {
-                            const iAmDebtor = payment.from === currentMember.id;
-                            const text = iAmDebtor ? payment.toName+' you owe' : payment.fromName+' owes you';
+                        {myPayments.map((payment) => {
+                            payment.fromMember = members.find(x => x.id === payment.from);
+                            payment.toMember = members.find(x => x.id === payment.to);
+
                             return (
-                                <View key={`${payment.from}-${payment.to}`} style={styles.cardPayment}>
-                                    <View style={styles.rowPayment}>
-                                        <Text style={styles.paymentTxt}>{text}</Text>
-                                        <View style={{alignItems: 'flex-end'}}>
-                                            <Text style={iAmDebtor ? styles.negativeAmount : styles.positiveAmount}>
-                                                {iAmDebtor ? '-' : '+'}{payment.amount} {groupCurrency}
-                                            </Text>
-                                            <Pressable style={commonStyle.inlineBtn} onPress={(() => alert('paid'))}>
-                                                <Text style={commonStyle.inlineBtnText}>Settle up</Text>
-                                            </Pressable>
-                                        </View>
-                                    </View>
-                                </View>
-                            )}
-                        )}
+                                <CardPayment 
+                                    key={`${payment.from}-${payment.to}`}
+                                    payment={payment} 
+                                    iAmDebtor={payment.from === currentMember.id}
+                                    groupCurrency={groupCurrency}
+                                    settleUp={true}
+                                />
+                            );
+                        })}
                     </View>
 
-                    {/* <Text>Balances</Text>
-                    {balances?.map((balance) => {
-                        const memb = members.find(x => x.id === balance.id);
-                        
-                        return (
-                            <View style={styles.cardExpense} key={balance.id}>
-                                <Text>{balance.name} {balance.balance} {currencies[group?.currency]}</Text>
-                            </View>
-                        );
-                    })} */}
+                    <Text style={commonStyle.sectionTitle}>Other payments</Text>
+                    {otherPayments.map((payment) => {
+                            payment.fromMember = members.find(x => x.id === payment.from);
+                            payment.toMember = members.find(x => x.id === payment.to);
 
-                    <Text style={styles.sectionTitle}>Other payments</Text>
-                    {otherPayments?.map((payment) => {
-                        return (
-                            <View style={styles.cardPayment2} key={`${payment.from}-${payment.to}`}>
-                                <Text style={styles.paymentTxt2}>{payment.fromName} owes {payment.amount} {groupCurrency} to {payment.toName}</Text>
-                            </View>
-                        );
-                    })}
+                            return (
+                                <CardPayment 
+                                    key={`${payment.from}-${payment.to}`}
+                                    payment={payment} 
+                                    iAmDebtor={payment.from === currentMember.id}
+                                    groupCurrency={groupCurrency}
+                                    settleUp={false}
+                                />
+                            );
+                        })}
 
                     {/* all balances */}
                     <View style={styles.bodyBalance}>
-                        <Text style={styles.sectionTitle}>Balances </Text>
+                        <Text style={commonStyle.sectionTitle}>Balances </Text>
                         {balances.map((balance) => {
-                            const positive = balance.balance >= 0;
+                            const bal = balance.balance;
                             return (
                                 <Pressable key={balance.id} >
                                     <View style={styles.cardBalance}>
                                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                            <View style={[styles.avatar, {backgroundColor: balance.avatar_color}]}>
-                                                <Text style={styles.avatarInits}>{balance.name.charAt(0)}</Text>
-                                            </View>
+                                            <Avatar color={balance.avatar_color} inits={getInits(balance.name)} />
                                             <Text>{balance.name}</Text>
                                         </View>
-                                        <Text style={[styles.balanceTxt, {color: positive ? colors.success : colors.danger}]}>{positive && '+'}{balance.balance} {currencies[group?.currency]}</Text>
+                                        <Text style={[styles.balanceTxt, {color: bal > 0 ? colors.positive : bal < 0 ? colors.negative : colors.primary}]}>
+                                            {bal >= 0 && '+'}{fmtNum(balance.balance)} {currencies[group?.currency]}
+                                        </Text>
                                     </View>
                                 </Pressable>
                             )
@@ -133,6 +126,36 @@ export default function Members() {
                 </ScrollView>
             </View>
         )
+}
+
+function CardPayment({ payment, iAmDebtor, groupCurrency, settleUp = false }) {
+    const fromInits = getInits(payment.fromMember?.name);
+    const toInits = getInits(payment.toMember?.name);
+
+    return (
+        <View style={styles.cardPayment}>
+            <View style={styles.rowPayment}>
+                <View style={styles.memberPayment}>
+                    <Avatar color={payment.fromMember?.avatar_color} inits={fromInits}/> 
+                    <Text style={styles.memberName}>{payment.fromMember?.name}</Text>
+                </View>
+                <View><Ionicons name='arrow-forward' size={26} color={colors.primary} /></View>
+                <View style={styles.memberPayment}>
+                    <Avatar color={payment.toMember?.avatar_color} inits={toInits} />
+                    <Text style={styles.memberName}>{payment.toMember?.name}</Text>
+                </View>
+
+            <View style={{alignItems: 'flex-end', width: '30%'}}>
+                <Text style={iAmDebtor ? styles.negativeAmount : styles.positiveAmount}>
+                    {iAmDebtor ? '-' : '+'}{fmtNum(payment.amount)} {groupCurrency}
+                </Text>
+                {settleUp && <Pressable style={commonStyle.inlineBtn} onPress={(() => alert('paid'))}>
+                    <Text style={commonStyle.inlineBtnText}>Settle up</Text>
+                </Pressable>}
+            </View>
+            </View>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -146,7 +169,6 @@ const styles = StyleSheet.create({
     myBalanceTitle: {
         color: colors.white,
         fontSize: 20,
-        
     },
     myBalanceText: {
         color: colors.white,
@@ -162,7 +184,7 @@ const styles = StyleSheet.create({
         // marginTop: sp[1],
     },
     cardPayment: {
-        backgroundColor: colors.background,
+        backgroundColor: colors.white,
         paddingHorizontal: sp[1],
         paddingVertical: sp.half,
         borderRadius: 20,
@@ -184,27 +206,18 @@ const styles = StyleSheet.create({
     },
     negativeAmount: {
         // flex: 1,
-        color: colors.danger,
+        // color: colors.negative,
+        color: colors.primary,
         fontWeight: 700,
         fontSize: 16,
     },
-    cardPayment2: {
-        backgroundColor: colors.background,
-        paddingHorizontal: sp[1],
-        paddingVertical: sp.half,
-        borderRadius: 20,
-        marginBottom: sp.half,
-    },
-    paymentTxt2: {
-        // fontSize: 16,
-    },
-    avatar: {
-        borderRadius: '100%',
-        height: sp[2],
-        width: sp[2],
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: sp.half
+    memberPayment: {
+        alignItems: 'center',
+        width: 70,
+    },    
+    memberName: {
+        textAlign: 'center',
+        fontSize: 12,
     },
     bodyBalance: {
         marginVertical: sp[1],
@@ -217,15 +230,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: 20,
         justifyContent: 'space-between'
-    },
-    avatarInits: {
-        color: colors.white,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        textAlign: 'center',
-        marginBottom: sp.half,
-        fontWeight: 700,
     },
     balanceTxt: {
         marginHorizontal: sp['half'],

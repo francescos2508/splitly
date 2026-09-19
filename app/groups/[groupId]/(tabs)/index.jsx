@@ -5,34 +5,40 @@ import { colors, currencies, sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { parseDate } from '../../../../src/utils/utils';
+import CardExpense from '../../../../src/components/CardExpense';
+import { fmtNum } from '../../../../src/utils/utils';
 
 export default function Group() {
     const { groupId } = useLocalSearchParams();
-    const [loading, setLoading] = useState(true);
 
-    const {group, members, expenses, balances, activity, currentMember} = useGroup();
+    const {group, members, expenses, balances, currentMember, loading} = useGroup();
     const {
-        setGroup,
-        setMembers,
         setExpenses,
         setBalances,
         setActivity,
-        setCurrentMember,
+        setLoading,
     } = useGroup();
 
     const myBalance = balances?.find(
         balance => balance.id === currentMember?.id
     );
+    const myBalanceColor = myBalance?.balance > 0 ? colors.positive : myBalance?.balance < 0 ? colors.negative : colors.primary;
 
     useFocusEffect(
         useCallback(() => {
             async function loadGroup(gid) {
                 try {
+                    setLoading(true);
                     const balances = await getGroupBalances(gid);
-                    setBalances(balances);
+                    setBalances(balances.sort((a,b) => {
+                        // currentMember will always be first one in the list
+                        if (a.id === currentMember?.id) return -1;
+                        if (b.id === currentMember?.id) return 1;
+
+                        return a.name.localeCompare(b.name);
+                    }));
                     
                     const expenses = await getGroupExpenses(gid);
                     setExpenses(expenses);
@@ -59,28 +65,27 @@ export default function Group() {
         <View style={commonStyle.container}>
             <View style={commonStyle.header}>
                 <Text style={commonStyle.title}>{group?.name || 'Error'}</Text>
-                <Ionicons style={styles.settings} name="settings-outline" size={24} color={colors.text} />
+                <Pressable style={styles.settings} onPress={() => router.push(`/groups/${groupId}/settings`)}>
+                    <Ionicons name="settings-outline" size={24} color={colors.text} />
+                </Pressable>
             </View>
             <ScrollView style={commonStyle.body}>
-                {/* <Text>Created: {parseDate(group?.created_at)}</Text>
-                <Text>Invite code: {group?.invite_code}</Text> */}
-
                 {/* my balance */}
-                <View style={styles.myBalance}>
+                <View style={[styles.myBalance, {backgroundColor: myBalanceColor}]}>
                     <Text style={styles.myBalanceTitle}>Your balance {currentMember?.name}</Text>
                     {myBalance && 
                         <Text style={styles.myBalanceText}>
                             {myBalance.balance >= 0 && '+'}
-                            {myBalance.balance} {currencies[group.currency]}
+                            {fmtNum(myBalance.balance)} {currencies[group.currency]}
                         </Text>
                     }
                 </View>
 
                 {/* all balances */}
                 <View style={styles.bodyBalance}>
-                    <Text style={styles.sectionTitle}>Balances </Text>
+                    <Text style={commonStyle.sectionTitle}>Balances </Text>
                     {balances.map((balance) => {
-                        const positive = balance.balance >= 0;
+                        const bal = balance.balance;
                         return (
                             <Pressable key={balance.id} >
                                 <View style={styles.cardBalance}>
@@ -90,7 +95,9 @@ export default function Group() {
                                         </View>
                                         <Text>{balance.name}</Text>
                                     </View>
-                                    <Text style={[styles.balanceTxt, {color: positive ? colors.success : colors.danger}]}>{positive && '+'}{balance.balance} {currencies[group?.currency]}</Text>
+                                    <Text style={[styles.balanceTxt, {color: bal > 0 ? colors.positive : bal < 0 ? colors.negative : colors.primary}]}>
+                                        {bal > 0 && '+'}{fmtNum(balance.balance)} {currencies[group?.currency]}
+                                        </Text>
                                 </View>
                             </Pressable>
                         )
@@ -99,28 +106,25 @@ export default function Group() {
 
                 {/* expenses */}
                 <View style={styles.bodyExpenses}>
-                    <Text style={styles.sectionTitle}>Last expenses</Text>
-                    {expenses.slice(-3).map((expense) => {
+                    <Text style={commonStyle.sectionTitle}>Last expenses</Text>
+                    {expenses.slice(0,3).map((expense) => {
                         const memb = members.find(x => x.id === expense.paid_by_member_id);
 
                         return (
-                            <View key={expense.id} style={styles.cardExpense}>
-                                <Text>{parseDate(expense.expense_date)}</Text>
-                                <Text>{memb?.name} paid {expense.amount} {currencies[group?.currency]} for {expense.description} </Text>
-                            </View>
+                            <CardExpense key={expense.id} expense={expense} paid_by_member={memb} groupCurrency={currencies[group?.currency]} />
                         );
                     })}
-                    <Pressable style={commonStyle.btn2}><Text style={commonStyle.btn2Text}>View All</Text></Pressable>
-                </View>
+                    <Pressable onPress={() => router.push(`/groups/${groupId}/expenses`)} style={commonStyle.btn2}>
+                        <Text style={commonStyle.btn2Text}>View All</Text>
+                    </Pressable>
+                </View>                
+            </ScrollView>
 
-
-                {/* <Text>{JSON.stringify(balances)}</Text> */}
-
+            <View style={commonStyle.footer}>
                 <Pressable style={commonStyle.btn} onPress={() => {router.push(`/groups/${groupId}/new-expense`)}} >
                     <Text style={commonStyle.btnText}>Add expense</Text>
                 </Pressable>
-                
-            </ScrollView>
+            </View>
         </View>
     )
 }
@@ -149,12 +153,6 @@ const styles = StyleSheet.create({
     avatarInits: {
         color: colors.white,
     },
-    sectionTitle: {
-        fontSize: 18,
-        textAlign: 'center',
-        marginBottom: sp.half,
-        fontWeight: 700,
-    },
     balanceTxt: {
         marginHorizontal: sp['half'],
         fontWeight: 700,
@@ -163,13 +161,14 @@ const styles = StyleSheet.create({
     myBalance: {
         alignItems: 'center',
         padding: sp[1],
-        backgroundColor: colors.accent,
+        backgroundColor: colors.primary,
+        // borderColor: colors.success,
+        // borderWidth: 5,
         borderRadius: 20,
     },
     myBalanceTitle: {
         color: colors.white,
-        fontSize: 20,
-        
+        fontSize: 16,
     },
     myBalanceText: {
         color: colors.white,
@@ -184,11 +183,39 @@ const styles = StyleSheet.create({
         marginVertical: sp[1],
     },
     cardExpense: {
-        // borderBottomWidth: 1,
         marginBottom: sp.half,
-        borderRadius: 20,
-        backgroundColor: colors.white,
-        paddingHorizontal: sp[1],
+        paddingLeft: sp.half,
         paddingVertical: 4,
+        borderLeftWidth: 2,
+        borderColor: colors.primary,
+    },
+    expenseMain: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    description: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    metainfo: {
+        fontSize: 13,
+        color: colors.textMuted,
+        marginTop: 3,
+    },
+    amount: {
+        fontSize: 16,
+        fontWeight: 600,
+        textAlign: 'right'
+    },
+    labelCat: {
+        fontSize: 12,
+        color: colors.primary,
+        backgroundColor: colors.primaryLight,
+        marginTop: 4,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: colors.primary,
+        paddingHorizontal: 8
     },
 })

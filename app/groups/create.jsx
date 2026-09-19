@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { createGroup } from '../../src/api/api';
 import AppInput from '../../src/components/AppInput';
+import Loader from '../../src/components/Loader';
 import SelectInput from '../../src/components/SelectInput';
 import { saveMemberToken } from '../../src/storage/auth';
 
@@ -11,6 +12,7 @@ export default function CreateGroup() {
     const [groupname, setGroupname] = useState('');
     const [username, setUsername] = useState('Admin');
     const [currency, setCurrency] = useState('EUR');
+    const [loading, setLoading] = useState(false);
 
     const currencies = [
         { label: "EUR (€)", value: "EUR" },
@@ -18,6 +20,7 @@ export default function CreateGroup() {
         { label: "GBP (£)", value: "GBP" },
     ];
 
+    if (loading) return (<Loader />);
 
     return (
         <View style={commonStyle.container}>
@@ -56,11 +59,14 @@ export default function CreateGroup() {
                     style={commonStyle.btn}
                     onPress={async () => {
                         try {
+                            setLoading(true);
                             const data = await createGroup({ groupName: groupname, userName: username, currency: currency })
                             await saveMemberToken(data.member.member_token);
+                            setLoading(false);
                             router.replace('/groups/' + data.group.id);
                         } catch (error) {
                             alert(error.message);
+                            setLoading(false);
                         }
                     }}
                 >

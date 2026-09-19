@@ -9,6 +9,7 @@ export default function GroupLayout() {
             <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="new-expense" />
+                <Stack.Screen name="settings" />
             </Stack>
         </GroupProvider>
     );
