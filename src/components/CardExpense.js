@@ -1,20 +1,9 @@
 import { categoryColors, colors, sp } from '@/src/constants/constants';
 import { StyleSheet, Text, View } from "react-native";
-import { fmtNum, parseDate } from "../utils/utils";
+import { fmtNum, lightColor, parseDate } from "../utils/utils";
 
-function lightColor(hex, amount = 0.75) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-
-    const mix = (value) => Math.round(value + (255 - value) * amount);
-
-    return `#${[mix(r), mix(g), mix(b)]
-        .map(v => v.toString(16).padStart(2, '0'))
-        .join('')}`;
-}
-
-export default function CardExpense({ expense, paid_by_member, groupCurrency }) {
+export default function CardExpense({ expense, paid_by_member, groupCurrency = '€' }) {
+    if (!expense) return;
     if (!expense.category) expense.category = 'Generic';
     const catColor = categoryColors[expense.category];
 
@@ -25,12 +14,12 @@ export default function CardExpense({ expense, paid_by_member, groupCurrency }) 
                 <View style={styles.info}>
                     <Text style={styles.description}>{expense.description}</Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <Text style={styles.metainfo}>{paid_by_member.name} · {parseDate(expense.expense_date)}</Text>
+                        <Text style={styles.metainfo}>{paid_by_member?.name} · {parseDate(expense.expense_date)}</Text>
                     </View>
                 </View>
                 <View >
                     <Text style={styles.amount}>{fmtNum(expense.amount)} {groupCurrency}</Text>
-                    <Text style={[styles.labelCat, {color: catColor, borderColor: catColor, backgroundColor: lightColor(catColor)}]}>{expense.category || 'Generic'}</Text>
+                    <Text style={[styles.labelCat, {color: catColor, borderColor: catColor, backgroundColor: lightColor(catColor)}]}>{expense.category}</Text>
                 </View>
             </View>
         </View>

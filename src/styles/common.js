@@ -98,5 +98,10 @@ export const commonStyle = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-    }
+    },
+    headerBack: {
+        position: 'absolute',
+        left: sp[1],
+        zIndex: 1,
+    },
 })

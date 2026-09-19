@@ -42,6 +42,22 @@ export async function createGroup(data) {
     return result;
 }
 
+export async function updateGroup(data) {
+    console.log("Calling API:", `${API_URL}/groups/${data.id}`);
+    const response = await apiFetch(`/groups/${data.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    console.log("Response received:", response.status);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Failed to update group");
+    return result;
+}
+
 export async function joinGroup(inviteCode, username) {
     inviteCode = inviteCode.toUpperCase();
     console.log("Calling API:", `${API_URL}/groups/:inviteCode/join`);

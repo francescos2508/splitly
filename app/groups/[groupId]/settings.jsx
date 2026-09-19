@@ -4,26 +4,14 @@ import { colors, sp } from '@/src/constants/constants';
 import { commonStyle } from "@/src/styles/common";
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useGroup } from "../../../backend/src/context/GroupContext";
 import { getInits } from '../../../src/utils/utils';
 
-const groupIcons = [
-    'rocket-outline',   
-    'house-outline',    
-    'hammer-outline',   
-    'fish-outline', 
-    'airplane-outline', 
-    'planet-outline',   
-    'bug-outline',  
-    'beer-outline', 
-    'cash-outline', 
-    'flash-outline',    
-    'paw-outline',  
-    'people-outline',   
-    'people-outline',   
-];
+
+
 
 
 export default function Settings() {
@@ -42,7 +30,7 @@ export default function Settings() {
     return (
         <View style={commonStyle.container}>
             <View style={commonStyle.header}>
-                <Pressable style={styles.headerBack} onPress={() => router.back()}>
+                <Pressable style={commonStyle.headerBack} onPress={() => router.back()}>
                     <Ionicons name="chevron-back" size={20} color={colors.primary} />
                 </Pressable>
                 <Text style={commonStyle.title}>Group settings</Text>
@@ -50,7 +38,7 @@ export default function Settings() {
 
             <ScrollView style={commonStyle.body}>
                 <Text style={commonStyle.sectionTitle}>Group info</Text>
-                <Pressable style={styles.cardSettings}>
+                <Pressable style={styles.cardSettings} onPress={() => router.push(`/groups/${groupId}/group-icon`)}>
                     <View style={styles.iconView}>
                         <Ionicons name={group?.icon || 'people-outline'} size={20} color={colors.primary} />
                     </View>
@@ -153,11 +141,6 @@ export default function Settings() {
 }
 
 const styles = StyleSheet.create({
-    headerBack: {
-        position: 'absolute',
-        left: sp[1],
-        zIndex: 1,
-    },
     cardSettings: {
         paddingHorizontal: sp[1],
         paddingVertical: sp.md,

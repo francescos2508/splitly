@@ -42,6 +42,20 @@ export const categoryColors = {
     'Fees & Charges': '#C75B5B',
     'Other': '#888888',
 };
+export const groupIcons = [
+    'people-outline',   
+    'rocket-outline',   
+    'home-outline',    
+    'hammer-outline',   
+    'fish-outline', 
+    'airplane-outline', 
+    'planet-outline',   
+    'beer-outline', 
+    'flash-outline',    
+    'paw-outline',  
+    // 'bug-outline',  
+    // 'cash-outline', 
+];
 
 const lightColors2 = {
     primary: "#2563EB",

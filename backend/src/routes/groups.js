@@ -443,7 +443,9 @@ router.patch('/:groupId', authorizeGroup, async (req, res) => {
     const {
         name,
         currency,
-        // inviteCode,
+        invite_code,
+        icon
+
     } = req.body;
 
     try {
@@ -453,7 +455,9 @@ router.patch('/:groupId', authorizeGroup, async (req, res) => {
             .update({
                 name,
                 currency,
-                // invite_code: inviteCode
+                invite_code,
+                icon
+
             })
             .eq('id', groupId)
             .eq('is_active', true)

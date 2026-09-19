@@ -52,3 +52,15 @@ export function getInits(str) {
 export function fmtNum(num) {
     return Number(num).toFixed(2).replace('.', ',');
 }
+
+export function lightColor(hex, amount = 0.75) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    const mix = (value) => Math.round(value + (255 - value) * amount);
+
+    return `#${[mix(r), mix(g), mix(b)]
+        .map(v => v.toString(16).padStart(2, '0'))
+        .join('')}`;
+}

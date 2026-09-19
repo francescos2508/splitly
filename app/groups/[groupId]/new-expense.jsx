@@ -82,7 +82,7 @@ export default function NewExpense() {
         try {
             if (isEditing) {
                 const res = await updateExpense(expenseId, newExpense);
-                if (res?.expense) router.back();
+                if (res) router.back();
             } else {
                 const res = await createExpense(groupId, newExpense);
                 if (res?.expense) router.back();
