@@ -20,6 +20,12 @@ export const sp = {
 }
 
 export const currencies = {EUR: '€', USD: '$', GBP: '£', CHF: '$$'};
+export const currencyOptions = [
+        { label: "EUR (€)", value: "EUR" },
+        { label: "USD ($)", value: "USD" },
+        { label: "GBP (£)", value: "GBP" },
+        { label: "CHF ($$)", value: "CHF" },
+    ];
 export const categoryColors = {
     'Generic': '#8C86B8',
     'Food': '#E8755F',

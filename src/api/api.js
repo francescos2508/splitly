@@ -58,6 +58,17 @@ export async function updateGroup(data) {
     return result;
 }
 
+export async function regenerateInviteCode(groupId) {
+    console.log("Calling API:", `${API_URL}/groups/${groupId}/invite-code`);
+    const resp = await apiFetch(`/groups/${groupId}/invite-code`, {
+        method: 'PATCH',
+    });
+    console.log('Response received: ', resp.status);
+    const res = await resp.json();
+    if (!resp.ok)  throw new Error(res.error || 'Failed to get the new code');
+    return res;
+}
+
 export async function joinGroup(inviteCode, username) {
     inviteCode = inviteCode.toUpperCase();
     console.log("Calling API:", `${API_URL}/groups/:inviteCode/join`);

@@ -1,9 +1,9 @@
+import { useGroup } from '@/backend/src/context/GroupContext';
 import CardExpense from '@/src/components/CardExpense';
 import { currencies } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useGroup } from '../../../../backend/src/context/GroupContext';
 
 
 export default function Expenses() {

@@ -1,5 +1,5 @@
+import { getGroup, loadCurrentMember } from "@/src/api/api";
 import { createContext, useContext, useEffect, useState } from "react";
-import { getGroup, loadCurrentMember } from "../../../src/api/api";
 
 const GroupContext = createContext(null);
 

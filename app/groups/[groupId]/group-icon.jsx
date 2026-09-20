@@ -1,12 +1,12 @@
+import { useGroup } from "@/backend/src/context/GroupContext";
+import { updateGroup } from "@/src/api/api";
 import { colors, groupIcons } from "@/src/constants/constants";
+import { commonStyle } from "@/src/styles/common";
+import { lightColor } from "@/src/utils/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useGroup } from "../../../backend/src/context/GroupContext";
-import { updateGroup } from "../../../src/api/api";
-import { commonStyle } from "../../../src/styles/common";
-import { lightColor } from "../../../src/utils/utils";
 
 // just to have some colors, not related to anything yet
 const iconColors = [

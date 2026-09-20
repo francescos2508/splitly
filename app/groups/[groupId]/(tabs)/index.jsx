@@ -1,20 +1,26 @@
 import { useGroup } from '@/backend/src/context/GroupContext';
-import { getGroupActivity, getGroupBalances, getGroupExpenses } from '@/src/api/api';
+import { getGroup, getGroupActivity, getGroupBalances, getGroupExpenses } from '@/src/api/api';
+import CardExpense from '@/src/components/CardExpense';
 import Loader from '@/src/components/Loader';
 import { colors, currencies, sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
+import { fmtNum } from '@/src/utils/utils';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import CardExpense from '../../../../src/components/CardExpense';
-import { fmtNum } from '../../../../src/utils/utils';
 
 export default function Group() {
-    const { groupId } = useLocalSearchParams();
 
-    const {group, members, expenses, balances, currentMember, loading} = useGroup();
     const {
+        group,
+        groupId,
+        members,
+        expenses,
+        balances,
+        currentMember,
+        loading,
+        setGroup,
         setExpenses,
         setBalances,
         setActivity,
@@ -31,6 +37,8 @@ export default function Group() {
             async function loadGroup(gid) {
                 try {
                     setLoading(true);
+                    const group = await getGroup(gid);
+                    setGroup(group);
                     const balances = await getGroupBalances(gid);
                     setBalances(balances.sort((a,b) => {
                         // currentMember will always be first one in the list
@@ -64,6 +72,9 @@ export default function Group() {
     return (
         <View style={commonStyle.container}>
             <View style={commonStyle.header}>
+                <Pressable style={commonStyle.headerBack} onPress={() => router.back()}>
+                    <Ionicons name="chevron-back" size={20} color={colors.primary} />
+                </Pressable>
                 <Text style={commonStyle.title}>{group?.name || 'Error'}</Text>
                 <Pressable style={styles.settings} onPress={() => router.push(`/groups/${groupId}/settings`)}>
                     <Ionicons name="settings-outline" size={24} color={colors.text} />

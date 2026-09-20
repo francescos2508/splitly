@@ -1,3 +1,4 @@
+import { useGroup } from '@/backend/src/context/GroupContext';
 import { getGroupBalances } from '@/src/api/api';
 import Avatar from '@/src/components/Avatar';
 import Loader from '@/src/components/Loader';
@@ -8,7 +9,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useGroup } from '../../../../backend/src/context/GroupContext';
 
 
 export default function Members() {

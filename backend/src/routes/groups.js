@@ -240,7 +240,8 @@ router.get("/me", async (req, res) => {
                 groups!inner (
                     id,
                     name,
-                    currency
+                    currency,
+                    icon
                 )
             `)
             .eq("member_token", memberToken)
@@ -702,6 +703,53 @@ router.patch('/:groupId/me', authorizeGroup, async (req, res) => {
         if (activityError) throw activityError;
         return res.json(updatedMember);
 
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            error: "Internal server error"
+        });
+    }
+});
+
+// regenerate new invite_code for the group
+router.patch('/:groupId/invite-code', authorizeGroup, async (req, res) => {
+    const { groupId } = req.params;
+    try {
+        if (!req.member.is_owner) {
+            return res.status(403).json({
+                error: "You are not allowed to regenerate the invite code"
+            });
+        }
+
+        let inviteCode;
+        let exists = true;
+
+        while (exists) {
+            inviteCode = generateInviteCode();
+
+            const { data } = await supabase
+                .from("groups")
+                .select("id")
+                .eq("invite_code", inviteCode)
+                .maybeSingle();
+
+            exists = !!data;
+        }
+
+        const {data: updatedGroup, error: updError} = await supabase
+            .from('groups')
+            .update({invite_code: inviteCode})
+            .eq('id', groupId)
+            .select()
+            .single();
+
+        if (updError) {
+            console.error(updError);
+            return res.status(500).json({ error: "Failed to update invite code" });
+        }
+        if (!updatedGroup) return res.status(404).json({error: 'Group not found'});
+
+        return res.status(200).json(updatedGroup);            
     } catch (error) {
         console.error(error);
         return res.status(500).json({

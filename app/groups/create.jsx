@@ -1,3 +1,4 @@
+import { currencyOptions } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { router } from 'expo-router';
 import { useState } from "react";
@@ -13,12 +14,6 @@ export default function CreateGroup() {
     const [username, setUsername] = useState('Admin');
     const [currency, setCurrency] = useState('EUR');
     const [loading, setLoading] = useState(false);
-
-    const currencies = [
-        { label: "EUR (€)", value: "EUR" },
-        { label: "USD ($)", value: "USD" },
-        { label: "GBP (£)", value: "GBP" },
-    ];
 
     if (loading) return (<Loader />);
 
@@ -48,7 +43,7 @@ export default function CreateGroup() {
                     <SelectInput
                         label="Currency"
                         value={currency}
-                        options={currencies}
+                        options={currencyOptions}
                         onChange={setCurrency}
                     />
                 </View>

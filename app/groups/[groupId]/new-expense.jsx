@@ -1,3 +1,6 @@
+import { useGroup } from "@/backend/src/context/GroupContext";
+import { createExpense, updateExpense } from "@/src/api/api";
+import AppInput from "@/src/components/AppInput";
 import DateInput from "@/src/components/DateInput";
 import SelectInput from "@/src/components/SelectInput";
 import { colors, sp } from '@/src/constants/constants';
@@ -6,9 +9,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
-import { useGroup } from "../../../backend/src/context/GroupContext";
-import { createExpense, updateExpense } from "../../../src/api/api";
-import AppInput from "../../../src/components/AppInput";
 
 
 

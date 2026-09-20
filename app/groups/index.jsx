@@ -5,10 +5,10 @@ import Loader from '@/src/components/Loader';
 import { colors, currencies, sp } from '@/src/constants/constants';
 import { commonStyle } from '@/src/styles/common';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from "expo-router";
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { fmtNum } from '../../src/utils/utils';
+import { fmtNum, lightColor } from '../../src/utils/utils';
 
 
 export default function myGroups() {
@@ -16,34 +16,36 @@ export default function myGroups() {
     const [loading, setLoading] = useState(true);
     const [bigBalance, setBigBalance] = useState({});
     const [balanceBg, setBalanceBg] = useState(colors.primary);
-    useEffect(() => {
-        async function loadGroups() {
-            try {
-                const myGroups = await getMyGroups();
-                const orderedGroups = myGroups.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-                const balances = {};
-                orderedGroups.forEach(g => {
-                    if (!balances[g.currency]) balances[g.currency] = 0;
-                    balances[g.currency] += Number(g.balance);
-                });
-                setBigBalance(balances);
-                setGroups(orderedGroups);
+    useFocusEffect(
+        useCallback(() => {
+            async function loadGroups() {
+                try {
+                    setLoading(true);
+                    const myGroups = await getMyGroups();
+                    const orderedGroups = myGroups.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+                    const balances = {};
+                    orderedGroups.forEach(g => {
+                        if (!balances[g.currency]) balances[g.currency] = 0;
+                        balances[g.currency] += Number(g.balance);
+                    });
+                    setBigBalance(balances);
+                    setGroups(orderedGroups);
 
-                const currenciesList = Object.keys(balances);
-                console.log(currenciesList);
-                if (currenciesList.length !== 1) setBalanceBg(colors.primary);
-                if (currenciesList.length === 1) {
-                    const bal = balances[currenciesList[0]];
-                    (bal > 0) ? setBalanceBg(colors.positive) : (bal < 0) ? setBalanceBg(colors.negative) : setBalanceBg(colors.primary);
+                    const currenciesList = Object.keys(balances);
+                    if (currenciesList.length !== 1) setBalanceBg(colors.primary);
+                    if (currenciesList.length === 1) {
+                        const bal = balances[currenciesList[0]];
+                        (bal > 0) ? setBalanceBg(colors.positive) : (bal < 0) ? setBalanceBg(colors.negative) : setBalanceBg(colors.primary);
+                    }
+                } catch (error) {
+                    alert(error.message);
+                } finally {
+                    setLoading(false);
                 }
-            } catch (error) {
-                alert(error.message);
-            } finally {
-                setLoading(false);
             }
-        }
-        loadGroups();
-    }, [])
+            loadGroups();
+        }, [])
+    );
 
     if (loading) {
         return (
@@ -71,7 +73,6 @@ export default function myGroups() {
                         {Object.entries(bigBalance).map(([name, balance]) => {
                             return (
                                 <View key={name}>
-                                    {/* <Text key={name}>Balance of all groups: {balance >= 0 && '+'}{balance} {currencies[name]}</Text>  */}
                                     <Text style={styles.myBalanceTitle}>Overall balance </Text>
                                     <Text style={styles.myBalanceText}>
                                         {balance >= 0 && '+'}{fmtNum(balance)} {currencies[name]}
@@ -86,14 +87,19 @@ export default function myGroups() {
                     <View>
                         {groups.map((group) => (
                             <Pressable key={group.id} style={styles.groupCard} onPress={() => router.push(`/groups/${group.id}`)}>
-                                <View >
-                                    <Text style={styles.groupName}>{group.name || 'Untitled'}</Text>
-                                    <Text style={styles.groupInfo}>
-                                        {group.currency || 'EUR'} | {group.count || '**'} members
-                                    </Text>
-                                    <Text style={[styles.groupBalance, { color: group.balance >= 0 ? colors.positive : colors.negative }]}>
-                                        {group.balance >= 0 && '+'}{fmtNum(group.balance)} {currencies[group.currency]}
-                                    </Text>
+                                <View style={commonStyle.rowBasic}>
+                                    <View style={styles.groupIcon}>
+                                        <Ionicons name={group.icon || 'people-outline'} size={35} color={colors.primary} />
+                                    </View>
+                                    <View style={{left: 20}}>
+                                        <Text style={styles.groupName}>{group.name || 'Group name'}</Text>
+                                        <Text style={styles.groupInfo}>
+                                            {group.currency || 'EUR'} | {group.count || '**'} members
+                                        </Text>
+                                        <Text style={[styles.groupBalance, { color: group.balance >= 0 ? colors.positive : colors.negative }]}>
+                                            {group.balance >= 0 && '+'}{fmtNum(group.balance)} {currencies[group.currency]}
+                                        </Text>
+                                    </View>
                                 </View>
                                 <View>
                                     <Ionicons name='chevron-forward' size={20} color={colors.primary} />
@@ -135,11 +141,11 @@ const styles = StyleSheet.create({
     },
 
     groupCard: {
-        padding: sp[1],
+        // padding: sp[1],
         // borderRadius: 20,
-        marginBottom: sp[1],
-        borderLeftWidth: 2,
-        borderLeftColor: colors.primary,
+        marginBottom: sp.md,
+        // borderLeftWidth: 2,
+        // borderLeftColor: colors.primary,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between'
@@ -172,4 +178,12 @@ const styles = StyleSheet.create({
         fontWeight: 600,
         fontSize: 16
     },
+    groupIcon: {
+        // position: 'absolute',
+        // width: 60,
+        // alignItems: 'center',
+        backgroundColor: lightColor(colors.primary),
+        borderRadius: 20,
+        padding: sp[1],
+    }
 });

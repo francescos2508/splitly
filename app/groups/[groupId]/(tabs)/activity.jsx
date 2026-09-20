@@ -1,8 +1,8 @@
+import { useGroup } from '@/backend/src/context/GroupContext';
 import Loader from '@/src/components/Loader';
 import { commonStyle } from '@/src/styles/common';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from "react-native";
-import { useGroup } from '../../../../backend/src/context/GroupContext';
 import { getGroupActivity } from '../../../../src/api/api';
 
 
