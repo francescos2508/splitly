@@ -8,7 +8,8 @@ export const commonStyle = StyleSheet.create({
         paddingBottom: sp[1],
         paddingTop: sp[5],
         // paddingHorizontal: sp[1]
-        backgroundColor: colors.background
+        backgroundColor: colors.background,
+        position: 'relative'
     },
     header: {
         // backgroundColor: colors['primary'],

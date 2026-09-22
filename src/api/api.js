@@ -1,4 +1,5 @@
 const API_URL = "http://192.168.0.15:3000";
+// const API_URL = "http://172.20.10.2:3000";
 import { getMemberToken } from "../storage/auth";
 
 async function apiFetch(endpoint, options = {}) {
@@ -6,7 +7,7 @@ async function apiFetch(endpoint, options = {}) {
     const headers = { ...options.headers, };
 
     if (token) headers.Authorization = `Bearer ${token}`;
-    console.log("AUTH HEADER:", headers.Authorization);
+    // console.log("AUTH HEADER:", headers.Authorization);
 
     return fetch(`${API_URL}${endpoint}`, {
         ...options,
@@ -125,7 +126,6 @@ export async function getGroupExpenses(id) {
     const res = await resp.json();
     if (!resp.ok)  throw new Error(res.error || 'Failed to get group expenses');
     if (res) res.sort((a, b) => new Date(b.expense_date) - new Date(a.expense_date));
-    console.log(res.map(x => {return {expense_date: x.expense_date}}));
     return res;
 }
 
@@ -157,7 +157,7 @@ export async function getMyGroups() {
 export async function createExpense(groupId, newExpense) {
     const expense = {
             groupId: groupId,
-            paidByMemberId: newExpense.paid_by,
+            paidByMemberId: newExpense.paid_by_member_id,
             description: newExpense.description,
             amount: Number(newExpense.amount),
             category: newExpense.category,
@@ -190,16 +190,43 @@ export async function updateExpense(expenseId, newExpense) {
 
         body: JSON.stringify({
             // groupId: groupId,
-            paidByMemberId: newExpense.paid_by,
+            paidByMemberId: newExpense.paid_by_member_id,
             description: newExpense.description,
             amount: newExpense.amount,
             category: newExpense.category,
             splitType: newExpense.split_type,
             participants: newExpense.participants,
+            expense_date: newExpense.expense_date,
         })
     });
     console.log('Response received: ', response.status);
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Failed to update the expense");
+    return data;
+}
+
+export async function deleteExpense(expenseId) {
+    console.log("Calling API:", `${API_URL}/expenses/${expenseId}/remove`);
+    const response = await apiFetch(`/expenses/${expenseId}/remove`, {
+        method: "PATCH",
+    });
+    console.log('Response received: ', response.status);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Failed to delete expense");
+    return data;
+}
+
+export async function createPayment(groupId, payment) {
+    console.log("Calling API:", `${API_URL}/payments`);
+    const response = await apiFetch(`/payments`, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({...payment, groupId: groupId})
+    });
+    console.log('Response received: ', response.status);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Failed to create the new payment");
     return data;
 }

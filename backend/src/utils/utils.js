@@ -31,7 +31,7 @@ function calculateBalance(memberId, expenses, payments) {
 
   for (let i = 0; i < payments.length; i++) {
       let paym = payments[i];
-      if (memberId === from_member_id) balance += Number(paym.amount);
+      if (memberId === paym.from_member_id) balance += Number(paym.amount);
       if (memberId === paym.to_member_id) balance -= Number(paym.amount)
   }
 

@@ -1,5 +1,4 @@
 import { useGroup } from '@/backend/src/context/GroupContext';
-import { getGroup, getGroupActivity, getGroupBalances, getGroupExpenses } from '@/src/api/api';
 import CardExpense from '@/src/components/CardExpense';
 import Loader from '@/src/components/Loader';
 import { colors, currencies, sp } from '@/src/constants/constants';
@@ -7,11 +6,12 @@ import { commonStyle } from '@/src/styles/common';
 import { fmtNum } from '@/src/utils/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from "expo-router";
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function Group() {
 
+    const isFirstFocus = useRef(true);
     const {
         group,
         groupId,
@@ -20,11 +20,7 @@ export default function Group() {
         balances,
         currentMember,
         loading,
-        setGroup,
-        setExpenses,
-        setBalances,
-        setActivity,
-        setLoading,
+        refreshGroup,
     } = useGroup();
 
     const myBalance = balances?.find(
@@ -34,34 +30,20 @@ export default function Group() {
 
     useFocusEffect(
         useCallback(() => {
-            async function loadGroup(gid) {
+            async function loadGroup() {
                 try {
-                    setLoading(true);
-                    const group = await getGroup(gid);
-                    setGroup(group);
-                    const balances = await getGroupBalances(gid);
-                    setBalances(balances.sort((a,b) => {
-                        // currentMember will always be first one in the list
-                        if (a.id === currentMember?.id) return -1;
-                        if (b.id === currentMember?.id) return 1;
-
-                        return a.name.localeCompare(b.name);
-                    }));
-                    
-                    const expenses = await getGroupExpenses(gid);
-                    setExpenses(expenses);
-                    
-                    const activity = await getGroupActivity(gid);
-                    setActivity(activity);
+                    if (isFirstFocus.current) {
+                        isFirstFocus.current = false;
+                        return;
+                    }
+                    // await refreshGroup('all');
                     
                 } catch (error) {
                     alert(error.message);
-                } finally {
-                    setLoading(false);
                 }
             }
-            loadGroup(groupId);
-    }, [groupId]));
+            loadGroup();
+    }, []));
     
     if (loading) {
         return (
@@ -122,7 +104,12 @@ export default function Group() {
                         const memb = members.find(x => x.id === expense.paid_by_member_id);
 
                         return (
-                            <CardExpense key={expense.id} expense={expense} paid_by_member={memb} groupCurrency={currencies[group?.currency]} />
+                            <CardExpense 
+                                key={expense.id} 
+                                expense={expense} 
+                                paid_by_member={memb} 
+                                groupCurrency={currencies[group?.currency]} 
+                                onPress={() => router.push(`/groups/${groupId}/new-expense?expenseId=${expense.id}`)} />
                         );
                     })}
                     <Pressable onPress={() => router.push(`/groups/${groupId}/expenses`)} style={commonStyle.btn2}>

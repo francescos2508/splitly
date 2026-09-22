@@ -2,19 +2,17 @@ import { useGroup } from '@/backend/src/context/GroupContext';
 import Loader from '@/src/components/Loader';
 import { commonStyle } from '@/src/styles/common';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from "react-native";
-import { getGroupActivity } from '../../../../src/api/api';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 
 export default function Activity() {
-    const {group, members, balances, activity, setActivity} = useGroup();
+    const {group, members, balances, activity, refreshGroup} = useGroup();
     const [loading, setLoading] = useState(true);
     
     useEffect(() => {
         async function loadGroup(gid) {
             try {
-                const activity = await getGroupActivity(gid);
-                setActivity(activity);
+                await refreshGroup({ activity: true })
             } catch (error) {
                 alert(error.message);
             } finally {
@@ -30,7 +28,7 @@ export default function Activity() {
                 <View style={commonStyle.header}>
                     <Text style={commonStyle.title}>{group?.name || 'Error'}</Text>
                 </View>
-                <View style={commonStyle.body}>
+                <ScrollView style={commonStyle.body}>
                     <Text>Activity</Text>
                     
                     {activity.map((act) => {
@@ -42,7 +40,7 @@ export default function Activity() {
                             </View>
                         );
                     })}
-                </View>
+                </ScrollView>
             </View>
         )
 }

@@ -1,5 +1,4 @@
 import { useGroup } from '@/backend/src/context/GroupContext';
-import { getGroupBalances } from '@/src/api/api';
 import Avatar from '@/src/components/Avatar';
 import Loader from '@/src/components/Loader';
 import { colors, currencies, sp } from '@/src/constants/constants';
@@ -8,24 +7,24 @@ import { calculatePayments, fmtNum, getInits } from '@/src/utils/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { createPayment } from '../../../../src/api/api';
 
 
 export default function Members() {
-    const {groupId, group, balances, members, currentMember, loading, setLoading, setBalances} = useGroup();
+    const {groupId, group, balances, members, currentMember, loading, setLoading, refreshGroup} = useGroup();
     const [payments, setPayments] = useState([]);
     const [myBalance, setMyBalance] = useState(null);
     const [myPayments, setMyPayments] = useState([]);
     const [otherPayments, setOtherPayments] = useState([]);
     const groupCurrency = group ? currencies[group.currency] : '';
     const myBalanceColor = myBalance?.balance > 0 ? colors.positive : myBalance?.balance < 0 ? colors.negative : colors.primary;
-    const reloadPayments = async (gid) => {
+    const reloadPayments = async () => {
         setLoading(true);
         // updated balances to now
-        const updBalances = await getGroupBalances(gid);
-        setBalances(updBalances);
+        const refreshed = await refreshGroup({balances: true});
         
-        const updPayments = calculatePayments(updBalances);
+        const updPayments = calculatePayments(refreshed.balances);
         setPayments(updPayments);
 
         const myPaym = updPayments.filter(x => x.from === currentMember?.id || x.to === currentMember?.id);
@@ -34,9 +33,7 @@ export default function Members() {
         const otherPaym = updPayments.filter(x => x.from !== currentMember?.id && x.to !== currentMember?.id);
         setOtherPayments(otherPaym);
 
-        const myBal = updBalances?.find(
-            balance => balance.id === currentMember?.id
-        );
+        const myBal = refreshed.balances?.find( balance => balance.id === currentMember?.id );
         setMyBalance(myBal);
         setLoading(false);
     }
@@ -71,37 +68,54 @@ export default function Members() {
 
                     <Text style={commonStyle.sectionTitle}>My payments</Text>
                     <View style={styles.myPayments}>
-                        {myPayments.map((payment) => {
-                            payment.fromMember = members.find(x => x.id === payment.from);
-                            payment.toMember = members.find(x => x.id === payment.to);
+                        {myPayments.length > 0 ? (
+                            <View>
+                                {myPayments.map((payment) => {
+                                    payment.fromMember = members.find(x => x.id === payment.from);
+                                    payment.toMember = members.find(x => x.id === payment.to);
 
-                            return (
-                                <CardPayment 
-                                    key={`${payment.from}-${payment.to}`}
-                                    payment={payment} 
-                                    iAmDebtor={payment.from === currentMember.id}
-                                    groupCurrency={groupCurrency}
-                                    settleUp={true}
-                                />
-                            );
-                        })}
+                                    return (
+                                        <CardPayment
+                                            key={`${payment.from}-${payment.to}`}
+                                            payment={payment}
+                                            iAmDebtor={payment.from === currentMember.id}
+                                            groupCurrency={groupCurrency}
+                                            settleUp={true}
+                                            reloadFunc={reloadPayments}
+                                        />
+                                    );
+                                })}
+                            </View>
+                        ) : (
+                            <View style={styles.emptySection}>
+                                <Text style={styles.emptyText}>No payments to settle</Text>
+                            </View>
+                        )}
                     </View>
 
                     <Text style={commonStyle.sectionTitle}>Other payments</Text>
-                    {otherPayments.map((payment) => {
-                            payment.fromMember = members.find(x => x.id === payment.from);
-                            payment.toMember = members.find(x => x.id === payment.to);
+                    {otherPayments.length > 0 ? (
+                        <View>
+                            {otherPayments.map((payment) => {
+                                payment.fromMember = members.find(x => x.id === payment.from);
+                                payment.toMember = members.find(x => x.id === payment.to);
 
-                            return (
-                                <CardPayment 
-                                    key={`${payment.from}-${payment.to}`}
-                                    payment={payment} 
-                                    iAmDebtor={payment.from === currentMember.id}
-                                    groupCurrency={groupCurrency}
-                                    settleUp={false}
-                                />
-                            );
-                        })}
+                                return (
+                                    <CardPayment
+                                        key={`${payment.from}-${payment.to}`}
+                                        payment={payment}
+                                        iAmDebtor={payment.from === currentMember?.id}
+                                        groupCurrency={groupCurrency}
+                                        settleUp={false}
+                                    />
+                                );
+                            })}
+                        </View>
+                    ) : (
+                        <View style={styles.emptySection}>
+                            <Text style={styles.emptyText}>No payments to settle</Text>
+                        </View>
+                    )}
 
                     {/* all balances */}
                     <View style={styles.bodyBalance}>
@@ -128,9 +142,24 @@ export default function Members() {
         )
 }
 
-function CardPayment({ payment, iAmDebtor, groupCurrency, settleUp = false }) {
+function CardPayment({ payment, iAmDebtor, groupCurrency, settleUp = false, reloadFunc }) {
     const fromInits = getInits(payment.fromMember?.name);
     const toInits = getInits(payment.toMember?.name);
+    const {refreshGroup, groupId} = useGroup();
+    const confirmSettleUp = (paym) => {
+        const yesno = [{text: 'Cancel', style: 'cancel'}, {text: 'Yes, settle up', style: 'default', onPress: () => handleSettleUp(paym)}]
+        Alert.alert('Settle up?', 'Do you confirm that '+paym?.fromMember?.name+' paid '+fmtNum(paym.amount)+' '+groupCurrency+' to '+paym.toMember?.name+'?', yesno);
+    }
+    const handleSettleUp = async (paym) => {
+        const newPaym = {
+            fromMemberId: paym.from,
+            toMemberId: paym.to,
+            amount: paym.amount,
+            note: paym.note
+        };
+        const res = await createPayment(groupId, newPaym);
+        if (res && typeof reloadFunc === 'function') await reloadFunc(); 
+    }
 
     return (
         <View style={styles.cardPayment}>
@@ -149,7 +178,7 @@ function CardPayment({ payment, iAmDebtor, groupCurrency, settleUp = false }) {
                 <Text style={iAmDebtor ? styles.negativeAmount : styles.positiveAmount}>
                     {iAmDebtor ? '-' : '+'}{fmtNum(payment.amount)} {groupCurrency}
                 </Text>
-                {settleUp && <Pressable style={commonStyle.inlineBtn} onPress={(() => alert('paid'))}>
+                {settleUp && <Pressable style={commonStyle.inlineBtn} onPress={() => confirmSettleUp(payment)}>
                     <Text style={commonStyle.inlineBtnText}>Settle up</Text>
                 </Pressable>}
             </View>
@@ -235,5 +264,13 @@ const styles = StyleSheet.create({
         marginHorizontal: sp['half'],
         fontWeight: 700,
         fontSize: 16,
+    },
+    emptySection: {
+        paddingVertical: sp[1],
+        alignItems: 'center',
+    },
+    emptyText: {
+        color: colors.textMuted,
+        fontSize: 14,
     },
 });

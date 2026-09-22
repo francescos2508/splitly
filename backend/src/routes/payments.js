@@ -17,17 +17,10 @@ router.post('/', authorizeGroup, async (req, res) => {
         note
     } = req.body;
 
-    if (!groupId || !fromMemberId || !toMemberId || amount == null) {
-        return res.status(400).json({
-            error: "Missing required fields"
-        });
-    }
+    if (!groupId || !fromMemberId || !toMemberId || amount == null) return res.status(400).json({ error: "Missing required fields" });
 
     try {
-        if (fromMemberId === toMemberId) {
-            return res.status(400).json({ error: 'Payment from and to the same member' })
-        }
-
+        if (fromMemberId === toMemberId) return res.status(400).json({ error: 'Payment from and to the same member' })
         if (amount <= 0) return res.status(400).json({ error: 'Amount must be higher than 0' });
 
         // check gruppo esiste
@@ -36,12 +29,7 @@ router.post('/', authorizeGroup, async (req, res) => {
             .select('id')
             .eq('id', groupId)
             .single();
-
-        if (groupError || !group) {
-            return res.status(404).json({
-                error: 'Group not found'
-            })
-        }
+        if (groupError || !group) return res.status(404).json({ error: 'Group not found' })
 
         // check membri appartengono al gruppo
         const { data: members, error: membersError } = await supabase
@@ -51,9 +39,7 @@ router.post('/', authorizeGroup, async (req, res) => {
             .in('id', [fromMemberId, toMemberId]);
 
         if (membersError) throw membersError;
-        if (members.length !== 2 ) {
-            return res.status(400).json({ error: 'One or more members not found' });
-        }
+        if (members.length !== 2 ) return res.status(400).json({ error: 'One or more members not found' });
 
         const fromMemberName = members.find(x => x.id === fromMemberId).name;
         const toMemberName = members.find(x => x.id === toMemberId).name;
@@ -70,7 +56,6 @@ router.post('/', authorizeGroup, async (req, res) => {
             })
             .select()
             .single();
-
         if (paymentError) throw paymentError;
 
         // activity log
@@ -84,11 +69,8 @@ router.post('/', authorizeGroup, async (req, res) => {
                 entity_id: payment.id,
                 description: `${fromMemberName} paid €${amount} to ${toMemberName}`,
             });
-
         if (activityError) throw activityError;
-
         return res.status(201).json(payment);
-        
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });

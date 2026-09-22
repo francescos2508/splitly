@@ -21,7 +21,7 @@ router.post('/', authorizeGroup, async (req, res) => {
         expense_date
     } = req.body;
 
-    if (!groupId || !paidByMemberId || !description || !amount || !participants) {
+    if (!groupId || !paidByMemberId || !description || !amount || !participants || !expense_date) {
         return res.status(400).json({
             error: 'Missing required fields'
         });
@@ -162,7 +162,7 @@ router.patch('/:expenseId', async (req, res) => {
 
     try {
         // check consistent data passed by client
-        if (!description || !amount || !paidByMemberId || !splitType || !participants) {
+        if (!description || !amount || !paidByMemberId || !splitType || !participants || !expense_date) {
             return res.status(400).json({
                 error: 'Missing required fields'
             });
@@ -354,7 +354,7 @@ router.patch('/:expenseId/remove', async (req, res) => {
 
         if (activityError) throw activityError;
 
-        return res.json({
+        return res.status(200).json({
             message: "Expense deleted successfully"
         });
     } catch (error) {

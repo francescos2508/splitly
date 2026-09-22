@@ -16,7 +16,7 @@ import { Keyboard, Pressable, ScrollView, StyleSheet, Text, View } from "react-n
 
 
 export default function Settings() {
-    const {group, groupId, members, currentMember, setGroup} = useGroup();
+    const {group, groupId, members, currentMember, setGroup, refreshGroup} = useGroup();
     const admin = currentMember?.is_owner;
     const [toast, setToast] = useState(null);
     const nameSheetRef = useRef(null);
@@ -39,7 +39,7 @@ export default function Settings() {
         try {
             const res = await updateGroup({...group, [field]: newVal});
             if (res) {
-                setGroup(prev => ({...prev, [field]: newVal}));
+                await refreshGroup({group: true});
                 if (sheetRef) sheetRef.current?.dismiss();
             }
         } catch (error) {
@@ -51,7 +51,7 @@ export default function Settings() {
         try {
             const res = await regenerateInviteCode(groupId);
             if (res) {
-                setGroup(prev => ({...prev, invite_code: res.invite_code}));
+                await refreshGroup({group: true});
                 inviteCodeSheetRef.current?.dismiss();
             }
         } catch (error) {

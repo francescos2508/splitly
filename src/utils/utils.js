@@ -12,11 +12,11 @@ export function parseDate(date) {
 export function calculatePayments(balances) {
     const creditors = balances
         .filter(x => x.balance > 0)
-        .map(x => ({...x}))
+        .map(x => ({ ...x, balance: Math.round(x.balance * 100) / 100 }))
         .sort((a, b) => b.balance - a.balance);
     const debtors = balances
         .filter(x => x.balance < 0)
-        .map(x => ({...x, balance: -x.balance}))
+        .map(x => ({ ...x, balance: Math.round(-x.balance * 100) / 100 }))
         .sort((a, b) => b.balance - a.balance);
 
     const payments = [];
@@ -26,6 +26,8 @@ export function calculatePayments(balances) {
         const debtor = debtors[i], creditor = creditors[j];
         // let's take the minimum amount and create the payment from debtor to creditor
         const amount = Math.min(debtor.balance, creditor.balance);
+        // for cents
+        if (amount <= 0) break;
         payments.push({
             from: debtor.id,
             fromMember : debtor,

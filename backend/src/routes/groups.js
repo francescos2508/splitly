@@ -357,7 +357,8 @@ router.get('/:groupId/expenses', authorizeGroup, async (req, res) => {
             .order('created_at', { ascending: false });
 
         if (expensesError) throw expensesError;
-        res.json(expenses);
+        const parsed = expenses.map(x => ({...x, participants: x.expense_participants}));
+        res.json(parsed);
 
     } catch (error) {
         console.error(error);

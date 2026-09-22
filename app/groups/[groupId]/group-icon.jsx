@@ -35,14 +35,14 @@ const iconColors = [
 ];
 
 export default function EditGroupIcon() {
-    const { group, setGroup } = useGroup();
+    const { group, refreshGroup } = useGroup();
     const [currentIcon, setCurrentIcon] = useState(group?.icon || 'people-outline');
 
     const handleSaveGroupSettings = async () => {
         try {
             const res = await updateGroup({...group, icon: currentIcon});
             if (res) {
-                setGroup(prev => ({...prev, icon: currentIcon}));
+                await refreshGroup({group: true});
                 router.back();
             }
         } catch (error) {

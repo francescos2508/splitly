@@ -14,16 +14,23 @@ export default function Expenses() {
             <View style={commonStyle.header}>
                 <Text style={commonStyle.title}>{group?.name || 'Error'}</Text>
             </View>
-            <ScrollView style={commonStyle.body}>
+            <View style={commonStyle.body}>
                 <Text style={commonStyle.sectionTitle}>Expenses</Text>
-                {expenses.map((expense) => {
-                    const memb = members.find(x => x.id === expense.paid_by_member_id);
+                <ScrollView >
+                    {expenses.map((expense) => {
+                        const memb = members.find(x => x.id === expense.paid_by_member_id);
 
-                    return (
-                        <CardExpense key={expense.id} expense={expense} paid_by_member={memb} groupCurrency={currencies[group.currency]} />
-                    );
-                })}
-            </ScrollView>
+                        return (
+                            <CardExpense key={expense.id} 
+                                expense={expense} 
+                                paid_by_member={memb} 
+                                groupCurrency={currencies[group.currency]} 
+                                onPress={() => router.push(`/groups/${groupId}/new-expense?expenseId=${expense.id}`)}
+                            />
+                        );
+                    })}
+                </ScrollView>
+            </View>
             <View style={commonStyle.footer}>
                 <Pressable style={commonStyle.btn} onPress={() => {router.push(`/groups/${groupId}/new-expense`)}} >
                     <Text style={commonStyle.btnText}>Add expense</Text>

@@ -1,14 +1,14 @@
 import { categoryColors, colors, sp } from '@/src/constants/constants';
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { fmtNum, lightColor, parseDate } from "../utils/utils";
 
-export default function CardExpense({ expense, paid_by_member, groupCurrency = '€' }) {
+export default function CardExpense({ expense, paid_by_member, groupCurrency = '€', onPress }) {
     if (!expense) return;
     if (!expense.category) expense.category = 'Generic';
     const catColor = categoryColors[expense.category];
 
     return (
-        <View style={[styles.cardExpense, {borderColor: catColor}]} key={expense.id}>
+        <Pressable style={[styles.cardExpense, {borderColor: catColor}]} key={expense.id} onPress={onPress}>
             <View style={styles.expenseMain}>
                 {/* <View style={styles.avatar}></View> */}
                 <View style={styles.info}>
@@ -22,7 +22,7 @@ export default function CardExpense({ expense, paid_by_member, groupCurrency = '
                     <Text style={[styles.labelCat, {color: catColor, borderColor: catColor, backgroundColor: lightColor(catColor)}]}>{expense.category}</Text>
                 </View>
             </View>
-        </View>
+        </Pressable>
     )
 }
 

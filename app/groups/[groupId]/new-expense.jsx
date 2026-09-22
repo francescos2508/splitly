@@ -2,18 +2,19 @@ import { useGroup } from "@/backend/src/context/GroupContext";
 import { createExpense, updateExpense } from "@/src/api/api";
 import AppInput from "@/src/components/AppInput";
 import DateInput from "@/src/components/DateInput";
+import Loader from '@/src/components/Loader';
 import SelectInput from "@/src/components/SelectInput";
 import { colors, sp } from '@/src/constants/constants';
 import { commonStyle } from "@/src/styles/common";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
-
+import { Alert, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import { deleteExpense } from "../../../src/api/api";
 
 
 export default function NewExpense() {
-    const { members, loading, setLoading } = useGroup();
+    const { members, expenses, loading, currentMember, setLoading, refreshGroup } = useGroup();
     const { groupId, expenseId } = useLocalSearchParams();
     const isEditing = !!expenseId;
     const [showParticipants, setShowParticipants] = useState(false);
@@ -22,7 +23,7 @@ export default function NewExpense() {
         amount: "",
         category: "",
         expense_date: new Date(),
-        paid_by: "",
+        paid_by_member_id: "",
         split_type: "equal",
         participants: [],
     });
@@ -56,9 +57,7 @@ export default function NewExpense() {
         paidBy: []
     });
 
-    const updExpense = (field, val) => {
-        setNewExpense((prev) => ({ ...prev, [field]: val }));
-    }
+    const updExpense = (field, val) => { setNewExpense((prev) => ({ ...prev, [field]: val })); }
 
     useEffect(() => {
         if (!members) return;
@@ -72,20 +71,33 @@ export default function NewExpense() {
         }));
 
         // automatically all members are selected
-        updExpense('participants', members.map(m => ({ memberId: m.id })));
-    }, [members]);
+        if (!isEditing) updExpense('participants', members.map(m => ({ memberId: m.id })));
+        if (isEditing) updExpense('participants', members.filter(m => newExpense?.expense_participants?.some(x => x.member?.id === m.id)).map(m => ({ memberId: m.id })));
+    }, [members, newExpense.expense_participants]);
+
+    useEffect(() => {
+        if (!expenseId) return;
+        const exp = expenses.find(x => x.id === expenseId);
+        if (!exp) return;
+        setNewExpense(exp);
+    }, [expenseId, expenses, loading]);
 
     const handleSaveExpense = async function () {
         if (loading) return;
         setLoading(true);
-
         try {
             if (isEditing) {
                 const res = await updateExpense(expenseId, newExpense);
-                if (res) router.back();
+                if (res) {
+                    await refreshGroup({expenses: true, balances: true, activity: true});
+                    router.back();
+                }
             } else {
                 const res = await createExpense(groupId, newExpense);
-                if (res?.expense) router.back();
+                if (res?.expense) {
+                    await refreshGroup({expenses: true, balances: true, activity: true});
+                    router.back();
+                }
             }
         } catch (error) {
             console.error(error);
@@ -94,10 +106,20 @@ export default function NewExpense() {
             setLoading(false);
         }
     }
+    const confirmDelete = () => {
+        const yesno = [{text: 'Cancel', style: 'cancel'}, {text: 'Yes, delete', style: 'destructive', onPress: handleDeleteExpense}]
+        Alert.alert('Delete expense?', 'Are you sure you want to delete this expense? This action cannot be undone.', yesno);
+    }
+    const handleDeleteExpense = async () => {
+        const res = await deleteExpense(newExpense.id);
+        if (res) {
+            await refreshGroup({expenses: true, balances: true, activity: true});
+            router.back();
+        }
+    }
     const toggleParticipant = function (mid) {
         setNewExpense((prev) => {
             const isExisting = prev.participants.some(p => p.memberId === mid);
-
             return {
                 ...prev,
                 participants: isExisting ? prev.participants.filter(x => x.memberId !== mid) : [...prev.participants, { memberId: mid }]
@@ -116,12 +138,14 @@ export default function NewExpense() {
         }));
     };
 
+    // if (loading) return (<Loader />);
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={commonStyle.container}>
+                {loading && <Loader overlay />}
                 <View style={commonStyle.header}>
-                    <Text style={commonStyle.title}>{isEditing ? expenseId.description : 'Add expense'}</Text>
+                    <Text style={commonStyle.title}>{isEditing ? 'Edit expense' : 'New expense'}</Text>
                 </View>
                 <ScrollView style={[commonStyle.body, { flex: 1 }]}>
                     <Text style={commonStyle.label}>Description</Text>
@@ -138,7 +162,7 @@ export default function NewExpense() {
                                 style={commonStyle.input}
                                 keyboardType="decimal-pad"
                                 placeholder='Amount'
-                                value={newExpense.amount}
+                                value={newExpense.amount?.toString() ?? ''}
                                 onChangeText={(value) => updExpense('amount', value)}
                                 suffix='€'
                             />
@@ -161,9 +185,9 @@ export default function NewExpense() {
 
                     <SelectInput
                         label='Paid by'
-                        value={newExpense.paid_by}
+                        value={newExpense.paid_by_member_id}
                         options={options.paidBy}
-                        onChange={(value) => updExpense('paid_by', value)}
+                        onChange={(value) => updExpense('paid_by_member_id', value)}
                     />
 
                     <SelectInput
@@ -182,9 +206,9 @@ export default function NewExpense() {
                                     size={20}
                                     color={colors.textSecondary}
                                 />
-                                {newExpense.participants.length === members.length
+                                {newExpense.participants?.length === members.length
                                     ? ' All members'
-                                    : ' '+newExpense.participants.length+'/'+members.length+' members'}
+                                    : ' '+newExpense.participants?.length+'/'+members.length+' members'}
                             </Text>
                         </Pressable>
 
@@ -201,7 +225,7 @@ export default function NewExpense() {
                                 <View style={styles.modal}>
                                     <Text style={styles.modalTitle}>Split between</Text>
                                     {members.map((member) => {
-                                        const selected = newExpense.participants.some(p => p.memberId === member.id);
+                                        const selected = newExpense.participants?.some(p => p.memberId === member.id);
                                         return (<Pressable style={styles.cardParticipant} key={member.id} onPress={() => toggleParticipant(member.id)}>
                                             <Ionicons name={selected ? "checkbox" : "square-outline"} size={24} color={colors['accent']} />
                                             <Text>{member.name}</Text>
@@ -226,7 +250,16 @@ export default function NewExpense() {
                     <Pressable disabled={loading} style={commonStyle.btn} onPress={handleSaveExpense} >
                         <Text style={commonStyle.btnText}>{isEditing ? "Save changes" : "Add expense"}</Text>
                     </Pressable>
+
+                    {isEditing && (
+                        <View style={styles.dangerZone}>
+                            <Pressable disabled={loading} style={styles.dangerBtn} onPress={confirmDelete} >
+                                <Text style={styles.dangerBtnTxt}>Delete expense</Text>
+                            </Pressable>
+                        </View>
+                    )}
                 </View>
+                
             </View>
         </TouchableWithoutFeedback>
     )
@@ -276,19 +309,42 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         paddingHorizontal: sp[2],
     },
-
     modal: {
         backgroundColor: colors.surface,
         borderRadius: 20,
         paddingVertical: sp[2],
         maxHeight: "60%",
     },
-
     modalTitle: {
         fontSize: 18,
         fontWeight: "700",
         color: colors.text,
         paddingHorizontal: sp[2],
         marginBottom: sp[1],
+    },
+    dangerBtn: {
+        width: "100%",
+        paddingVertical: 14,
+        alignItems: "center",
+        borderRadius: 20,
+        marginBottom: 12,
+        borderColor: colors.danger,
+        borderWidth: 1,
+        // backgroundColor: colors.danger,
+    },
+    dangerBtnTxt: {
+        // color: colors.white,
+        color: colors.danger,
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    handle: {
+        width: 40,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: colors.textMuted,
+        alignSelf: 'center',
+        marginTop: 8,
+        marginBottom: 16,
     },
 });
