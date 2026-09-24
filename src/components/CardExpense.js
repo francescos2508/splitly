@@ -39,6 +39,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
+    info: {
+        flex: 1,
+        minWidth: 0,
+        maxWidth: '70%'
+    },
     description: {
         fontSize: 16,
         fontWeight: '600',

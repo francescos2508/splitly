@@ -29,17 +29,17 @@ export default function Index() {
       ]),
 
       // Pause
-      Animated.delay(200),
+      // Animated.delay(200),
 
       Animated.parallel([
         Animated.timing(contentOpacity, {
           toValue: 1,
-          duration: 500,
+          duration: 400,
           useNativeDriver: true,
         }),
         Animated.timing(contentTranslateY, {
           toValue: 0,
-          duration: 500,
+          duration: 400,
           useNativeDriver: true,
         }),
       ]),

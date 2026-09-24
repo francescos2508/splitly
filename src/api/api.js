@@ -129,6 +129,19 @@ export async function getGroupExpenses(id) {
     return res;
 }
 
+// get a specific group payments
+export async function getGroupPayments(id) {
+    console.log("Calling API:", `${API_URL}/groups/${id}/payments`);
+    const resp = await apiFetch(`/groups/${id}/payments`, {
+        method: 'GET',
+    });
+    console.log('Response received: ', resp.status);
+    const res = await resp.json();
+    if (!resp.ok)  throw new Error(res.error || 'Failed to get group payments');
+    if (res) res.sort((a, b) => new Date(b.expense_date) - new Date(a.expense_date));
+    return res;
+}
+
 // get a specific group activity
 export async function getGroupActivity(id) {
     console.log("Calling API:", `${API_URL}/groups/${id}/activity`);

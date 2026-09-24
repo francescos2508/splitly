@@ -1,6 +1,5 @@
-import { getGroup, loadCurrentMember } from "@/src/api/api";
+import { getGroup, getGroupActivity, getGroupBalances, getGroupExpenses, getGroupPayments, loadCurrentMember } from "@/src/api/api";
 import { createContext, useContext, useEffect, useState } from "react";
-import { getGroupActivity, getGroupBalances, getGroupExpenses } from "../../../src/api/api";
 
 const GroupContext = createContext(null);
 
@@ -8,6 +7,7 @@ export function GroupProvider({ children, groupId }) {
     const [group, setGroup] = useState(null);
     const [members, setMembers] = useState([]);
     const [expenses, setExpenses] = useState([]);
+    const [payments, setPayments] = useState([]);
     const [balances, setBalances] = useState([]);
     const [activity, setActivity] = useState([]);
     const [currentMember, setCurrentMember] = useState(null);
@@ -15,8 +15,8 @@ export function GroupProvider({ children, groupId }) {
 
     const refreshGroup = async ( param = 'all' ) => {
         let result = {};
-        if (param === 'all') param = {group: true, expenses: true, balances: true, activity: true};
-        const {group, expenses, balances, activity} = param;
+        if (param === 'all') param = {group: true, expenses: true, balances: true, activity: true, payments: true};
+        const {group, expenses, balances, activity, payments} = param;
         try {
             setLoading(true);
             if (group) {
@@ -45,6 +45,12 @@ export function GroupProvider({ children, groupId }) {
                 setExpenses(expensesData);
                 result.expenses = expensesData;
             }
+            
+            if (payments) {
+                const paymentsData = await getGroupPayments(groupId);
+                setPayments(paymentsData);
+                result.payments = paymentsData;
+            }
 
             if (balances) {
                 const balancesData = await getGroupBalances(groupId);
@@ -70,7 +76,7 @@ export function GroupProvider({ children, groupId }) {
 
         const loadGroupData = async () => {
             try {
-                await refreshGroup({group: true, expenses: true, balances: true, activity: true})
+                await refreshGroup()
             } catch (error) {
                 console.error("Failed to load group data:", error);
             }
@@ -86,6 +92,7 @@ export function GroupProvider({ children, groupId }) {
                 group,
                 members,
                 expenses,
+                payments,
                 balances,
                 activity,
                 currentMember,
@@ -93,6 +100,7 @@ export function GroupProvider({ children, groupId }) {
                 setGroup,
                 setMembers,
                 setExpenses,
+                setPayments,
                 setBalances,
                 setActivity,
                 setCurrentMember,

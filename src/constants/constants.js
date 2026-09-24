@@ -48,6 +48,13 @@ export const categoryColors = {
     'Fees & Charges': '#C75B5B',
     'Other': '#888888',
 };
+export const activityColors = {
+    group: '#FFCA3A', // Gold
+    members: '#9B5DE5',  // Purple
+    expenses: '#00B4D8', // Cyan
+    payments: '#8AC926', // Lime
+}
+
 export const groupIcons = [
     'people-outline',   
     'rocket-outline',   
@@ -220,12 +227,12 @@ export const colors = DarkMode ? darkColors : lightColors;
 
 /* export const AVATAR_COLORS = {
     1: '#2A9D8F',  // Teal
-    2: '#9B5DE5',  // Purple
-    3: '#F77F00',  // Orange
     4: '#F72585',  // Magenta
-    5: '#118AB2',  // Ocean blue
-    6: '#8AC926', // Lime
     7: '#FF595E', // Coral
+    5: '#118AB2',  // Ocean blue
+    3: '#F77F00',  // Orange
+    2: '#9B5DE5',  // Purple
+    6: '#8AC926', // Lime
     8: '#00B4D8', // Cyan
     9: '#FFCA3A', // Gold
     10: '#52B788', // Green

@@ -369,6 +369,29 @@ router.get('/:groupId/expenses', authorizeGroup, async (req, res) => {
     }
 });
 
+router.get('/:groupId/payments', authorizeGroup, async (req, res) => {
+    const { groupId } = req.params;
+
+    try {
+        const { data: payments, error: paymentsError } = await supabase
+            .from('payments')
+            .select(`*`)
+            .eq('group_id', groupId)
+            .eq('status', 'completed')
+            .order('created_at', { ascending: false });
+
+        if (paymentsError) throw paymentsError;
+        res.json(payments);
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: "Internal server error",
+        });
+    }
+});
+
 router.get('/:groupId/balances', authorizeGroup, async (req, res) => {
     const { groupId } = req.params;
     try {
@@ -427,7 +450,9 @@ router.get('/:groupId/activity', authorizeGroup, async (req, res) => {
         const {data: activity, error: activityError} = await supabase
             .from('activity_log')
             .select('*')
-            .eq('group_id', groupId);
+            .eq('group_id', groupId)
+            .order('created_at', { ascending: false });
+
 
         if (activityError) throw activityError;
 
@@ -621,7 +646,7 @@ router.patch('/:groupId/members/:memberId/remove', authorizeGroup, async (req, r
                 event_type: "member_removed",
                 entity_type: "member",
                 entity_id: memberId,
-                description: `${req.member.name} removed ${member.name} from the group ${group.name}`
+                description: `${req.member.name} removed ${member.name} from the group`
             });
 
         if (activityError) throw activityError;
