@@ -50,7 +50,9 @@ export default function Settings() {
         showToast('Copied!');
     };
     const handleSaveGroupSettings = async (field, newVal, sheetRef) => {
+        if (loading) return;
         try {
+            setLoading(true);
             const res = await updateGroup({...group, [field]: newVal});
             if (res) {
                 await refreshGroup({group: true});
@@ -59,10 +61,14 @@ export default function Settings() {
         } catch (error) {
             console.error(error.message);
             alert('Problem while updating group, please retry in few minutes.');
+        } finally {
+            setLoading(false);
         }
     };
     const handleRegenerateInviteCode = async () => {
+        if (loading) return;
         try {
+            setLoading(true);
             const res = await regenerateInviteCode(groupId);
             if (res) {
                 await refreshGroup({group: true});
@@ -71,9 +77,12 @@ export default function Settings() {
         } catch (error) {
             console.error(error.message);
             alert('Problem while regenerating the code, please retry in few minutes.');
+        } finally {
+            setLoading(false);
         }
     }
     const handleRemoveMember = async () => {
+        if (loading) return;
         try {
             setLoading(true);
             const res = await removeMemberGroup(groupId, removingMember?.id);
@@ -82,7 +91,7 @@ export default function Settings() {
                 removeMemberSheetRef.current?.dismiss();
             }
         } catch (error) {
-             console.error(error.message);
+            console.error(error.message);
             alert('Problem while removing the member, please retry in few minutes.');
         } finally {
             setLoading(false);
@@ -279,10 +288,10 @@ export default function Settings() {
                         <Text>Are you sure you want to remove {removingMember?.name} from the group? {'\n'}
                             This member will no longer have access to the group. Expenses and payments will remain in the group history.</Text>
                     </View>
-                    <Pressable  style={styles.dangerBtn} onPress={handleRemoveMember}>
+                    <Pressable style={styles.dangerBtn} onPress={handleRemoveMember}>
                         <Text style={styles.dangerBtnTxt}>Remove</Text>
                     </Pressable>
-                    <Pressable  style={commonStyle.btn2} onPress={() => removeMemberSheetRef.current?.dismiss()}>
+                    <Pressable style={commonStyle.btn2} onPress={() => {if (loading) return; removeMemberSheetRef.current?.dismiss()}}>
                         <Text style={commonStyle.btn2Text}>Cancel</Text>
                     </Pressable>
                 </View>
