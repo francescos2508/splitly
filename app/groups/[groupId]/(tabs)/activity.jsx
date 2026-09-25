@@ -131,20 +131,20 @@ export default function Activity() {
                             onScroll={handleFilterScroll}
                             scrollEventThrottle={16}
                         >
-                            <Pressable onPress={() => setFilter('all')} style={styles.filterBtn}>
-                                <Text style={styles.filterBtnText}>All</Text>
+                            <Pressable onPress={() => setFilter('all')} style={[styles.filterBtn, filter === 'all' && {backgroundColor: colors.primary}]}>
+                                <Text style={[styles.filterBtnText, filter === 'all' && {color: (lightColor(colors.primary))}]}>All</Text>
                             </Pressable>
-                            <Pressable onPress={() => setFilter('group')} style={[styles.filterBtn, {borderColor: activityColors.group, backgroundColor: lightColor(activityColors.group)}]}>
-                                <Text style={[styles.filterBtnText, {color: activityColors.group}]}>Group</Text>
+                            <Pressable onPress={() => setFilter('group')} style={[styles.filterBtn, {borderColor: activityColors.group, backgroundColor: filter === 'group' ? activityColors.group : lightColor(activityColors.group)}]}>
+                                <Text style={[styles.filterBtnText, {color: filter === 'group' ? lightColor(activityColors.group) : activityColors.group}]}>Group</Text>
                             </Pressable>
-                            <Pressable onPress={() => setFilter('member')} style={[styles.filterBtn, {borderColor: activityColors.members, backgroundColor: lightColor(activityColors.members)}]}>
-                                <Text style={[styles.filterBtnText, {color: activityColors.members}]}>Members</Text>
+                            <Pressable onPress={() => setFilter('member')} style={[styles.filterBtn, {borderColor: activityColors.members, backgroundColor: filter === 'member' ? activityColors.members : lightColor(activityColors.members)}]}>
+                                <Text style={[styles.filterBtnText, {color: filter === 'member' ? lightColor(activityColors.members) : activityColors.members}]}>Members</Text>
                             </Pressable>
-                            <Pressable onPress={() => setFilter('expense')} style={[styles.filterBtn, {borderColor: activityColors.expenses, backgroundColor: lightColor(activityColors.expenses)}]}>
-                                <Text style={[styles.filterBtnText, {color: activityColors.expenses}]}>Expenses</Text>
+                            <Pressable onPress={() => setFilter('expense')} style={[styles.filterBtn, {borderColor: activityColors.expenses, backgroundColor: filter === 'expense' ? activityColors.expenses : lightColor(activityColors.expenses)}]}>
+                                <Text style={[styles.filterBtnText, {color: filter === 'expense' ? lightColor(activityColors.expenses) : activityColors.expenses}]}>Expenses</Text>
                             </Pressable>
-                            <Pressable onPress={() => setFilter('payment')} style={[styles.filterBtn, {borderColor: activityColors.payments, backgroundColor: lightColor(activityColors.payments)}]}>
-                                <Text style={[styles.filterBtnText, {color: activityColors.payments}]}>Payments</Text>
+                            <Pressable onPress={() => setFilter('payment')} style={[styles.filterBtn, {borderColor: activityColors.payments, backgroundColor: filter === 'payment' ? activityColors.payments : lightColor(activityColors.payments)}]}>
+                                <Text style={[styles.filterBtnText, {color: filter === 'payment' ? lightColor(activityColors.payments) : activityColors.payments}]}>Payments</Text>
                             </Pressable>
                         </ScrollView>
                         {showFilterHint && (
