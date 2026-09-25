@@ -20,8 +20,8 @@ router.post('/', authorizeGroup, async (req, res) => {
         participants,
         expense_date
     } = req.body;
-
-    if (!groupId || !paidByMemberId || !description || !amount || !participants || !expense_date) {
+    const numbAmount = Number( typeof amount === 'string' ? amount.replace(',', '.') : amount );
+    if (!groupId || !paidByMemberId || !description || !numbAmount || !participants || !expense_date) {
         return res.status(400).json({
             error: 'Missing required fields'
         });
@@ -29,7 +29,7 @@ router.post('/', authorizeGroup, async (req, res) => {
 
     try {
         // altri controlli
-        if (amount <= 0) {
+        if (numbAmount <= 0) {
             return res.status(400).json({ error: 'Amount must be higher than 0' })
         }
         if (participants.length <= 0) {
@@ -66,7 +66,7 @@ router.post('/', authorizeGroup, async (req, res) => {
 
         if (payerError || !payer) {
             return res.status(400).json({
-                error: 'Payer is not a member of this group'
+                error: 'Payer is not a member of the group'
             })
         }
 
@@ -89,7 +89,7 @@ router.post('/', authorizeGroup, async (req, res) => {
 
         let expenseParticipants;
         try {
-            expenseParticipants = calculateExpenseParticipants(amount, splitType, participants);
+            expenseParticipants = calculateExpenseParticipants(numbAmount, splitType, participants);
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
@@ -104,7 +104,7 @@ router.post('/', authorizeGroup, async (req, res) => {
                 paid_by_member_id: paidByMemberId,
                 description: description,
                 category: category,
-                amount: amount,
+                amount: numbAmount,
                 split_type: splitType,
                 expense_date: fmtDate,
             })
@@ -160,16 +160,17 @@ router.patch('/:expenseId', async (req, res) => {
         expense_date,
     } = req.body;
 
+    const numbAmount = Number( typeof amount === 'string' ? amount.replace(',', '.') : amount );
     try {
         // check consistent data passed by client
-        if (!description || !amount || !paidByMemberId || !splitType || !participants || !expense_date) {
+        if (!description || !numbAmount || !paidByMemberId || !splitType || !participants || !expense_date) {
             return res.status(400).json({
                 error: 'Missing required fields'
             });
         }
 
         // altri controlli
-        if (amount <= 0) {
+        if (numbAmount <= 0) {
             return res.status(400).json({ error: 'Amount must be higher than 0' })
         }
         if (participants.length <= 0) {
@@ -208,9 +209,9 @@ router.patch('/:expenseId', async (req, res) => {
         const { data: members, error: membersError } = await supabase
             .from("group_members")
             .select("id")
-            .eq('is_active', true)
+            // .eq('is_active', true)
             .eq("group_id", expense.group_id);
-
+        // we don't put "is_active" filter because for expenses where inactive members were involved we could change description, category or other fields
         if (membersError) throw membersError;
 
         // payer è nel gruppo
@@ -218,25 +219,19 @@ router.patch('/:expenseId', async (req, res) => {
 
         if (!memberIds.includes(paidByMemberId)) {
             return res.status(400).json({
-                error: "Payer is not part of the group"
+                error: "Payer is not a member of the group"
             });
         }
 
         // partecipanti della spesa tutti nel gruppo
         const participantIds = participants.map(p => p.memberId);
 
-        const allParticipantsValid = participantIds.every(id =>
-            memberIds.includes(id)
-        );
-        if (!allParticipantsValid) {
-            return res.status(400).json({
-                error: "Not all participants belong to the group"
-            });
-        }
+        const allParticipantsValid = participantIds.every(id => memberIds.includes(id));
+        if (!allParticipantsValid) return res.status(400).json({ error: "Not all participants belong to the group" });
 
         let expenseParticipants;
         try {
-            expenseParticipants = calculateExpenseParticipants(amount, splitType, participants);
+            expenseParticipants = calculateExpenseParticipants(numbAmount, splitType, participants);
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
@@ -244,11 +239,11 @@ router.patch('/:expenseId', async (req, res) => {
         // uniform date
         const fmtDate = new Date(expense_date).toLocaleDateString('en-CA');
         // modifica expense
-        const {data: newExpense, error: newExpenseError }= await supabase
+        const {data: newExpense, error: newExpenseError } = await supabase
             .from("expenses")
             .update({
                 description,
-                amount,
+                amount: numbAmount,
                 category,
                 paid_by_member_id: paidByMemberId,
                 split_type: splitType,

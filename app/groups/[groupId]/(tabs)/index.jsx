@@ -16,6 +16,7 @@ export default function Group() {
         group,
         groupId,
         members,
+        allMembers,
         expenses,
         balances,
         currentMember,
@@ -101,7 +102,7 @@ export default function Group() {
                 <View style={styles.bodyExpenses}>
                     <Text style={commonStyle.sectionTitle}>Last expenses</Text>
                     {expenses.slice(0,3).map((expense) => {
-                        const memb = members.find(x => x.id === expense.paid_by_member_id);
+                        const memb = allMembers.find(x => x.id === expense.paid_by_member_id);
 
                         return (
                             <CardExpense 

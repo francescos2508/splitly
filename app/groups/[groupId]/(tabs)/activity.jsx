@@ -8,15 +8,15 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { fmtNum, getInits, lightColor } from '../../../../src/utils/utils';
 
-const getActivityDescription = (act, {members, expenses, payments, group}) => {
-    const actor = members.find(x => x.id === act.actor_id);
+const getActivityDescription = (act, {allMembers, expenses, payments, group}) => {
+    const actor = allMembers.find(x => x.id === act.actor_id);
     if (act.entity_type === 'group') {
         // created, updated
         if (act.event_type === 'group_created') return actor?.name+' created the group';
         if (act.event_type === 'group_updated') return actor?.name+' updated the group settings';
     }
     if (act.entity_type === 'member') {
-        const memb = members.find(x => x.id === act.entity_id);
+        const memb = allMembers.find(x => x.id === act.entity_id);
         // joined, left, removed 
         if (act.event_type === 'member_joined') return actor?.name+' joined the group';
         if (act.event_type === 'member_left') return actor?.name+' left the group';
@@ -31,8 +31,8 @@ const getActivityDescription = (act, {members, expenses, payments, group}) => {
     }
     if (act.entity_type === 'payment') {
         const payment = payments.find(x => x.id === act.entity_id);
-        const from = members.find(x => x.id === payment.from_member_id);
-        const to = members.find(x => x.id === payment.to_member_id);
+        const from = allMembers.find(x => x.id === payment.from_member_id);
+        const to = allMembers.find(x => x.id === payment.to_member_id);
         // created, canceled(?)
         if (act.event_type === 'payment_created') return from?.name+' paid '+fmtNum(payment?.amount)+' '+currencies[group?.currency]+' to '+to?.name;
     }
@@ -84,22 +84,19 @@ const getSeparatorDate = (act) => {
 
     const datestr = new Date(act.created_at).toLocaleDateString('en-GB', {
         day: '2-digit',
-        month: 'short',
+        month: 'long',
     });
     return datestr;
 }
 export default function Activity() {
-    const {group, members, balances, activity, refreshGroup} = useGroup();
+    const {group, activity, refreshGroup} = useGroup();
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [showFilterHint, setShowFilterHint] = useState(true);
 
     const handleFilterScroll = (e) => {
         const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
-
-        setShowFilterHint(
-            contentOffset.x + layoutMeasurement.width < contentSize.width - 5
-        );
+        setShowFilterHint( contentOffset.x + layoutMeasurement.width < contentSize.width - 5 );
     };
     
     useEffect(() => {
@@ -178,9 +175,9 @@ export default function Activity() {
 }
 
 function CardActivity({act}) {
-    const { members, expenses, payments, group } = useGroup();
-    const member = members.find(x => x.id === act.actor_id);
-    const desc = getActivityDescription(act, {members, expenses, payments, group});
+    const { allMembers, expenses, payments, group } = useGroup();
+    const member = allMembers.find(x => x.id === act.actor_id);
+    const desc = getActivityDescription(act, {allMembers, expenses, payments, group});
     const datestr = getActivityDate(act);
 
     return (

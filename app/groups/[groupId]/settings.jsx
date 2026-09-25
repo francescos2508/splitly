@@ -11,17 +11,21 @@ import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { removeMemberGroup } from "../../../src/api/api";
+import Loader from "../../../src/components/Loader";
 
 
 
 
 export default function Settings() {
-    const {group, groupId, members, currentMember, setGroup, refreshGroup} = useGroup();
+    const {group, groupId, members, balances, currentMember, loading, setLoading, refreshGroup} = useGroup();
     const admin = currentMember?.is_owner;
     const [toast, setToast] = useState(null);
     const nameSheetRef = useRef(null);
     const currencySheetRef = useRef(null);
     const inviteCodeSheetRef = useRef(null);
+    const removeMemberSheetRef = useRef(null);
+    const [removingMember, setRemovingMember] = useState(null);
     const [groupName, setGroupName] = useState(group?.name || '');
 
     const openNameSheet = () => {
@@ -30,6 +34,16 @@ export default function Settings() {
     }
     const openCurrencySheet = () => { currencySheetRef.current?.present(); }
     const openInviteCodeSheet = () => { inviteCodeSheetRef.current?.present(); }
+    const openRemoveMemberSheet = (member) => { 
+        const bal = balances.find(x => x.id === member.id);
+        const isSettled = !bal || Math.abs(bal.balance) < 0.01;
+        if (!isSettled) {
+            alert('It\'s not possible to remove from the group a member that is not settled up');
+            return;
+        }
+        setRemovingMember(member);
+        removeMemberSheetRef.current?.present();
+    }
     const showToast = (message) => { setToast(message); };
     const copyInviteCode = async (code) => {
         await Clipboard.setStringAsync(code);
@@ -59,9 +73,25 @@ export default function Settings() {
             alert('Problem while regenerating the code, please retry in few minutes.');
         }
     }
+    const handleRemoveMember = async () => {
+        try {
+            setLoading(true);
+            const res = await removeMemberGroup(groupId, removingMember?.id);
+            if (res) {
+                await refreshGroup();
+                removeMemberSheetRef.current?.dismiss();
+            }
+        } catch (error) {
+             console.error(error.message);
+            alert('Problem while removing the member, please retry in few minutes.');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <View style={commonStyle.container}>
+            {loading && <Loader overlay />}
             <View style={commonStyle.header}>
                 <Pressable style={commonStyle.headerBack} onPress={() => router.back()}>
                     <Ionicons name="chevron-back" size={20} color={colors.primary} />
@@ -150,7 +180,7 @@ export default function Settings() {
                                         <Ionicons name='pencil' size={20} color={colors.primary} />
                                     </Pressable>
                                 ) : admin ? ( 
-                                    <Pressable onPress={() => alert('Deleted!')}>
+                                    <Pressable onPress={() => openRemoveMemberSheet(member)}>
                                         <Ionicons name='trash-outline' size={20} color={colors.primary} />
                                     </Pressable>
                                 ): null}
@@ -234,6 +264,25 @@ export default function Settings() {
                         <Text style={commonStyle.btnText}>Regenerate code</Text>
                     </Pressable>
                     <Pressable  style={commonStyle.btn2} onPress={() => inviteCodeSheetRef.current?.dismiss()}>
+                        <Text style={commonStyle.btn2Text}>Cancel</Text>
+                    </Pressable>
+                </View>
+            </BottomSheetModal>
+
+            <BottomSheetModal ref={removeMemberSheetRef} snapPoints={['40%']} enablePanDownToClose enableDynamicSizing={false} 
+                keyboardBehavior='interactive' keyboardBlurBehavior='restore'
+                backdropComponent={(props) => (<BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior='close' />)}
+            >
+                <View style={styles.sheet} >
+                    <View style={{flex:1}} >
+                        <Text style={commonStyle.label}>Remove {removingMember?.name}?</Text>
+                        <Text>Are you sure you want to remove {removingMember?.name} from the group? {'\n'}
+                            This member will no longer have access to the group. Expenses and payments will remain in the group history.</Text>
+                    </View>
+                    <Pressable  style={styles.dangerBtn} onPress={handleRemoveMember}>
+                        <Text style={styles.dangerBtnTxt}>Remove</Text>
+                    </Pressable>
+                    <Pressable  style={commonStyle.btn2} onPress={() => removeMemberSheetRef.current?.dismiss()}>
                         <Text style={commonStyle.btn2Text}>Cancel</Text>
                     </Pressable>
                 </View>
@@ -329,7 +378,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: sp[1],
         paddingVertical: sp.half,
     },
-
     regenerateText: {
         color: colors.primary,
         fontSize: 14,

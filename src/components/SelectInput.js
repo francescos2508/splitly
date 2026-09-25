@@ -17,6 +17,7 @@ export default function SelectInput({
     options,
     onChange,
     placeholder = "Select...",
+    editable = true
 }) {
     const [visible, setVisible] = useState(false);
 
@@ -33,20 +34,11 @@ export default function SelectInput({
         <>
             <Text style={styles.label}>{label}</Text>
 
-            <Pressable
-                style={styles.input}
-                onPress={() => setVisible(true)}
-            >
-                <Text
-                    style={[
-                        styles.value,
-                        !selectedOption && styles.placeholder,
-                    ]}
-                >
+            <Pressable style={styles.input} onPress={() => {if (editable) setVisible(true); else return;} }>
+                <Text style={[styles.value, !selectedOption && styles.placeholder]}>
                     {selectedOption?.label || placeholder}
                 </Text>
 
-                {/* <Text style={styles.arrow}>▼</Text> */}
                 <Text style={styles.arrow}>
                     <Ionicons name='chevron-down' size={20} color={colors.textSecondary}/>
                 </Text>

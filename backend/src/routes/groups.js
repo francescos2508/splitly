@@ -314,10 +314,10 @@ router.get('/:groupId', authorizeGroup, async (req, res) => {
     try {
         const { data: group, error } = await supabase
             .from('groups')
-            .select(`*, group_members (id, name, avatar_color, is_owner)`)
+            .select(`*, group_members (id, name, avatar_color, is_active, is_owner)`)
             .eq('id', groupId)
             .eq('is_active', true)
-            .eq('group_members.is_active', true)
+            // .eq('group_members.is_active', true)
             .single();
 
         if (error || !group) {
@@ -325,11 +325,15 @@ router.get('/:groupId', authorizeGroup, async (req, res) => {
                 error: "Group not found",
             });
         }
-        res.json(group);
+        const result = {
+            ...group,
+            group_members_all: group.group_members,
+            group_members: group.group_members.filter(x => x.is_active === true),
+        }
+        res.json(result);
 
     } catch (error) {
         console.error(error);
-
         res.status(500).json({
             error: 'Internal server error'
         })
@@ -592,17 +596,8 @@ router.patch('/:groupId/members/:memberId/remove', authorizeGroup, async (req, r
     const { groupId, memberId } = req.params;
 
     try {
-        if (!req.member.is_owner) {
-            return res.status(403).json({
-                error: "You are not allowed to remove this member"
-            });
-        }
-
-        if (req.member.id === memberId) {
-            return res.status(400).json({
-                error: "Owner cannot remove themselves"
-            });
-        }
+        if (!req.member.is_owner) return res.status(403).json({ error: "You are not allowed to remove this member" });
+        if (req.member.id === memberId) return res.status(400).json({ error: "Owner cannot remove themselves" });
 
         // Check that the group exists
         const { data: group, error: groupError } = await supabase
@@ -611,12 +606,9 @@ router.patch('/:groupId/members/:memberId/remove', authorizeGroup, async (req, r
             .eq('id', groupId)
             .eq('is_active', true)
             .single();
+        if (groupError || !group) return res.status(404).json({ error: 'Group not found' });
 
-        if (groupError || !group) {
-            return res.status(404).json({ error: 'Group not found' });
-        }
-
-        // verifica membro da eliminare fa parte del gruppo
+        // check member is part of the group
         const { data: member, error: memberError } = await supabase
             .from('group_members')
             .select('id, name, is_owner')
@@ -625,16 +617,39 @@ router.patch('/:groupId/members/:memberId/remove', authorizeGroup, async (req, r
             .eq('is_active', true)
             .single();
 
-        if (memberError || !member) {
-            return res.status(404).json({ error: 'Member is not part of the group' });
-        }
+        if (memberError || !member) return res.status(404).json({ error: 'Member is not part of the group' });
 
+        // Get expenses
+        const { data: expenses, error: expensesError } = await supabase
+            .from('expenses')
+            .select(`
+                *,
+                expense_participants (
+                    member_id,
+                    share_amount
+                )
+            `)
+            .eq('group_id', groupId)
+            .eq('is_active', true);
+        if (expensesError) throw expensesError;
+
+        // Get payments
+        const { data: payments, error: paymentsError } = await supabase
+            .from('payments')
+            .select('*')
+            .eq('group_id', groupId);
+        if (paymentsError) throw paymentsError;
+
+        // Check member balance === 0
+        const balance = calculateBalance(member.id, expenses, payments);
+        if (Math.abs(balance) >= 0.01) return res.status(400).json({ error: "Member must be settled up before being removed" });
+
+        // actually setting not active
         const { error: deleteError } = await supabase
             .from('group_members')
             .update({ is_active: false })
             .eq('group_id', groupId)
             .eq('id', memberId);
-
         if (deleteError) throw deleteError;
 
         // activity log
@@ -651,7 +666,7 @@ router.patch('/:groupId/members/:memberId/remove', authorizeGroup, async (req, r
 
         if (activityError) throw activityError;
 
-        return res.json({
+        return res.status(200).json({
             message: "Member removed successfully from the group"
         })
 

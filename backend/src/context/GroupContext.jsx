@@ -6,6 +6,7 @@ const GroupContext = createContext(null);
 export function GroupProvider({ children, groupId }) {
     const [group, setGroup] = useState(null);
     const [members, setMembers] = useState([]);
+    const [allMembers, setAllMembers] = useState([]);
     const [expenses, setExpenses] = useState([]);
     const [payments, setPayments] = useState([]);
     const [balances, setBalances] = useState([]);
@@ -26,7 +27,7 @@ export function GroupProvider({ children, groupId }) {
                 ]);
 
                 setGroup(groupData);
-                const members = groupData.group_members.sort((a,b) => {
+                const members = [...groupData.group_members].sort((a,b) => {
                     // currentMember will always be first one in the list
                     if (a.id === member.id) return -1;
                     if (b.id === member.id) return 1;
@@ -34,9 +35,18 @@ export function GroupProvider({ children, groupId }) {
                     return a.name.localeCompare(b.name);
                 });
                 setMembers(members);
+                const allMembers = [...(groupData.group_members_all ?? [])].sort((a,b) => {
+                    // currentMember will always be first one in the list
+                    if (a.id === member.id) return -1;
+                    if (b.id === member.id) return 1;
+
+                    return a.name.localeCompare(b.name);
+                });
+                setAllMembers(allMembers);
                 setCurrentMember(member);
                 result.group = groupData;
                 result.members = members;
+                result.allMembers = allMembers;
                 result.currentMember = member;
             }
 
@@ -91,6 +101,7 @@ export function GroupProvider({ children, groupId }) {
                 groupId,
                 group,
                 members,
+                allMembers,
                 expenses,
                 payments,
                 balances,
@@ -99,6 +110,7 @@ export function GroupProvider({ children, groupId }) {
                 loading,
                 setGroup,
                 setMembers,
+                setAllMembers,
                 setExpenses,
                 setPayments,
                 setBalances,

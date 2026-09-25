@@ -11,10 +11,11 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import { deleteExpense } from "../../../src/api/api";
+import { fmtNum, lightColor } from "../../../src/utils/utils";
 
 
 export default function NewExpense() {
-    const { members, expenses, loading, currentMember, setLoading, refreshGroup } = useGroup();
+    const { allMembers, members, expenses, loading, currentMember, setLoading, refreshGroup } = useGroup();
     const { groupId, expenseId } = useLocalSearchParams();
     const isEditing = !!expenseId;
     const [showParticipants, setShowParticipants] = useState(false);
@@ -56,15 +57,22 @@ export default function NewExpense() {
         ],
         paidBy: []
     });
+    // all id of removed members
+    const removedIds = allMembers.filter(x => !x.is_active).map(x => x.id);
+    // flag 
+    const hasRemovedMembers = removedIds.includes(newExpense.paid_by_member_id) || newExpense.participants.some(x => removedIds.includes(x.memberId));
+    // to view everything correct even though there are removed members
+    const participantMembers = hasRemovedMembers ? allMembers : members;
 
     const updExpense = (field, val) => { setNewExpense((prev) => ({ ...prev, [field]: val })); }
 
     useEffect(() => {
+        if (!allMembers) return;
         if (!members) return;
 
         setOptions(prev => ({
             ...prev,
-            paidBy: members.map(member => ({
+            paidBy: (hasRemovedMembers ? allMembers : members).map(member => ({
                 label: member.name,
                 value: member.id,
             })),
@@ -72,20 +80,28 @@ export default function NewExpense() {
 
         // automatically all members are selected
         if (!isEditing) updExpense('participants', members.map(m => ({ memberId: m.id })));
-        if (isEditing) updExpense('participants', members.filter(m => newExpense?.expense_participants?.some(x => x.member?.id === m.id)).map(m => ({ memberId: m.id })));
-    }, [members, newExpense.expense_participants]);
+        // if (isEditing) updExpense('participants', allMembers.filter(m => newExpense?.expense_participants?.some(x => x.member?.id === m.id)).map(m => ({ memberId: m.id })));
+    }, [allMembers, members, isEditing, hasRemovedMembers]);
 
     useEffect(() => {
         if (!expenseId) return;
         const exp = expenses.find(x => x.id === expenseId);
         if (!exp) return;
-        setNewExpense(exp);
-    }, [expenseId, expenses, loading]);
+        // setNewExpense(exp);
+        setNewExpense({
+            ...exp,
+            participants: exp.expense_participants.map(p => ({
+                memberId: p.member.id,
+                amount: p.share_amount,
+            })),
+        });
+    }, [expenseId, expenses]);
 
     const handleSaveExpense = async function () {
         if (loading) return;
         setLoading(true);
         try {
+            console.log(newExpense);
             if (isEditing) {
                 const res = await updateExpense(expenseId, newExpense);
                 if (res) {
@@ -137,15 +153,15 @@ export default function NewExpense() {
             ),
         }));
     };
-
-    // if (loading) return (<Loader />);
-
+    
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={commonStyle.container}>
                 {loading && <Loader overlay />}
                 <View style={commonStyle.header}>
-                    <Text style={commonStyle.title}>{isEditing ? 'Edit expense' : 'New expense'}</Text>
+                    <Text style={commonStyle.title}>
+                        {isEditing ? `Edit expense${hasRemovedMembers ? ' *' : ''}` : 'New expense'}
+                    </Text>
                 </View>
                 <ScrollView style={[commonStyle.body, { flex: 1 }]}>
                     <Text style={commonStyle.label}>Description</Text>
@@ -162,9 +178,10 @@ export default function NewExpense() {
                                 style={commonStyle.input}
                                 keyboardType="decimal-pad"
                                 placeholder='Amount'
-                                value={newExpense.amount?.toString() ?? ''}
+                                value={newExpense.amount !== null ? fmtNum(newExpense.amount) : ''}
                                 onChangeText={(value) => updExpense('amount', value)}
                                 suffix='€'
+                                editable={!hasRemovedMembers}
                             />
                         </View>
                         <View style={styles.col}>
@@ -188,6 +205,7 @@ export default function NewExpense() {
                         value={newExpense.paid_by_member_id}
                         options={options.paidBy}
                         onChange={(value) => updExpense('paid_by_member_id', value)}
+                        editable={!hasRemovedMembers}
                     />
 
                     <SelectInput
@@ -195,9 +213,10 @@ export default function NewExpense() {
                         value={newExpense.split_type}
                         options={options.splitType}
                         onChange={(value) => updExpense('split_type', value)}
+                        editable={!hasRemovedMembers}
                     />
 
-                    <Text style={commonStyle.label}>Split between</Text>
+                    <Text style={commonStyle.label}>{hasRemovedMembers ? 'Participants' : 'Split between'}</Text>
                     <View style={styles.bodyParticipants}>
                         <Pressable onPress={() => setShowParticipants(true)}>
                             <Text style={styles.textInput}>
@@ -206,9 +225,10 @@ export default function NewExpense() {
                                     size={20}
                                     color={colors.textSecondary}
                                 />
-                                {newExpense.participants?.length === members.length
+                                {/* {newExpense.participants?.length === members.length
                                     ? ' All members'
-                                    : ' '+newExpense.participants?.length+'/'+members.length+' members'}
+                                    : ' '+newExpense.participants?.length+'/'+participantMembers.length+' members'} */}
+                                {' '+newExpense.participants?.length+'/'+participantMembers.length+' members'}
                             </Text>
                         </Pressable>
 
@@ -223,11 +243,16 @@ export default function NewExpense() {
                                 onPress={() => setShowParticipants(false)}
                             >
                                 <View style={styles.modal}>
-                                    <Text style={styles.modalTitle}>Split between</Text>
-                                    {members.map((member) => {
+                                    <Text style={styles.modalTitle}>
+                                        {hasRemovedMembers ? 'Participants' : 'Split between'}
+                                    </Text>
+                                    {participantMembers.map((member) => {
                                         const selected = newExpense.participants?.some(p => p.memberId === member.id);
-                                        return (<Pressable style={styles.cardParticipant} key={member.id} onPress={() => toggleParticipant(member.id)}>
-                                            <Ionicons name={selected ? "checkbox" : "square-outline"} size={24} color={colors['accent']} />
+                                        return (
+                                        <Pressable style={styles.cardParticipant} key={member.id} 
+                                            onPress={() => !hasRemovedMembers && toggleParticipant(member.id)}
+                                        >
+                                            <Ionicons name={selected ? "checkbox" : "square-outline"} size={24} color={hasRemovedMembers ? lightColor(colors.primary) : colors.primary} />
                                             <Text>{member.name}</Text>
                                         </Pressable>
                                         )
@@ -243,17 +268,21 @@ export default function NewExpense() {
                         </Modal>
                     </View>
 
-
-
+                        
                 </ScrollView>
                 <View style={commonStyle.footer}>
+                    {hasRemovedMembers && (
+                        <Text style={styles.editWarning}>
+                            *Amount, paid by, split type and participants can't be changed, and this expense can't be deleted because it involves a removed member.
+                        </Text>
+                    )}
                     <Pressable disabled={loading} style={commonStyle.btn} onPress={handleSaveExpense} >
                         <Text style={commonStyle.btnText}>{isEditing ? "Save changes" : "Add expense"}</Text>
                     </Pressable>
 
                     {isEditing && (
-                        <View style={styles.dangerZone}>
-                            <Pressable disabled={loading} style={styles.dangerBtn} onPress={confirmDelete} >
+                        <View style={[styles.dangerZone, hasRemovedMembers && {opacity: 0.5}]}>
+                            <Pressable disabled={loading || hasRemovedMembers} style={styles.dangerBtn} onPress={confirmDelete} >
                                 <Text style={styles.dangerBtnTxt}>Delete expense</Text>
                             </Pressable>
                         </View>
@@ -346,5 +375,11 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         marginTop: 8,
         marginBottom: 16,
+    },
+    editWarning: {
+        fontSize: 13,
+        color: colors.textMuted,
+        marginBottom: sp.half,
+        lineHeight: 18,
     },
 });

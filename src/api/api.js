@@ -72,7 +72,7 @@ export async function regenerateInviteCode(groupId) {
 
 export async function joinGroup(inviteCode, username) {
     inviteCode = inviteCode.toUpperCase();
-    console.log("Calling API:", `${API_URL}/groups/:inviteCode/join`);
+    console.log("Calling API:", `${API_URL}/groups/${inviteCode}/join`);
     const response = await fetch(`${API_URL}/groups/${inviteCode}/join`, {
         method: 'POST',
         body: JSON.stringify({userName: username}),
@@ -84,8 +84,19 @@ export async function joinGroup(inviteCode, username) {
     console.log("Response received:", response.status);
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Failed to join group");
+    return result;   
+}
+
+export async function removeMemberGroup(groupId, memberId) {
+    console.log('Calling API:', `${API_URL}/groups/${groupId}/members/${memberId}/remove`);
+    const response = await apiFetch(`/groups/${groupId}/members/${memberId}/remove`, {
+        method: 'PATCH',
+    });
+
+    console.log('Response received: ', response.status);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to remove member from the group');
     return result;
-    
 }
 
 // get a specific group and the members
@@ -172,7 +183,7 @@ export async function createExpense(groupId, newExpense) {
             groupId: groupId,
             paidByMemberId: newExpense.paid_by_member_id,
             description: newExpense.description,
-            amount: Number(newExpense.amount),
+            amount: Number( typeof newExpense.amount === 'string' ? newExpense.amount.replace(',', '.') : newExpense.amount ),
             category: newExpense.category,
             splitType: newExpense.split_type,
             expense_date: newExpense.expense_date,
@@ -205,7 +216,7 @@ export async function updateExpense(expenseId, newExpense) {
             // groupId: groupId,
             paidByMemberId: newExpense.paid_by_member_id,
             description: newExpense.description,
-            amount: newExpense.amount,
+            amount: Number( typeof newExpense.amount === 'string' ? newExpense.amount.replace(',', '.') : newExpense.amount ),
             category: newExpense.category,
             splitType: newExpense.split_type,
             participants: newExpense.participants,

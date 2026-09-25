@@ -7,7 +7,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 
 export default function Expenses() {
-    const {groupId, group, expenses, members} = useGroup();
+    const {groupId, group, expenses, allMembers} = useGroup();
 
     return (
         <View style={commonStyle.container}>
@@ -18,7 +18,7 @@ export default function Expenses() {
                 <Text style={commonStyle.sectionTitle}>Expenses</Text>
                 <ScrollView >
                     {expenses.map((expense) => {
-                        const memb = members.find(x => x.id === expense.paid_by_member_id);
+                        const memb = allMembers.find(x => x.id === expense.paid_by_member_id);
 
                         return (
                             <CardExpense key={expense.id} 
