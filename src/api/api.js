@@ -16,8 +16,8 @@ async function apiFetch(endpoint, options = {}) {
 }
 
 export async function loadCurrentMember(groupId) {
-    console.log("Calling API:", `${API_URL}/groups/${groupId}/me`);
-    const response = await apiFetch(`/groups/${groupId}/me`, {
+    console.log("Calling API:", `${API_URL}/groups/${groupId}/members/me`);
+    const response = await apiFetch(`/groups/${groupId}/members/me`, {
         method: "GET",
     });
 
@@ -96,6 +96,23 @@ export async function removeMemberGroup(groupId, memberId) {
     console.log('Response received: ', response.status);
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Failed to remove member from the group');
+    return result;
+}
+
+// update my membership in the group
+export async function updateMe(groupId, newMember) {
+    console.log('Calling API:', `${API_URL}/groups/${groupId}/members/me`);
+    const response = await apiFetch(`/groups/${groupId}/members/me`, {
+        method: 'PATCH',
+        body: JSON.stringify(newMember),
+        headers: {
+            "Content-Type": "application/json",
+        }
+    });
+
+    console.log('Response received: ', response.status);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to update member');
     return result;
 }
 

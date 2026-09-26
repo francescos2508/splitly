@@ -185,7 +185,7 @@ export default function Settings() {
                                     <Text style={styles.name}>{!itsme ? member.name : 'You'} {member.is_owner && ' · admin'}</Text>
                                 </View>
                                 {itsme ? (
-                                    <Pressable onPress={() => alert('Modified!')}>
+                                    <Pressable onPress={() => router.push(`/groups/${groupId}/my-profile`)}>
                                         <Ionicons name='pencil' size={20} color={colors.primary} />
                                     </Pressable>
                                 ) : admin ? ( 
@@ -199,18 +199,18 @@ export default function Settings() {
                 </View>
 
                 <View style={styles.dangerZone}>
-                    <Pressable style={styles.dangerBtn}>
+                    <Pressable style={styles.dangerBtn} onPress={() => alert('Not developed yet...')}>
                         <Text style={styles.dangerBtnTxt}>Leave group</Text>
                     </Pressable>
 
                     {admin && (
-                        <Pressable style={styles.dangerBtn}>
+                        <Pressable style={styles.dangerBtn} onPress={() => alert('Not developed yet...')}>
                             <Text style={styles.dangerBtnTxt}>Delete group</Text>
                         </Pressable>
                     )}
                     <Text style={styles.created}>
                         Created on 
-                        {' '+new Date(group.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {' '+new Date(group?.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </Text>
                 </View>
             </ScrollView>

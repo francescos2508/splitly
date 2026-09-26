@@ -6,6 +6,7 @@ const { authenticateMember } = require("../middleware/authenticateMember");
 
 router.use(authenticateMember);
 
+// dont't use // *** OLD ***
 router.patch('/me', async (req, res) => {
     const {updatedName, updatedAvatar_color} = req.body;
 

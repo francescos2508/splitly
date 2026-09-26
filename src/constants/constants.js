@@ -225,27 +225,27 @@ export const darkColors = {
 const DarkMode = false;
 export const colors = DarkMode ? darkColors : lightColors;
 
-/* export const AVATAR_COLORS = {
-    1: '#2A9D8F',  // Teal
-    4: '#F72585',  // Magenta
-    7: '#FF595E', // Coral
-    5: '#118AB2',  // Ocean blue
-    3: '#F77F00',  // Orange
-    2: '#9B5DE5',  // Purple
-    6: '#8AC926', // Lime
-    8: '#00B4D8', // Cyan
-    9: '#FFCA3A', // Gold
-    10: '#52B788', // Green
+export const AVATAR_COLORS = [
+    '#2A9D8F',  // Teal
+    '#9B5DE5',  // Purple
+    '#F77F00',  // Orange
+    '#F72585',  // Magenta
+    '#118AB2',  // Ocean blue
+    '#8AC926', // Lime
+    '#FF595E', // Coral
+    '#00B4D8', // Cyan
+    '#FFCA3A', // Gold
+    '#52B788', // Green
 
     // discarded ↓
-    // 1: '#E63946',  // Red
-    // 2: '#4361EE',  // Blue
-    // 4: '#F4D35E',  // Yellow
-    // 7: '#06D6A0',  // Emerald
-    // 11: '#6C584C', // Brown
-    // 13: '#8338EC', // Violet
-    // 16: '#1982C4', // Azure
-    // 18: '#C77DFF', // Lavender
-    // 19: '#FF70A6', // Pink
-    // 20: '#6D6875', // Slate
-}; */
+    // '#E63946',  // Red
+    // '#4361EE',  // Blue
+    // '#F4D35E',  // Yellow
+    // '#06D6A0',  // Emerald
+    // '#6C584C', // Brown
+    // '#8338EC', // Violet
+    // '#1982C4', // Azure
+    // '#C77DFF', // Lavender
+    // '#FF70A6', // Pink
+    // '#6D6875', // Slate
+];

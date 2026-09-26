@@ -680,7 +680,7 @@ router.patch('/:groupId/members/:memberId/remove', authorizeGroup, async (req, r
 });
 
 // get member (me)
-router.get('/:groupId/me', authorizeGroup, async (req, res) => {
+router.get('/:groupId/members/me', authorizeGroup, async (req, res) => {
     const { groupId } = req.params;
     try {
         const {data: member, error: memberError} = await supabase
@@ -704,15 +704,15 @@ router.get('/:groupId/me', authorizeGroup, async (req, res) => {
 })
 
 // update member (me)
-router.patch('/:groupId/me', authorizeGroup, async (req, res) => {
+router.patch('/:groupId/members/me', authorizeGroup, async (req, res) => {
     const { groupId } = req.params;
-    const { updatedName, updatedAvatar_color } = req.body;
+    const { name, avatar_color } = req.body;
 
     try {
         // update
         const { data: updatedMember, error: updatedMemberError } = await supabase
             .from('group_members')
-            .update({ name: updatedName, avatar_color: updatedAvatar_color })
+            .update({ name: name, avatar_color: avatar_color })
             .eq('id', req.member.id)
             .eq('group_id', groupId)
             .eq('is_active', true)
@@ -738,7 +738,7 @@ router.patch('/:groupId/me', authorizeGroup, async (req, res) => {
                 event_type: "member_updated",
                 entity_type: "member",
                 entity_id: req.member.id,
-                description: `Member ${req.member.name} updated their profile`
+                description: `${req.member.name} updated own profile`
             });
 
         if (activityError) throw activityError;
