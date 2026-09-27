@@ -8,6 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Avatar from '../../../../src/components/Avatar';
+import { getInits } from '../../../../src/utils/utils';
 
 export default function Group() {
 
@@ -52,6 +54,7 @@ export default function Group() {
         );
     }
 
+    console.log('myBalance?.balance ', myBalance?.balance);
     return (
         <View style={commonStyle.container}>
             <View style={commonStyle.header}>
@@ -69,7 +72,7 @@ export default function Group() {
                     <Text style={styles.myBalanceTitle}>Your balance {currentMember?.name}</Text>
                     {myBalance && 
                         <Text style={styles.myBalanceText}>
-                            {myBalance.balance >= 0 && '+'}
+                            {myBalance.balance > 0 && '+'}
                             {fmtNum(myBalance.balance)} {currencies[group.currency]}
                         </Text>
                     }
@@ -84,9 +87,7 @@ export default function Group() {
                             <Pressable key={balance.id} >
                                 <View style={styles.cardBalance}>
                                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                        <View style={[styles.avatar, {backgroundColor: balance.avatar_color}]}>
-                                            <Text style={styles.avatarInits}>{balance.name.charAt(0)}</Text>
-                                        </View>
+                                        <Avatar color={balance.avatar_color} inits={getInits(balance.name)} />
                                         <Text>{balance.name}</Text>
                                     </View>
                                     <Text style={[styles.balanceTxt, {color: bal > 0 ? colors.positive : bal < 0 ? colors.negative : colors.primary}]}>

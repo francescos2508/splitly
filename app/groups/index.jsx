@@ -75,7 +75,7 @@ export default function myGroups() {
                                 <View key={name}>
                                     <Text style={styles.myBalanceTitle}>Overall balance </Text>
                                     <Text style={styles.myBalanceText}>
-                                        {balance >= 0 && '+'}{fmtNum(balance)} {currencies[name]}
+                                        {balance > 0 && '+'}{fmtNum(balance)} {currencies[name]}
                                     </Text>
                                 </View>
                             );
@@ -96,8 +96,8 @@ export default function myGroups() {
                                         <Text style={styles.groupInfo}>
                                             {group.currency || 'EUR'} | {group.count || '**'} members
                                         </Text>
-                                        <Text style={[styles.groupBalance, { color: group.balance >= 0 ? colors.positive : colors.negative }]}>
-                                            {group.balance >= 0 && '+'}{fmtNum(group.balance)} {currencies[group.currency]}
+                                        <Text style={[styles.groupBalance, { color: group.balance > 0 ? colors.positive : group.balance < 0 ? colors.negative : colors.primary}]}>
+                                            {group.balance > 0 && '+'}{fmtNum(group.balance)} {currencies[group.currency]}
                                         </Text>
                                     </View>
                                 </View>

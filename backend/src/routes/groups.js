@@ -529,8 +529,9 @@ router.patch('/:groupId', authorizeGroup, async (req, res) => {
     }
 });
 
-router.patch('/:groupId/members/:memberId/leave', authorizeGroup, async (req, res) => {
-    const { groupId, memberId } = req.params;
+router.patch('/:groupId/members/leave', authorizeGroup, async (req, res) => {
+    const { groupId } = req.params;
+    const memberId = req.member.id;
 
     try {
         // authenticated member has to be the one is leaving the group
@@ -542,7 +543,7 @@ router.patch('/:groupId/members/:memberId/leave', authorizeGroup, async (req, re
 
         if (req.member.is_owner) {
             return res.status(400).json({
-                error: "Group owner cannot leave the group"
+                error: "Group admin cannot leave the group"
             });
         }
 

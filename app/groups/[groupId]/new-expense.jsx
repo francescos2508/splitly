@@ -11,7 +11,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import { deleteExpense } from "../../../src/api/api";
-import { fmtNum, lightColor } from "../../../src/utils/utils";
+import { lightColor } from "../../../src/utils/utils";
 
 
 export default function NewExpense() {
@@ -90,6 +90,7 @@ export default function NewExpense() {
         // setNewExpense(exp);
         setNewExpense({
             ...exp,
+            amount: exp.amount.toString(),
             participants: exp.expense_participants.map(p => ({
                 memberId: p.member.id,
                 amount: p.share_amount,
@@ -101,15 +102,17 @@ export default function NewExpense() {
         if (loading) return;
         setLoading(true);
         try {
-            console.log(newExpense);
+            const amount = Number(newExpense.amount.replace(',', '.'));
+            if (!Number.isFinite(amount) || amount <= 0) throw new Error('Amount must be higher than 0');
+            const expenseData = { ...newExpense, amount };
             if (isEditing) {
-                const res = await updateExpense(expenseId, newExpense);
+                const res = await updateExpense(expenseId, expenseData);
                 if (res) {
                     await refreshGroup({expenses: true, balances: true, activity: true});
                     router.back();
                 }
             } else {
-                const res = await createExpense(groupId, newExpense);
+                const res = await createExpense(groupId, expenseData);
                 if (res?.expense) {
                     await refreshGroup({expenses: true, balances: true, activity: true});
                     router.back();
@@ -127,10 +130,19 @@ export default function NewExpense() {
         Alert.alert('Delete expense?', 'Are you sure you want to delete this expense? This action cannot be undone.', yesno);
     }
     const handleDeleteExpense = async () => {
-        const res = await deleteExpense(newExpense.id);
-        if (res) {
-            await refreshGroup({expenses: true, balances: true, activity: true});
-            router.back();
+        if (loading) return;
+        setLoading(true);
+        try {
+            const res = await deleteExpense(newExpense.id);
+            if (res) {
+                await refreshGroup({expenses: true, balances: true, activity: true});
+                router.back();
+            }
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        } finally {
+            setLoading(false);
         }
     }
     const toggleParticipant = function (mid) {
@@ -178,7 +190,7 @@ export default function NewExpense() {
                                 style={commonStyle.input}
                                 keyboardType="decimal-pad"
                                 placeholder='Amount'
-                                value={newExpense.amount !== null ? fmtNum(newExpense.amount) : ''}
+                                value={newExpense.amount}
                                 onChangeText={(value) => updExpense('amount', value)}
                                 suffix='€'
                                 editable={!hasRemovedMembers}

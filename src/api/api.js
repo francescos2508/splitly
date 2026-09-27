@@ -99,6 +99,18 @@ export async function removeMemberGroup(groupId, memberId) {
     return result;
 }
 
+export async function leaveGroup(groupId) {
+    console.log('Calling API:', `${API_URL}/groups/${groupId}/members/leave`);
+    const response = await apiFetch(`/groups/${groupId}/members/leave`, {
+        method: 'PATCH',
+    });
+
+    console.log('Response received: ', response.status);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to leave the group');
+    return result;
+}
+
 // update my membership in the group
 export async function updateMe(groupId, newMember) {
     console.log('Calling API:', `${API_URL}/groups/${groupId}/members/me`);

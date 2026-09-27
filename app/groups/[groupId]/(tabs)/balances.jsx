@@ -61,7 +61,7 @@ export default function Members() {
                             </Text>
                         }
                         <Text style={styles.myBalanceText}>
-                            {myBalance?.balance >= 0 ? '+' : ''}
+                            {myBalance?.balance > 0 ? '+' : ''}
                             {fmtNum(myBalance?.balance)+' '+groupCurrency}
                         </Text>
                     </View>
@@ -130,7 +130,7 @@ export default function Members() {
                                             <Text>{balance.name}</Text>
                                         </View>
                                         <Text style={[styles.balanceTxt, {color: bal > 0 ? colors.positive : bal < 0 ? colors.negative : colors.primary}]}>
-                                            {bal >= 0 && '+'}{fmtNum(balance.balance)} {currencies[group?.currency]}
+                                            {bal > 0 && '+'}{fmtNum(balance.balance)} {currencies[group?.currency]}
                                         </Text>
                                     </View>
                                 </Pressable>

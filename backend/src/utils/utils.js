@@ -35,7 +35,7 @@ function calculateBalance(memberId, expenses, payments) {
       if (memberId === paym.to_member_id) balance -= Number(paym.amount)
   }
 
-  return balance;
+  return Math.round(balance * 100) / 100;;
 }
 
 function calculateExpenseParticipants(amount, splitType, participants) {

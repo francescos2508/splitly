@@ -57,7 +57,7 @@ export default function MyProfile() {
                 <AppInput
                     style={commonStyle.input}
                     placeholder='Display name'
-                    value={member?.name}
+                    value={member?.name || ''}
                     onChangeText={(value) => updMember('name', value)}
                 />
                 <Text style={commonStyle.label}>Choose avatar color</Text>

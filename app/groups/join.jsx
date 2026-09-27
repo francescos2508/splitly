@@ -37,7 +37,7 @@ export default function JoinGroup() {
             </View>
             <View style={commonStyle.body}>
                 <Text style={commonStyle.label}>Insert invite code</Text>
-                <AppInput style={commonStyle.input} value={inviteCode} onChangeText={setInviteCode} placeholder="Invite code" />
+                <AppInput style={commonStyle.input} value={inviteCode.toUpperCase()} onChangeText={setInviteCode} placeholder="Invite code" />
                 
                 <Text style={commonStyle.label}>Join group as </Text>
                 <AppInput style={commonStyle.input} value={username} onChangeText={setUsername} placeholder="Join group as" />

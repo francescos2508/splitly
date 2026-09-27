@@ -1,6 +1,7 @@
 import { useGroup } from "@/backend/src/context/GroupContext";
-import { regenerateInviteCode, updateGroup } from '@/src/api/api';
+import { leaveGroup, regenerateInviteCode, removeMemberGroup, updateGroup } from '@/src/api/api';
 import Avatar from '@/src/components/Avatar';
+import Loader from "@/src/components/Loader";
 import Toast from '@/src/components/Toast';
 import { colors, currencies, currencyOptions, sp } from '@/src/constants/constants';
 import { commonStyle } from "@/src/styles/common";
@@ -11,8 +12,6 @@ import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { removeMemberGroup } from "../../../src/api/api";
-import Loader from "../../../src/components/Loader";
 
 
 
@@ -25,6 +24,7 @@ export default function Settings() {
     const currencySheetRef = useRef(null);
     const inviteCodeSheetRef = useRef(null);
     const removeMemberSheetRef = useRef(null);
+    const leaveGroupSheetRef = useRef(null);
     const [removingMember, setRemovingMember] = useState(null);
     const [groupName, setGroupName] = useState(group?.name || '');
 
@@ -43,6 +43,19 @@ export default function Settings() {
         }
         setRemovingMember(member);
         removeMemberSheetRef.current?.present();
+    }
+    const openLeaveGroupSheet = () => { 
+        if (admin) {
+            alert('You can\'t leave the group while you\'re the admin');
+            return;
+        }
+        const bal = balances.find(x => x.id === currentMember.id);
+        const isSettled = !bal || Math.abs(bal.balance) < 0.01;
+        if (!isSettled) {
+            alert('It\'s not possible to remove from the group a member that is not settled up');
+            return;
+        }
+        leaveGroupSheetRef.current?.present();
     }
     const showToast = (message) => { setToast(message); };
     const copyInviteCode = async (code) => {
@@ -93,6 +106,20 @@ export default function Settings() {
         } catch (error) {
             console.error(error.message);
             alert('Problem while removing the member, please retry in few minutes.');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const handleLeaveGroup = async () => {
+        if (loading) return;
+        try {
+            setLoading(true);
+            const res = await leaveGroup(groupId);
+            if (res) router.dismissTo('/groups');
+        } catch (error) {
+            console.error(error.message);
+            alert('Problem while leaving the group, please retry in few minutes.');
         } finally {
             setLoading(false);
         }
@@ -160,9 +187,6 @@ export default function Settings() {
                 </Pressable>
                 {admin && (
                     <Pressable style={styles.cardSettings} onPress={openInviteCodeSheet}>
-                        {/* <View style={styles.iconView}>
-                            <Ionicons name='sync-outline' size={20} color={colors.primary} />
-                        </View> */}
                         <View style={styles.mainInfo}>
                             <Text>Regenerate invite code</Text>
                             <Text style={styles.oldValue}>Replace the current invite code</Text>
@@ -199,7 +223,7 @@ export default function Settings() {
                 </View>
 
                 <View style={styles.dangerZone}>
-                    <Pressable style={styles.dangerBtn} onPress={() => alert('Not developed yet...')}>
+                    <Pressable style={styles.dangerBtn} onPress={openLeaveGroupSheet}>
                         <Text style={styles.dangerBtnTxt}>Leave group</Text>
                     </Pressable>
 
@@ -292,6 +316,25 @@ export default function Settings() {
                         <Text style={styles.dangerBtnTxt}>Remove</Text>
                     </Pressable>
                     <Pressable style={commonStyle.btn2} onPress={() => {if (loading) return; removeMemberSheetRef.current?.dismiss()}}>
+                        <Text style={commonStyle.btn2Text}>Cancel</Text>
+                    </Pressable>
+                </View>
+            </BottomSheetModal>
+
+            <BottomSheetModal ref={leaveGroupSheetRef} snapPoints={['40%']} enablePanDownToClose enableDynamicSizing={false} 
+                keyboardBehavior='interactive' keyboardBlurBehavior='restore'
+                backdropComponent={(props) => (<BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior='close' />)}
+            >
+                <View style={styles.sheet} >
+                    <View style={{flex:1}} >
+                        <Text style={commonStyle.label}>Leave the group?</Text>
+                        <Text>Are you sure you want to leave the group? {'\n'}
+                            This operation can't be undone.</Text>
+                    </View>
+                    <Pressable style={styles.dangerBtn} onPress={handleLeaveGroup}>
+                        <Text style={styles.dangerBtnTxt}>Leave</Text>
+                    </Pressable>
+                    <Pressable style={commonStyle.btn2} onPress={() => {if (loading) return; leaveGroupSheetRef.current?.dismiss()}}>
                         <Text style={commonStyle.btn2Text}>Cancel</Text>
                     </Pressable>
                 </View>
