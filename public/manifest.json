@@ -1,0 +1,15 @@
+{
+  "name": "splitly",
+  "short_name": "splitly",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F7FA",
+  "theme_color": "#7567A8",
+  "icons": [
+    {
+      "src": "/app-icon.png",
+      "sizes": "1254x1254",
+      "type": "image/png"
+    }
+  ]
+}
