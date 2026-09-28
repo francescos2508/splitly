@@ -23,12 +23,7 @@ export default function Root({ children }: PropsWithChildren) {
                          -webkit-tap-highlight-color: transparent;
                     }
                     html, body { overscroll-behavior: none; }
-                    input, textarea { -webkit-user-select: text; user-select: text; }
-                    body {
-                        padding-top: env(safe-area-inset-top);
-                        padding-top: 100px !important;
-                        background: red;
-                    }
+                    input, textarea { -webkit-user-select: text; user-select: text; outline: none }
                 `}</style>
 
                 <link rel="manifest" href="/manifest.json" />

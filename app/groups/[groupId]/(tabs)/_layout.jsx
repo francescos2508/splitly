@@ -1,10 +1,10 @@
 import { useGroup } from "@/backend/src/context/GroupContext";
 import { colors } from '@/src/constants/constants';
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs, useLocalSearchParams } from "expo-router";
+import { Tabs } from "expo-router";
+import { Platform } from "react-native";
 
 export default function GroupLayout() {
-    const { groupId } = useLocalSearchParams();
 
     return ( <GroupTabs /> );
 }
@@ -18,6 +18,7 @@ function GroupTabs() {
                 headerShown: false,
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textMuted,
+                tabBarStyle: Platform.OS === "web" ? { paddingBottom: "env(safe-area-inset-bottom)", } : undefined,
             }}
             screenListeners={{
                 tabPress: (e) => {
