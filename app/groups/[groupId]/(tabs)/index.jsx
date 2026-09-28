@@ -54,7 +54,6 @@ export default function Group() {
         );
     }
 
-    console.log('myBalance?.balance ', myBalance?.balance);
     return (
         <View style={commonStyle.container}>
             <View style={commonStyle.header}>
