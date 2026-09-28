@@ -11,7 +11,7 @@ app.use(cors({
     origin: [
         "http://localhost:8081",
         "http://192.168.0.15:3000",
-        // "https://tuo-frontend.onrender.com"
+        "https://splitly-f.onrender.com",
     ]
 }));
 app.use(express.json());
