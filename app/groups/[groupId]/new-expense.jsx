@@ -9,7 +9,7 @@ import { commonStyle } from "@/src/styles/common";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import { deleteExpense } from "../../../src/api/api";
 import { lightColor } from "../../../src/utils/utils";
 
@@ -167,10 +167,15 @@ export default function NewExpense() {
     };
     
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <TouchableWithoutFeedback >
             <View style={commonStyle.container}>
                 {loading && <Loader overlay />}
                 <View style={commonStyle.header}>
+                    {Platform.OS === 'web' && 
+                        <Pressable style={commonStyle.headerBack} onPress={() => router.back()}>
+                            <Ionicons name="chevron-back" size={20} color={colors.primary} />
+                        </Pressable>
+                    }
                     <Text style={commonStyle.title}>
                         {isEditing ? `Edit expense${hasRemovedMembers ? ' *' : ''}` : 'New expense'}
                     </Text>

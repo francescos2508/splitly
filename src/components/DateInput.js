@@ -3,63 +3,119 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import {
-    Modal, Pressable,
+    Modal,
+    Platform,
+    Pressable,
     StyleSheet,
     Text,
-    View
+    View,
 } from "react-native";
 
-export default function DateInput({value, label, onChange}) {
+export default function DateInput({ value, label, onChange }) {
     const [date, setDate] = useState(value || new Date());
     const [showPicker, setShowPicker] = useState(false);
+
+    const formattedDate =
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+    const handleWebChange = (event) => {
+        const value = event.target.value;
+
+        if (!value) return;
+
+        const [year, month, day] = value.split('-');
+        const newDate = new Date(
+            Number(year),
+            Number(month) - 1,
+            Number(day)
+        );
+
+        setDate(newDate);
+        onChange?.(newDate);
+    };
 
     return (
         <View>
             <Text style={styles.label}>{label || 'Date'}</Text>
 
-            <Pressable
-                style={styles.input}
-                onPress={() => setShowPicker(true)}
-            >
-                <Text style={styles.inputText}>
-                    {date.toLocaleDateString("en-GB")}
-                </Text>
+            {Platform.OS === 'web' ? (
+                <View style={styles.input}>
+                    <Text style={styles.inputText}>
+                        {date.toLocaleDateString("en-GB")}
+                    </Text>
 
-                {/* <Text style={styles.arrow}>›</Text> */}
-                <Text style={styles.arrow}>
-                    <Ionicons name='calendar-outline' size={20} color={colors.textSecondary}/>
-                </Text>
-            </Pressable>
+                    <Ionicons
+                        name="calendar-outline"
+                        size={20}
+                        color={colors.textSecondary}
+                    />
 
-            <Modal visible={showPicker} transparent animationType="fade"
-                onRequestClose={() => setShowPicker(false)}
-            >
-                <Pressable style={styles.modalOverlay} onPress={() => setShowPicker(false)}>
-                    <View style={styles.modal}>
-                        <Text style={styles.modalTitle}>Select date</Text>
+                    <input
+                        type="date"
+                        value={formattedDate}
+                        onChange={handleWebChange}
+                        style={styles.webInput}
+                    />
+                </View>
+            ) : (
+                <>
+                    <Pressable
+                        style={styles.input}
+                        onPress={() => setShowPicker(true)}
+                    >
+                        <Text style={styles.inputText}>
+                            {date.toLocaleDateString("en-GB")}
+                        </Text>
 
-                        <DateTimePicker
-                            value={date}
-                            mode="date"
-                            display="inline"
-                            onChange={((event, selectedDate) => {
-                                setShowPicker(false);
-                                if (selectedDate) {
-                                    setDate(selectedDate);
-                                    onChange?.(selectedDate);
-                                }
-                            })}
+                        <Ionicons
+                            name="calendar-outline"
+                            size={20}
+                            color={colors.textSecondary}
                         />
+                    </Pressable>
 
+                    <Modal
+                        visible={showPicker}
+                        transparent
+                        animationType="fade"
+                        onRequestClose={() => setShowPicker(false)}
+                    >
                         <Pressable
-                            style={styles.doneButton}
+                            style={styles.modalOverlay}
                             onPress={() => setShowPicker(false)}
                         >
-                            <Text style={styles.doneButtonText}>Done</Text>
+                            <View style={styles.modal}>
+                                <Text style={styles.modalTitle}>
+                                    Select date
+                                </Text>
+
+                                <DateTimePicker
+                                    value={date}
+                                    mode="date"
+                                    display="inline"
+                                    onChange={(event, selectedDate) => {
+                                        setShowPicker(false);
+
+                                        if (selectedDate) {
+                                            setDate(selectedDate);
+                                            onChange?.(selectedDate);
+                                        }
+                                    }}
+                                />
+
+                                <Pressable
+                                    style={styles.doneButton}
+                                    onPress={() => setShowPicker(false)}
+                                >
+                                    <Text style={styles.doneButtonText}>
+                                        Done
+                                    </Text>
+                                </Pressable>
+                            </View>
                         </Pressable>
-                    </View>
-                </Pressable>
-            </Modal>
+                    </Modal>
+                </>
+            )}
         </View>
     );
 }
@@ -83,7 +139,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         marginBottom: sp[1],
-        color: colors.text,
+        position: "relative",
     },
 
     inputText: {
@@ -91,9 +147,13 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
 
-    arrow: {
-        fontSize: 24,
-        color: colors.textSecondary,
+    webInput: {
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        opacity: 0,
+        cursor: "pointer",
     },
 
     modalOverlay: {

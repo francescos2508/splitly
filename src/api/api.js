@@ -1,5 +1,7 @@
-const API_URL = "http://192.168.0.15:3000";
+// const API_URL = "http://192.168.0.15:3000";
+// const API_URL = "https://splitly-api.onrender.com";
 // const API_URL = "http://172.20.10.2:3000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 import { getMemberToken } from "../storage/auth";
 
 async function apiFetch(endpoint, options = {}) {
