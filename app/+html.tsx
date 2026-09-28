@@ -26,7 +26,8 @@ export default function Root({ children }: PropsWithChildren) {
                     input, textarea { -webkit-user-select: text; user-select: text; }
                     body {
                         padding-top: env(safe-area-inset-top);
-                        padding-bottom: env(safe-area-inset-bottom);
+                        padding-top: 100px !important;
+                        background: red;
                     }
                 `}</style>
 
