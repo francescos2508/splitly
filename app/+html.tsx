@@ -12,10 +12,25 @@ export default function Root({ children }: PropsWithChildren) {
                 />
                 <meta
                     name="viewport"
-                    content="width=device-width, initial-scale=1, shrink-to-fit=no"
+                    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
                 />
+                {/* style to avoid select text like i am in safari */}
+                <style>{`
+                    * {
+                        -webkit-user-select: none;
+                        user-select: none;
+                        -webkit-touch-callout: none;
+                         -webkit-tap-highlight-color: transparent;
+                    }
+                    html, body { overscroll-behavior: none; }
+                    input, textarea { -webkit-user-select: text; user-select: text; }
+                    body {
+                        padding-top: env(safe-area-inset-top);
+                        padding-bottom: env(safe-area-inset-bottom);
+                    }
+                `}</style>
 
-                <link rel="manifest" href="/manifest.json?v=2" />
+                <link rel="manifest" href="/manifest.json" />
 
                 <link
                     rel="apple-touch-icon"
@@ -31,10 +46,9 @@ export default function Root({ children }: PropsWithChildren) {
                     name="apple-mobile-web-app-status-bar-style"
                     content="default"
                 />
-
                 <meta
                     name="theme-color"
-                    content="#7567A8"
+                    content="#F7F7FA"
                 />
 
                 <ScrollViewStyleReset />
