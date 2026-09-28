@@ -15,7 +15,7 @@ export default function Root({ children }: PropsWithChildren) {
                     content="width=device-width, initial-scale=1, shrink-to-fit=no"
                 />
 
-                <link rel="manifest" href="/manifest.json" />
+                <link rel="manifest" href="/manifest.json?v=2" />
 
                 <link
                     rel="apple-touch-icon"
