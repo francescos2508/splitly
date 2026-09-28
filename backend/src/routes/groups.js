@@ -153,13 +153,39 @@ router.post('/:inviteCode/join', async (req, res) => {
     const { inviteCode } = req.params;
     const { userName } = req.body;
 
-    if (!userName) {
-        return res.status(400).json({
-            error: "userName is required",
-        })
-    }
-
+    
     try {
+        // check memberToken
+        const authHeader = req.headers.authorization;
+        let memberToken = null, recoveryCode = null;
+
+        if (authHeader && authHeader.startsWith('Bearer ')) memberToken = authHeader.split(' ')[1];
+        if (memberToken && memberToken !== 'undefined') {
+            const { data: existingMember, error: memberError } = await supabase
+                .from('group_members')
+                .select('member_token, name, recovery_code')
+                .eq('member_token', memberToken)
+                .limit(1)
+                .maybeSingle();
+
+            if (memberError) throw memberError;
+            if (!existingMember) {
+                return res.status(401).json({
+                    error: "Invalid member token"
+                });
+            }
+            recoveryCode = existingMember.recovery_code;
+            // userName = existingMember.name;
+        }
+
+        if (!memberToken) memberToken = generateMemberToken();
+        if (!recoveryCode) recoveryCode = generateRecoveryCode();
+
+        if (!userName) {
+            return res.status(400).json({
+                error: "userName is required",
+            })
+        }
         const { data: group, error: groupError } = await supabase
             .from('groups')
             .select('*')
@@ -179,8 +205,8 @@ router.post('/:inviteCode/join', async (req, res) => {
             .insert({
                 group_id: group.id,
                 name: userName,
-                member_token: generateMemberToken(),
-                recovery_code: generateRecoveryCode(),
+                member_token: memberToken,
+                recovery_code: recoveryCode,
                 avatar_color: generateAvatarColor()
             })
             .select()
