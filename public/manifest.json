@@ -1,7 +1,8 @@
 {
-  "name": "splitly",
-  "short_name": "splitly",
-  "start_url": "/",
+  "name": "Splitly",
+  "short_name": "Splitly",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "background_color": "#F7F7FA",
   "theme_color": "#7567A8",
