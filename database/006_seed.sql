@@ -17,7 +17,7 @@ INSERT INTO groups (
 )
 VALUES (
     '11111111-1111-1111-1111-111111111111',
-    'Viaggio Barcellona',
+    'Barcelona trip',
     'BCN2026X',
     'EUR'
 );
@@ -98,7 +98,7 @@ VALUES
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     '11111111-1111-1111-1111-111111111111',
     '22222222-2222-2222-2222-222222222222',
-    'Cena ristorante',
+    'Dinner',
     80.00,
     'restaurant',
     'equal'
@@ -119,8 +119,8 @@ VALUES
 -- EXPENSE PARTICIPANTS
 -- ===========================================
 
--- Cena ristorante:
--- Francesco paga 80€, ma partecipano tutti 20€ ciascuno
+-- Dinner:
+-- Francesco pays 80€, 20€ each
 
 INSERT INTO expense_participants (
     expense_id,
@@ -154,9 +154,9 @@ VALUES
 );
 
 
--- Spesa supermercato:
--- pagata da Marco
--- partecipano solo Marco e Luca
+-- Groceries:
+-- paid from Marco
+-- splitted between Marco and Luca
 
 INSERT INTO expense_participants (
     expense_id,
@@ -182,7 +182,7 @@ VALUES
 -- PAYMENTS
 -- ===========================================
 
--- Marco paga Francesco 20€ per la cena
+-- Marco pays Francesco 20€
 
 INSERT INTO payments (
     id,
@@ -202,7 +202,7 @@ VALUES
     '22222222-2222-2222-2222-222222222222',
     20.00,
     'completed',
-    'Rimborso cena'
+    'For the dinner'
 );
 
 
@@ -226,7 +226,7 @@ VALUES
     'group_created',
     'group',
     '11111111-1111-1111-1111-111111111111',
-    'Francesco ha creato il gruppo'
+    'Francesco created the group'
 ),
 
 (
@@ -235,7 +235,7 @@ VALUES
     'member_joined',
     'member',
     '33333333-3333-3333-3333-333333333333',
-    'Marco è entrato nel gruppo'
+    'Marco joined the group'
 ),
 
 (
@@ -244,5 +244,5 @@ VALUES
     'expense_created',
     'expense',
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    'Creata la spesa Cena ristorante'
+    'Expense Dinner created'
 );
