@@ -14,9 +14,9 @@ export default function AppInput({ suffix, iconLeft, iconRight, ...props }) {
                 placeholderTextColor={colors.textMuted}
             />
 
-            {suffix && <Text style={styles.suffix}>{suffix}</Text>}
-
             {iconRight && <Ionicons name={iconRight} size={20} color={colors.textSecondary} />}
+
+            {suffix && <Text style={styles.suffix}>{suffix}</Text>}
         </View>
     );
 }

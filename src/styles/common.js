@@ -6,7 +6,7 @@ export const commonStyle = StyleSheet.create({
     container: {
         flex: 1,
         paddingBottom: sp[1],
-        paddingTop: Platform.OS === "web" ? sp[1] : sp[5],
+        paddingTop: Platform.OS === "web" ? sp[2] : sp[5],
         // paddingHorizontal: sp[1]
         backgroundColor: colors.background,
         position: 'relative'
