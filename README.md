@@ -1,50 +1,56 @@
-# Welcome to your Expo app 👋
+Splitly - the app for share the expenses in your group
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+DESCRIPTION
+Splitly is an app for managing shared expenses with friends, roommates, or groups. 
+Users can create or join multiple groups, add shared expenses, track balances, and settle up without registration or a traditional account.
 
-## Get started
+DEMO
+- WebApp: https://splitly-f.onrender.com
+- Android APK: available in this repository
 
-1. Install dependencies
+SCREENSHOTS
+<p align="center">
+  <img src="screenshots/groups.jpeg" width="180">
+  <img src="screenshots/overview.jpeg" width="180">
+  <img src="screenshots/expenses.jpeg" width="180">
+  <img src="screenshots/balances.jpeg" width="180">
+</p>
 
-   ```bash
-   npm install
-   ```
+<p align="center">
+  <img src="screenshots/add-expense.jpeg" width="180">
+  <img src="screenshots/activity.jpeg" width="180">
+  <img src="screenshots/settings.jpeg" width="180">
+</p>
+FEATURES
+-Create and join groups (with an invite code)
+-Add and split shared expenses
+-Track balances between group members
+-Settle up payments
+-Activity history
+-No registration required
+-Persistent member identity across groups
 
-2. Start the app
+TECH STACK
+Frontend:
+-Javascript
+-React Native
+-Expo
+-Expo router
+-PWA
 
-   ```bash
-   npx expo start
-   ```
+Backend:
+-Nodejs
+-Express
+-REST API
+-Javascript
 
-In the output, you'll find options to open the app in a
+Database:
+-Supabase
+-PostgreSQL
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Deployment:
+-Render
+-Expo Application Service (EAS)
+-GitHub
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.

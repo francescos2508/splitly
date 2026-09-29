@@ -115,9 +115,9 @@ export default function Group() {
                     })) : (<View style={styles.emptySection}>
                         <Text style={styles.emptyText}>No expenses yet</Text>
                     </View>)}
-                    <Pressable onPress={() => router.push(`/groups/${groupId}/expenses`)} style={commonStyle.btn2}>
+                    {expenses?.length > 0  && <Pressable onPress={() => router.push(`/groups/${groupId}/expenses`)} style={commonStyle.btn2}>
                         <Text style={commonStyle.btn2Text}>View All</Text>
-                    </Pressable>
+                    </Pressable>}
                 </View>                
             </ScrollView>
 
