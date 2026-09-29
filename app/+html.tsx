@@ -24,9 +24,12 @@ export default function Root({ children }: PropsWithChildren) {
                     }
                     html, body { overscroll-behavior: none; }
                     input, textarea { -webkit-user-select: text; user-select: text; outline: none }
-                    div[style*="height: 49px"] {
-                        height: 100px !important;
-                        overflow: visible !important;
+                    /* bottombar */
+                    @media (display-mode: standalone) {
+                        div:has(> div > a[role="tab"]) {
+                            height: 70px !important;
+                            overflow: visible !important;
+                        }
                     }
                 `}</style>
 
