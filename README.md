@@ -1,14 +1,14 @@
-#Splitly - Share expenses with your group
+# Splitly - Share expenses with your group
 
-##DESCRIPTION
+## DESCRIPTION
 Splitly is an app for managing shared expenses with friends, roommates, or groups. 
 Users can create or join multiple groups, add shared expenses, track balances, and settle up without registration or a traditional account.
 
-##DEMO
+## DEMO
 - WebApp: https://splitly-f.onrender.com
 - Android APK: available in this repository
 
-##SCREENSHOTS
+## SCREENSHOTS
 <p align="center">
   <img src="screenshots/groups.jpeg" width="180">
   <img src="screenshots/overview.jpeg" width="180">
@@ -21,7 +21,7 @@ Users can create or join multiple groups, add shared expenses, track balances, a
   <img src="screenshots/activity.jpeg" width="180">
   <img src="screenshots/settings.jpeg" width="180">
 </p>
-##FEATURES
+## FEATURES
 - Create and join groups (with an invite code)
 - Add and split shared expenses
 - Track balances between group members
@@ -30,25 +30,25 @@ Users can create or join multiple groups, add shared expenses, track balances, a
 - No registration required
 - Persistent member identity across groups
 
-##TECH STACK
-###Frontend:
+## TECH STACK
+### Frontend:
 - Javascript
 - React Native
 - Expo
 - Expo router
 - PWA
 
-###Backend:
+### Backend:
 - Node.js
 - Express
 - REST API
 - JavaScript
 
-###Database:
+### Database:
 - Supabase
 - PostgreSQL
 
-###Deployment:
+### Deployment:
 - Render
 - Expo Application Services (EAS)
 - GitHub
