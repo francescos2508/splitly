@@ -2,7 +2,6 @@ import { useGroup } from "@/backend/src/context/GroupContext";
 import { colors } from '@/src/constants/constants';
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Platform } from "react-native";
 
 export default function GroupLayout() {
 
@@ -19,7 +18,7 @@ function GroupTabs() {
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textMuted,
                 tabBarShowLabel: true,
-                tabBarStyle: {height: Platform.OS === 'web' && 70},
+                // tabBarStyle: Platform.OS === 'web' ? { height: 70 } : undefined,
             }}
             screenListeners={{
                 tabPress: (e) => {
