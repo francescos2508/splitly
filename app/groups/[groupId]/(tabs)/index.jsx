@@ -101,7 +101,7 @@ export default function Group() {
                 {/* expenses */}
                 <View style={styles.bodyExpenses}>
                     <Text style={commonStyle.sectionTitle}>Last expenses</Text>
-                    {expenses.slice(0,3).map((expense) => {
+                    {expenses?.length > 0 ? (expenses.slice(0,3).map((expense) => {
                         const memb = allMembers.find(x => x.id === expense.paid_by_member_id);
 
                         return (
@@ -112,7 +112,9 @@ export default function Group() {
                                 groupCurrency={currencies[group?.currency]} 
                                 onPress={() => router.push(`/groups/${groupId}/new-expense?expenseId=${expense.id}`)} />
                         );
-                    })}
+                    })) : (<View style={styles.emptySection}>
+                        <Text style={styles.emptyText}>No expenses yet</Text>
+                    </View>)}
                     <Pressable onPress={() => router.push(`/groups/${groupId}/expenses`)} style={commonStyle.btn2}>
                         <Text style={commonStyle.btn2Text}>View All</Text>
                     </Pressable>
@@ -216,5 +218,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.primary,
         paddingHorizontal: 8
+    },
+    emptySection: {
+        paddingVertical: sp[1],
+        alignItems: 'center',
+    },
+    emptyText: {
+        color: colors.textMuted,
+        fontSize: 14,
     },
 })

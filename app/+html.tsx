@@ -27,7 +27,8 @@ export default function Root({ children }: PropsWithChildren) {
                     /* bottombar */
                     @media (display-mode: standalone) {
                         div:has(> div > a[role="tab"]) {
-                            height: 60px !important;
+                            margin-bottom: -10px;
+                            height: 65px !important;
                             overflow: visible !important;
                         }
                     }

@@ -144,7 +144,7 @@ export default function Settings() {
                         <Text style={styles.oldValue}>{group?.icon}</Text>
                     </View>
                     <View>
-                        <Ionicons name='chevron-forward' size={20} color={colors.text} />
+                        <Ionicons name='chevron-forward' size={20} color={colors.primary} />
                     </View>
                 </Pressable>
                 <Pressable style={styles.cardSettings} onPress={openNameSheet}>
@@ -156,7 +156,7 @@ export default function Settings() {
                         <Text style={styles.oldValue}>{group?.name}</Text>
                     </View>
                     <View>
-                        <Ionicons name='chevron-forward' size={20} color={colors.text} />
+                        <Ionicons name='chevron-forward' size={20} color={colors.primary} />
                     </View>
                 </Pressable>
                 <Pressable style={styles.cardSettings} onPress={openCurrencySheet}>
@@ -168,7 +168,7 @@ export default function Settings() {
                         <Text style={styles.oldValue}>{group?.currency} {'(' + currencies[group?.currency] + ')'}</Text>
                     </View>
                     <View>
-                        <Ionicons name='chevron-forward' size={20} color={colors.text} />
+                        <Ionicons name='chevron-forward' size={20} color={colors.primary} />
                     </View>
                 </Pressable>
                 <Pressable style={styles.cardSettings} onPress={() => copyInviteCode(group?.invite_code)}>
@@ -180,7 +180,7 @@ export default function Settings() {
                         <Text style={styles.oldValue}>{group?.invite_code}</Text>
                     </View>
                     <View>
-                        <Ionicons name='copy-outline' size={20} color={colors.text} />
+                        <Ionicons name='copy-outline' size={20} color={colors.primary} />
                     </View>
                 </Pressable>
                 {admin && (
@@ -190,7 +190,7 @@ export default function Settings() {
                             <Text style={styles.oldValue}>Replace the current invite code</Text>
                         </View>
                         <View>
-                            <Ionicons name='sync-outline' size={20} color={colors.text} />
+                            <Ionicons name='sync-outline' size={20} color={colors.primary} />
                         </View>
                     </Pressable>
                 )}

@@ -48,8 +48,8 @@ export function calculatePayments(balances) {
 export function getInits(str) {
     if (!str) return 'U'; // generic user
     const parts = str.split(' ');
-    if (parts.length === 1) return parts[0].charAt(0);
-    if (parts.length > 1) return parts[0].charAt(0)+parts[1].charAt(0);
+    if (parts.length === 1) return String(parts[0].charAt(0)).toUpperCase();
+    if (parts.length > 1) return String(parts[0].charAt(0)+parts[1].charAt(0)).toUpperCase();
 }
 
 export function fmtNum(num) {

@@ -23,8 +23,9 @@ export default function AppInput({ suffix, iconLeft, iconRight, ...props }) {
 
 const styles = StyleSheet.create({
     suffix: {
-        marginLeft: 8,
+        right: 8,
         color: colors.textSecondary,
         fontSize: 16,
+        position: 'absolute'
     }
 })
