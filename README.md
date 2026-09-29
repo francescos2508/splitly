@@ -21,6 +21,7 @@ Users can create or join multiple groups, add shared expenses, track balances, a
   <img src="screenshots/activity.jpeg" width="180">
   <img src="screenshots/settings.jpeg" width="180">
 </p>
+
 ## FEATURES
 - Create and join groups (with an invite code)
 - Add and split shared expenses
