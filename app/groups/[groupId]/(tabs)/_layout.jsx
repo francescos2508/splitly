@@ -19,7 +19,7 @@ function GroupTabs() {
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textMuted,
                 tabBarShowLabel: true,
-                tabBarItemStyle: {paddingVertical: Platform.OS === 'web' && 6},
+                tabBarStyle: {height: Platform.OS === 'web' && 70},
             }}
             screenListeners={{
                 tabPress: (e) => {
