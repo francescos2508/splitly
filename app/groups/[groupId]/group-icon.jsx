@@ -1,5 +1,6 @@
 import { useGroup } from "@/backend/src/context/GroupContext";
 import { updateGroup } from "@/src/api/api";
+import Loader from "@/src/components/Loader";
 import { colors, groupIcons } from "@/src/constants/constants";
 import { commonStyle } from "@/src/styles/common";
 import { lightColor } from "@/src/utils/utils";
@@ -35,11 +36,12 @@ const iconColors = [
 ];
 
 export default function EditGroupIcon() {
-    const { group, refreshGroup } = useGroup();
+    const { group, refreshGroup, loading, setLoading } = useGroup();
     const [currentIcon, setCurrentIcon] = useState(group?.icon || 'people-outline');
 
     const handleSaveGroupSettings = async () => {
         try {
+            setLoading(true);
             const res = await updateGroup({...group, icon: currentIcon});
             if (res) {
                 await refreshGroup({group: true});
@@ -48,11 +50,14 @@ export default function EditGroupIcon() {
         } catch (error) {
             console.error(error.message);
             alert('Problem while updating group, please retry in few minutes.');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <View style={commonStyle.container}>
+            {loading && <Loader overlay />}
             <View style={commonStyle.header}>
                 <Pressable style={commonStyle.headerBack} onPress={() => router.back()}>
                     <Ionicons name="chevron-back" size={20} color={colors.primary} />

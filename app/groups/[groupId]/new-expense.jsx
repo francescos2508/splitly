@@ -53,7 +53,7 @@ export default function NewExpense() {
         ],
         splitType: [
             { label: 'equal', value: 'equal' },
-            { label: 'custom', value: 'custom' },
+            // { label: 'custom', value: 'custom' },
         ],
         paidBy: []
     });

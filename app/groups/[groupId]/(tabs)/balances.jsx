@@ -145,7 +145,7 @@ export default function Members() {
 function CardPayment({ payment, iAmDebtor, groupCurrency, settleUp = false, reloadFunc }) {
     const fromInits = getInits(payment.fromMember?.name);
     const toInits = getInits(payment.toMember?.name);
-    const {refreshGroup, groupId} = useGroup();
+    const {groupId} = useGroup();
     const confirmSettleUp = (paym) => {
         const yesno = [{text: 'Cancel', style: 'cancel'}, {text: 'Yes, settle up', style: 'default', onPress: () => handleSettleUp(paym)}]
         Alert.alert('Settle up?', 'Do you confirm that '+paym?.fromMember?.name+' paid '+fmtNum(paym.amount)+' '+groupCurrency+' to '+paym.toMember?.name+'?', yesno);
