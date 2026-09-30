@@ -1,11 +1,12 @@
-import { useGroup } from "@/backend/src/context/GroupContext";
 import { createExpense, updateExpense } from "@/src/api/api";
 import AppInput from "@/src/components/AppInput";
 import DateInput from "@/src/components/DateInput";
 import Loader from '@/src/components/Loader';
 import SelectInput from "@/src/components/SelectInput";
-import { colors, sp } from '@/src/constants/constants';
-import { commonStyle } from "@/src/styles/common";
+import { sp } from '@/src/constants/constants';
+import { useGroup } from "@/src/context/GroupContext";
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from "@/src/styles/common";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -15,6 +16,9 @@ import { lightColor } from "../../../src/utils/utils";
 
 
 export default function NewExpense() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
+    const styles = createStyles(colors);
     const { allMembers, members, expenses, loading, currentMember, setLoading, refreshGroup } = useGroup();
     const { groupId, expenseId } = useLocalSearchParams();
     const isEditing = !!expenseId;
@@ -270,7 +274,7 @@ export default function NewExpense() {
                                             onPress={() => !hasRemovedMembers && toggleParticipant(member.id)}
                                         >
                                             <Ionicons name={selected ? "checkbox" : "square-outline"} size={24} color={hasRemovedMembers ? lightColor(colors.primary) : colors.primary} />
-                                            <Text>{member.name}</Text>
+                                            <Text style={styles.participantName}>{member.name}</Text>
                                         </Pressable>
                                         )
                                     })}
@@ -311,7 +315,7 @@ export default function NewExpense() {
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     bodyParticipants: {
         backgroundColor: 'transparent',
         marginBottom: sp[1],
@@ -327,6 +331,9 @@ const styles = StyleSheet.create({
         gap: sp['half'],
         // justifyContent: "center",
         // paddingVertical: sp[1],
+    },
+    participantName: {
+        color: colors.text,
     },
     textInput: {
         fontSize: 16,

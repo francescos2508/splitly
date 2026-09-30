@@ -1,8 +1,9 @@
 import { currencyOptions } from '@/src/constants/constants';
-import { commonStyle } from '@/src/styles/common';
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from '@/src/styles/common';
 import { router } from 'expo-router';
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { createGroup } from '../../src/api/api';
 import AppInput from '../../src/components/AppInput';
 import Loader from '../../src/components/Loader';
@@ -10,6 +11,8 @@ import SelectInput from '../../src/components/SelectInput';
 import { saveMemberToken } from '../../src/storage/auth';
 
 export default function CreateGroup() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
     const [groupname, setGroupname] = useState('');
     const [username, setUsername] = useState('Admin');
     const [currency, setCurrency] = useState('EUR');
@@ -78,7 +81,3 @@ export default function CreateGroup() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    
-})

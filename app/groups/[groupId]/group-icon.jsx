@@ -1,8 +1,9 @@
-import { useGroup } from "@/backend/src/context/GroupContext";
 import { updateGroup } from "@/src/api/api";
 import Loader from "@/src/components/Loader";
-import { colors, groupIcons } from "@/src/constants/constants";
-import { commonStyle } from "@/src/styles/common";
+import { groupIcons } from "@/src/constants/constants";
+import { useGroup } from "@/src/context/GroupContext";
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from "@/src/styles/common";
 import { lightColor } from "@/src/utils/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -36,6 +37,8 @@ const iconColors = [
 ];
 
 export default function EditGroupIcon() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
     const { group, refreshGroup, loading, setLoading } = useGroup();
     const [currentIcon, setCurrentIcon] = useState(group?.icon || 'people-outline');
 

@@ -1,10 +1,11 @@
-import { useGroup } from '@/backend/src/context/GroupContext';
 import { updateMe } from '@/src/api/api';
 import AppInput from '@/src/components/AppInput';
 import Avatar from '@/src/components/Avatar';
 import Toast from '@/src/components/Toast';
-import { AVATAR_COLORS, colors, sp } from '@/src/constants/constants';
-import { commonStyle } from "@/src/styles/common";
+import { AVATAR_COLORS, sp } from '@/src/constants/constants';
+import { useGroup } from '@/src/context/GroupContext';
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from "@/src/styles/common";
 import { getInits } from '@/src/utils/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -15,8 +16,11 @@ import Loader from '../../../src/components/Loader';
 
 
 export default function MyProfile() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
+    const styles = createStyles(colors);
     const [member, setMember] = useState(null);
-    const {group, groupId, members, currentMember, refreshGroup, loading, setLoading} = useGroup();
+    const {groupId, currentMember, refreshGroup, loading, setLoading} = useGroup();
     const [toast, setToast] = useState(null);
     const updMember = (field, val) => { setMember(prev => ({...prev, [field]: val}))};
 
@@ -82,7 +86,7 @@ export default function MyProfile() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     avatarCont: {
         width: '100%',
         alignItems: 'center',
@@ -91,7 +95,8 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 18,
         fontWeight: '600',
-        marginTop: sp.half
+        marginTop: sp.half,
+        color: colors.text,
     },
     chooseColorCont: {
         flexDirection: 'row',

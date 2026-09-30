@@ -1,8 +1,9 @@
-import { useGroup } from '@/backend/src/context/GroupContext';
 import Avatar from '@/src/components/Avatar';
 import Loader from '@/src/components/Loader';
-import { colors, currencies, sp } from '@/src/constants/constants';
-import { commonStyle } from '@/src/styles/common';
+import { currencies, sp } from '@/src/constants/constants';
+import { useGroup } from '@/src/context/GroupContext';
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from "@/src/styles/common";
 import { calculatePayments, fmtNum, getInits } from '@/src/utils/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from "expo-router";
@@ -12,6 +13,9 @@ import { createPayment } from '../../../../src/api/api';
 
 
 export default function Members() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
+    const styles = createStyles(colors); 
     const {groupId, group, balances, members, currentMember, loading, setLoading, refreshGroup} = useGroup();
     const [payments, setPayments] = useState([]);
     const [myBalance, setMyBalance] = useState(null);
@@ -127,7 +131,7 @@ export default function Members() {
                                     <View style={styles.cardBalance}>
                                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
                                             <Avatar color={balance.avatar_color} inits={getInits(balance.name)} />
-                                            <Text>{balance.name}</Text>
+                                            <Text style={styles.balanceName}>{balance.name}</Text>
                                         </View>
                                         <Text style={[styles.balanceTxt, {color: bal > 0 ? colors.positive : bal < 0 ? colors.negative : colors.primary}]}>
                                             {bal > 0 && '+'}{fmtNum(balance.balance)} {currencies[group?.currency]}
@@ -143,6 +147,9 @@ export default function Members() {
 }
 
 function CardPayment({ payment, iAmDebtor, groupCurrency, settleUp = false, reloadFunc }) {
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
+    const commonStyle = createCommonStyle(colors);
     const fromInits = getInits(payment.fromMember?.name);
     const toInits = getInits(payment.toMember?.name);
     const {groupId} = useGroup();
@@ -187,11 +194,10 @@ function CardPayment({ payment, iAmDebtor, groupCurrency, settleUp = false, relo
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     myBalance: {
         alignItems: 'center',
         padding: sp[1],
-        backgroundColor: colors.accent,
         borderRadius: 20,
         marginBottom: sp[1],
     },
@@ -202,7 +208,7 @@ const styles = StyleSheet.create({
     myBalanceText: {
         color: colors.white,
         fontSize: 30,
-        fontWeight: 700,
+        fontWeight: "700",
     },
     myBalanceText2: {
         color: colors.white,
@@ -213,7 +219,7 @@ const styles = StyleSheet.create({
         // marginTop: sp[1],
     },
     cardPayment: {
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
         paddingHorizontal: sp[1],
         paddingVertical: sp.half,
         borderRadius: 20,
@@ -224,20 +230,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    paymentTxt: {
-        fontSize: 16,
-    },
     positiveAmount: {
         // flex: 1,
         color: colors.primary,
-        fontWeight: 700,
+        fontWeight: "700",
         fontSize: 16,
     },
     negativeAmount: {
         // flex: 1,
         // color: colors.negative,
         color: colors.primary,
-        fontWeight: 700,
+        fontWeight: "700",
         fontSize: 16,
     },
     memberPayment: {
@@ -247,6 +250,10 @@ const styles = StyleSheet.create({
     memberName: {
         textAlign: 'center',
         fontSize: 12,
+        color: colors.text,
+    },
+    balanceName: {
+        color: colors.text,
     },
     bodyBalance: {
         marginVertical: sp[1],
@@ -256,13 +263,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: sp.half,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 20,
         justifyContent: 'space-between'
     },
     balanceTxt: {
         marginHorizontal: sp['half'],
-        fontWeight: 700,
+        fontWeight: "700",
         fontSize: 16,
     },
     emptySection: {

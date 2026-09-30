@@ -31,7 +31,7 @@ export default function Root({ children }: PropsWithChildren) {
                     /* bottombar */
                     @media (display-mode: standalone) {
                         div:has(> div > a[role="tab"]) {
-                            transform: translateY(10px);
+                            transform: translateY(5px);
                             height: 70px !important;
                             overflow: visible !important;
                         }

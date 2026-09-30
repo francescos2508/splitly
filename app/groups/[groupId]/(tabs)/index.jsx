@@ -1,8 +1,9 @@
-import { useGroup } from '@/backend/src/context/GroupContext';
 import CardExpense from '@/src/components/CardExpense';
 import Loader from '@/src/components/Loader';
-import { colors, currencies, sp } from '@/src/constants/constants';
-import { commonStyle } from '@/src/styles/common';
+import { currencies, sp } from '@/src/constants/constants';
+import { useGroup } from '@/src/context/GroupContext';
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from "@/src/styles/common";
 import { fmtNum } from '@/src/utils/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from "expo-router";
@@ -12,6 +13,9 @@ import Avatar from '../../../../src/components/Avatar';
 import { getInits } from '../../../../src/utils/utils';
 
 export default function Group() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
+    const styles = createStyles(colors);
 
     const isFirstFocus = useRef(true);
     const {
@@ -87,7 +91,7 @@ export default function Group() {
                                 <View style={styles.cardBalance}>
                                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                                         <Avatar color={balance.avatar_color} inits={getInits(balance.name)} />
-                                        <Text>{balance.name}</Text>
+                                        <Text style={styles.balanceName}>{balance.name}</Text>
                                     </View>
                                     <Text style={[styles.balanceTxt, {color: bal > 0 ? colors.positive : bal < 0 ? colors.negative : colors.primary}]}>
                                         {bal > 0 && '+'}{fmtNum(balance.balance)} {currencies[group?.currency]}
@@ -130,7 +134,7 @@ export default function Group() {
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     avatar: {
         borderRadius: '100%',
         height: sp[2],
@@ -147,16 +151,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: sp.half,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
         borderRadius: 20,
         justifyContent: 'space-between'
+    },
+    balanceName: {
+        color: colors.text,
     },
     avatarInits: {
         color: colors.white,
     },
     balanceTxt: {
         marginHorizontal: sp['half'],
-        fontWeight: 700,
+        fontWeight: "700",
         fontSize: 16,
     },
     myBalance: {
@@ -174,7 +181,7 @@ const styles = StyleSheet.create({
     myBalanceText: {
         color: colors.white,
         fontSize: 30,
-        fontWeight: 700,
+        fontWeight: "700",
     },
     settings: {
         position: 'absolute',
@@ -195,19 +202,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    description: {
-        fontSize: 16,
-        fontWeight: '600',
-    },
     metainfo: {
         fontSize: 13,
         color: colors.textMuted,
         marginTop: 3,
-    },
-    amount: {
-        fontSize: 16,
-        fontWeight: 600,
-        textAlign: 'right'
     },
     labelCat: {
         fontSize: 12,

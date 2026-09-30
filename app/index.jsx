@@ -1,9 +1,12 @@
-import { colors, sp } from '@/src/constants/constants';
+import { sp } from '@/src/constants/constants';
+import { useTheme } from "@/src/context/ThemeContext";
 import { router } from "expo-router";
 import { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const logoScale = useRef(new Animated.Value(0.2)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
@@ -80,11 +83,12 @@ export default function Index() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({  
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: colors.background,
   },
   content: {
     width: "100%",
@@ -96,6 +100,7 @@ const styles = StyleSheet.create({
     // fontWeight: 700,
     marginBottom: sp[2],
     fontStyle: 'italic',
+    color: colors.text,
   },
   body: {
     justifyContent: "center",
@@ -109,10 +114,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 20,
     marginBottom: 12,
-    backgroundColor: colors['primary'],
+    backgroundColor: colors.primary,
   },
   btnText: {
-    color: colors['white'],
+    color: colors.white,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -123,5 +128,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
+    color: colors.textSecondary,
   }
 })

@@ -18,14 +18,13 @@ export const sp = {
     xlg: 20,
     xxlg: 24,
 }
-
 export const currencies = {EUR: '€', USD: '$', GBP: '£', CHF: '$$'};
 export const currencyOptions = [
-        { label: "EUR (€)", value: "EUR" },
-        { label: "USD ($)", value: "USD" },
-        { label: "GBP (£)", value: "GBP" },
-        { label: "CHF ($$)", value: "CHF" },
-    ];
+    { label: "EUR (€)", value: "EUR" },
+    { label: "USD ($)", value: "USD" },
+    { label: "GBP (£)", value: "GBP" },
+    { label: "CHF ($$)", value: "CHF" },
+];
 export const categoryColors = {
     'Generic': '#8C86B8',
     'Food': '#E8755F',
@@ -54,7 +53,6 @@ export const activityColors = {
     expenses: '#00B4D8', // Cyan
     payments: '#8AC926', // Lime
 }
-
 export const groupIcons = [
     'people-outline',   
     'rocket-outline',   
@@ -69,63 +67,6 @@ export const groupIcons = [
     // 'bug-outline',  
     // 'cash-outline', 
 ];
-
-const lightColors2 = {
-    primary: "#2563EB",
-    primaryPressed: "#1D4ED8",
-    accent: "#14B8A6",
-
-    success: "#16A34A",
-    error: "#DC2626",
-    warning: "#F59E0B",
-
-    background: "#F8FAFC",
-    surface: "#FFFFFF",
-    surfaceSecondary: "#F1F5F9",
-    input: "#F1F5F9",
-    border: "#E2E8F0",
-
-    text: "#0F172A",
-    textSecondary: "#64748B",
-    textMuted: "#94A3B8",
-
-    icon: "#475569",
-    overlay: "rgba(15, 23, 42, 0.5)",
-    white: '#ffffff',
-};
-
-const lightColors3 = {
-    // Brand
-    // primary: '#6FAF8F',
-    primary: '#7567A8',
-    primaryDark: '#3F765C',
-    primaryLight: '#DDEFE5',
-    accent: "#6FAF8F",
-
-    // Backgrounds
-    background: '#F7FBF8',
-    surface: '#FFFFFF',
-
-    // Text
-    text: '#263B32',
-    textSecondary: '#718078',
-    border: '#DCE8E1',
-
-    // Status
-    success: '#78B89A',
-    successBackground: '#E8F5EC',
-
-    danger: '#E99A9A',
-    dangerBackground: '#FBEAEA',
-
-    warning: '#EBCB75',
-    warningBackground: '#FFF7DF',
-
-    info: '#82B6D1',
-    infoBackground: '#EAF5FA',
-    white: '#FFFFFF'
-};
-
 export const lightColors = {
     // Brand
     primary: '#7567A8',
@@ -160,71 +101,45 @@ export const lightColors = {
     divider: '#EAE8EE',
 
     // Misc
-    overlay: 'rgba(0, 0, 0, 0.4)',
+    overlay: 'rgba(255, 255, 255, 0.6)',
 };
-
-const darkColors2 = {
-    primary: "#3B82F6",
-    primaryPressed: "#2563EB",
-    accent: "#2DD4BF",
-
-    success: "#22C55E",
-    error: "#F87171",
-    warning: "#FBBF24",
-
-    background: "#0F172A",
-    surface: "#1E293B",
-    surfaceSecondary: "#334155",
-    input: "#1E293B",
-    border: "#475569",
-
-    text: "#F8FAFC",
-    textSecondary: "#CBD5E1",
-    textMuted: "#94A3B8",
-
-    icon: "#CBD5E1",
-    overlay: "rgba(0, 0, 0, 0.6)",
-    
-    white: '#ffffff',
-};
-
 export const darkColors = {
     // Brand
-    primary: '#9B8FC9',
-    primaryLight: '#3A3550',
-    primaryDark: '#7567A8',
+    primary: '#8B7CC4',
+    primaryLight: '#3A3450',
+    primaryDark: '#A99DDB',
 
     // Semantic
-    positive: '#82C5A3',
-    positiveLight: '#293F34',
-    positiveDark: '#5FA47F',
+    positive: '#78B89A',
+    positiveLight: '#30483A',
+    positiveDark: '#9BD0B3',
 
-    negative: '#E89B9B',
-    negativeLight: '#432F2F',
-    negativeDark: '#D27676',
+    negative: '#E99A9A',
+    negativeLight: '#4A3434',
+    negativeDark: '#F0B5B5',
+
+    danger: '#FF6B75',
 
     // Backgrounds
-    background: '#15141A',
-    surface: '#1E1D24',
-    surfaceSecondary: '#282630',
+    background: '#1C1B20',
+    surface: '#26242B',
+    surfaceSecondary: '#302E37',
 
     // Text
-    text: '#F2F0F5',
-    textSecondary: '#B5B1BC',
-    textMuted: '#817D89',
+    text: '#F5F3F7',
+    textSecondary: '#C4C0CB',
+    textMuted: '#96929F',
     textLight: '#FFFFFF',
     white: '#FFFFFF',
 
     // Borders / separators
-    border: '#393640',
-    divider: '#302E37',
+    border: '#45414D',
+    divider: '#38353F',
 
     // Misc
     overlay: 'rgba(0, 0, 0, 0.6)',
 };
-const DarkMode = false;
-export const colors = DarkMode ? darkColors : lightColors;
-
+export const colors = lightColors;
 export const AVATAR_COLORS = [
     '#2A9D8F',  // Teal
     '#9B5DE5',  // Purple

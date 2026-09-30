@@ -1,8 +1,10 @@
+import { useTheme } from '@/src/context/ThemeContext';
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 
 export default function Loader( {overlay = false} ) {
-
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
     const translateY = useRef(new Animated.Value(8)).current;
     useEffect(() => {
         Animated.loop(
@@ -32,11 +34,12 @@ export default function Loader( {overlay = false} ) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.overlay,
   },
   logo: {
     height: 150,
@@ -44,7 +47,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 100,

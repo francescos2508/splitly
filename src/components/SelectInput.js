@@ -8,17 +8,13 @@ import {
     View,
 } from "react-native";
 
-import { colors, sp } from "@/src/constants/constants";
+import { sp } from "@/src/constants/constants";
+import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from "@expo/vector-icons";
 
-export default function SelectInput({
-    label,
-    value,
-    options,
-    onChange,
-    placeholder = "Select...",
-    editable = true
-}) {
+export default function SelectInput({ label, value, options, onChange, placeholder = "Select...", editable = true }) {
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
     const [visible, setVisible] = useState(false);
 
     const selectedOption = options.find(
@@ -39,9 +35,7 @@ export default function SelectInput({
                     {selectedOption?.label || placeholder}
                 </Text>
 
-                <Text style={styles.arrow}>
-                    <Ionicons name='chevron-down' size={20} color={colors.textSecondary}/>
-                </Text>
+                <Ionicons name='chevron-down' size={20} color={colors.textSecondary}/>
             </Pressable>
 
             <Modal
@@ -60,16 +54,20 @@ export default function SelectInput({
                         <FlatList
                             data={options}
                             keyExtractor={(item) => item.value}
-                            renderItem={({ item }) => (
-                                <Pressable
-                                    style={styles.option}
-                                    onPress={() => handleSelect(item)}
-                                >
-                                    <Text style={styles.optionText}>
-                                        {item.label}
-                                    </Text>
-                                </Pressable>
-                            )}
+                            renderItem={({ item }) => {
+                                const sel = item.value === value;
+                                return (
+                                    <Pressable
+                                        style={styles.option}
+                                        onPress={() => handleSelect(item)}
+                                    >
+                                        <Text style={sel ? styles.optionTextSelected : styles.optionText}>
+                                            {item.label}
+                                        </Text>
+                                        {sel && (<Ionicons name="checkmark-outline" size={20} color={colors.primary} />)}
+                                    </Pressable>
+                                )
+                            }}
                         />
                     </View>
                 </Pressable>
@@ -78,19 +76,18 @@ export default function SelectInput({
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     label: {
         fontSize: 15,
         fontWeight: "600",
         marginBottom: sp['half'],
         color: colors.text,
     },
-
     input: {
         height: 40,
         borderWidth: 1,
         borderColor: colors.border,
-        backgroundColor: colors.input,
+        backgroundColor: colors.surface,
         borderRadius: 20,
         paddingHorizontal: sp[1],
         marginBottom: sp[1],
@@ -98,35 +95,25 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
     },
-
     value: {
         fontSize: 16,
         color: colors.text,
     },
-
     placeholder: {
         color: colors.textMuted,
     },
-
-    arrow: {
-        fontSize: 15,
-        color: colors.textSecondary,
-    },
-
     overlay: {
         flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.5)",
         justifyContent: "center",
         paddingHorizontal: sp[2],
     },
-
     modal: {
         backgroundColor: colors.surface,
         borderRadius: 20,
         paddingVertical: sp[2],
         maxHeight: "60%",
     },
-
     modalTitle: {
         fontSize: 18,
         fontWeight: "700",
@@ -134,14 +121,19 @@ const styles = StyleSheet.create({
         paddingHorizontal: sp[2],
         marginBottom: sp[1],
     },
-
     option: {
-        paddingVertical: sp[1],
+        paddingVertical: sp.md,
         paddingHorizontal: sp[2],
+        flexDirection: 'row',
+        gap: 8,
     },
-
     optionText: {
         fontSize: 16,
         color: colors.text,
     },
+    optionTextSelected: {
+        fontSize: 16,
+        color: colors.primary,
+        fontWeight: '700',
+    }
 });

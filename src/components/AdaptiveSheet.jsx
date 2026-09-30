@@ -1,3 +1,4 @@
+import { useTheme } from '@/src/context/ThemeContext';
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
@@ -6,10 +7,9 @@ import {
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-const AdaptiveSheet = forwardRef(({
-    children,
-    snapPoints = ['40%', '70%'],
-}, ref) => {
+const AdaptiveSheet = forwardRef(({ children, snapPoints = ['40%', '70%']}, ref) => {
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
     const bottomSheetRef = useRef(null);
     const [visible, setVisible] = useState(false);
 
@@ -68,6 +68,7 @@ const AdaptiveSheet = forwardRef(({
             keyboardBehavior='interactive'
             keyboardBlurBehavior='restore'
             enableDynamicSizing={false}
+            backgroundStyle={{ backgroundColor: colors.surface }}
             android_keyboardInputMode="adjustResize"
             backdropComponent={(props) => (
                 <BottomSheetBackdrop
@@ -87,15 +88,15 @@ const AdaptiveSheet = forwardRef(({
 
 export default AdaptiveSheet;
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        backgroundColor: colors.overlay,
         justifyContent: 'center',
         padding: 20,
     },
     modal: {
-        backgroundColor: 'white',
+        backgroundColor: colors.surface,
         borderRadius: 20,
         padding: 20,
         minHeight: 200,

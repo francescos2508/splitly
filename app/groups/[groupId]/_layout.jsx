@@ -1,4 +1,4 @@
-import { GroupProvider } from "@/backend/src/context/GroupContext";
+import { GroupProvider } from "@/src/context/GroupContext";
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Stack, useLocalSearchParams } from "expo-router";
 

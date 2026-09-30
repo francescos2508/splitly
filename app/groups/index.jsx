@@ -2,20 +2,25 @@
 
 import { getMyGroups } from '@/src/api/api';
 import Loader from '@/src/components/Loader';
-import { colors, currencies, sp } from '@/src/constants/constants';
-import { commonStyle } from '@/src/styles/common';
+import { currencies, sp } from '@/src/constants/constants';
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from '@/src/styles/common';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { fmtNum, lightColor } from '../../src/utils/utils';
+import Switcher from '../../src/components/Switcher';
+import { fmtNum } from '../../src/utils/utils';
+
 
 
 export default function myGroups() {
+    const { colors, isDark, toggleDarkMode } = useTheme();
+    const styles = createStyles(colors);
+    const commonStyle = createCommonStyle(colors);
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     const [bigBalance, setBigBalance] = useState({});
-    const [balanceBg, setBalanceBg] = useState(colors.primary);
     useFocusEffect(
         useCallback(() => {
             async function loadGroups() {
@@ -30,13 +35,6 @@ export default function myGroups() {
                     });
                     setBigBalance(balances);
                     setGroups(orderedGroups);
-
-                    const currenciesList = Object.keys(balances);
-                    if (currenciesList.length !== 1) setBalanceBg(colors.primary);
-                    if (currenciesList.length === 1) {
-                        const bal = balances[currenciesList[0]];
-                        (bal > 0) ? setBalanceBg(colors.positive) : (bal < 0) ? setBalanceBg(colors.negative) : setBalanceBg(colors.primary);
-                    }
                 } catch (error) {
                     alert(error.message);
                 } finally {
@@ -47,6 +45,13 @@ export default function myGroups() {
         }, [])
     );
 
+    const currenciesList = Object.keys(bigBalance);
+    let balanceBg = colors.primary;
+    if (currenciesList.length === 1) {
+        const bal = bigBalance[currenciesList[0]];
+        (bal > 0) ? balanceBg = colors.positive : (bal < 0) ? balanceBg = colors.negative : balanceBg = colors.primary;
+    }
+
     if (loading) {
         return (
             <Loader />
@@ -55,18 +60,22 @@ export default function myGroups() {
 
     return (
         <View style={commonStyle.container}>
-            <View style={commonStyle.header}>
-                <Text style={commonStyle.title}>Your Groups</Text>
-                {/* <Text style={commonStyle.title}>Profile</Text> */}
+            <View style={[commonStyle.header, {justifyContent: 'flex-end', gap: 8}]}>
+                <Ionicons name={isDark ? 'moon-outline' : 'sunny-outline'} size={20} color={colors.text} />
+                <Switcher value={isDark} onChange={toggleDarkMode}/>
             </View>
-
             {groups.length === 0 ? (
-                <ScrollView style={commonStyle.body}>
-                    <View style={styles.emptyBody}>
-                        <Text style={styles.emptyTitle}>No groups yet</Text>
-                        <Text style={styles.emptyText}>Create a group or join one to start splitting expenses.</Text>
+                <View>
+                    <View style={commonStyle.header}>
+                        <Text style={commonStyle.title}>Your Groups</Text>
                     </View>
-                </ScrollView>
+                    <ScrollView style={commonStyle.body}>
+                        <View style={styles.emptyBody}>
+                            <Text style={styles.emptyTitle}>No groups yet</Text>
+                            <Text style={styles.emptyText}>Create a group or join one to start splitting expenses.</Text>
+                        </View>
+                    </ScrollView>
+                </View>
             ) : (
                 <ScrollView style={commonStyle.body}>
                     <View style={[styles.myBalance, { backgroundColor: balanceBg }]}>
@@ -83,6 +92,9 @@ export default function myGroups() {
                         {Object.keys(bigBalance).length > 1 && (
                             <Text style={{ fontSize: 12, color: colors.white }}>Balances are calculated separately for each currency.</Text>
                         )}
+                    </View>
+                    <View style={commonStyle.header}>
+                        <Text style={commonStyle.title}>Your Groups</Text>
                     </View>
                     <View>
                         {groups.map((group) => (
@@ -122,7 +134,7 @@ export default function myGroups() {
     );
 }
 
-const styles = StyleSheet.create({
+export const createStyles = (colors) => StyleSheet.create({
     emptyBody: {
         flex: 1,
         justifyContent: "center",
@@ -154,9 +166,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "600",
         marginBottom: 4,
+        color: colors.text
     },
     groupInfo: {
         fontSize: 14,
+        color: colors.text
     },
     myBalance: {
         alignItems: 'center',
@@ -182,7 +196,7 @@ const styles = StyleSheet.create({
         // position: 'absolute',
         // width: 60,
         // alignItems: 'center',
-        backgroundColor: lightColor(colors.primary),
+        backgroundColor: colors.primaryLight,
         borderRadius: 20,
         padding: sp[1],
     }

@@ -1,4 +1,5 @@
-import { colors, sp } from '@/src/constants/constants';
+import { sp } from '@/src/constants/constants';
+import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
@@ -12,6 +13,8 @@ import {
 } from "react-native";
 
 export default function DateInput({ value, label, onChange }) {
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
     const [date, setDate] = useState(value || new Date());
     const [showPicker, setShowPicker] = useState(false);
 
@@ -120,11 +123,12 @@ export default function DateInput({ value, label, onChange }) {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     label: {
         fontSize: 15,
         fontWeight: "600",
         marginBottom: sp['half'],
+        color: colors.text,
     },
 
     input: {
@@ -132,7 +136,7 @@ const styles = StyleSheet.create({
         width: '100%',
         borderWidth: 1,
         borderColor: colors.border,
-        backgroundColor: colors.input,
+        backgroundColor: colors.surface,
         borderRadius: 20,
         paddingHorizontal: sp[1],
         flexDirection: "row",
@@ -166,7 +170,7 @@ const styles = StyleSheet.create({
 
     modal: {
         width: "100%",
-        backgroundColor: colors['textSecondary'],
+        backgroundColor: colors.surface,
         borderRadius: 20,
         padding: 20,
     },
@@ -174,7 +178,7 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: "700",
-        color: colors.white,
+        color: colors.text,
         marginBottom: 16,
     },
 

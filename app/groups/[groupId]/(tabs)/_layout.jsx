@@ -1,5 +1,5 @@
-import { useGroup } from "@/backend/src/context/GroupContext";
-import { colors } from '@/src/constants/constants';
+import { useGroup } from "@/src/context/GroupContext";
+import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
@@ -9,6 +9,7 @@ export default function GroupLayout() {
 }
 
 function GroupTabs() {
+    const { colors } = useTheme();
     const { loading } = useGroup();
 
     return (
@@ -18,7 +19,10 @@ function GroupTabs() {
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textMuted,
                 tabBarShowLabel: true,
-                // tabBarStyle: Platform.OS === 'web' ? { height: 70 } : undefined,
+                tabBarStyle: {
+                    backgroundColor: colors.surface,
+                    borderTopColor: colors.border,
+                },            
             }}
             screenListeners={{
                 tabPress: (e) => {

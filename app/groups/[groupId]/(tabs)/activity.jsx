@@ -1,8 +1,9 @@
-import { useGroup } from '@/backend/src/context/GroupContext';
 import Avatar from '@/src/components/Avatar';
 import Loader from '@/src/components/Loader';
-import { activityColors, colors, currencies, sp } from '@/src/constants/constants';
-import { commonStyle } from '@/src/styles/common';
+import { activityColors, currencies, sp } from '@/src/constants/constants';
+import { useGroup } from '@/src/context/GroupContext';
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from "@/src/styles/common";
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -89,6 +90,9 @@ const getSeparatorDate = (act) => {
     return datestr;
 }
 export default function Activity() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
+    const styles = createStyles(colors);
     const {group, activity, refreshGroup} = useGroup();
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
@@ -175,6 +179,8 @@ export default function Activity() {
 }
 
 function CardActivity({act}) {
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
     const { allMembers, expenses, payments, group } = useGroup();
     const member = allMembers.find(x => x.id === act.actor_id);
     const desc = getActivityDescription(act, {allMembers, expenses, payments, group});
@@ -195,7 +201,7 @@ function CardActivity({act}) {
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     cardActivity: {
         marginBottom: sp.half,
         paddingLeft: sp.half,
@@ -215,6 +221,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         flexShrink: 1,
+        color: colors.text,
     },
     
     metainfo: {

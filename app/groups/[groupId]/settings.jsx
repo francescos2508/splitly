@@ -1,11 +1,12 @@
-import { useGroup } from "@/backend/src/context/GroupContext";
 import { leaveGroup, regenerateInviteCode, removeMemberGroup, updateGroup } from '@/src/api/api';
 import AdaptiveSheet from '@/src/components/AdaptiveSheet';
 import Avatar from '@/src/components/Avatar';
 import Loader from "@/src/components/Loader";
 import Toast from '@/src/components/Toast';
-import { colors, currencies, currencyOptions, sp } from '@/src/constants/constants';
-import { commonStyle } from "@/src/styles/common";
+import { currencies, currencyOptions, sp } from '@/src/constants/constants';
+import { useGroup } from "@/src/context/GroupContext";
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from "@/src/styles/common";
 import { getInits } from '@/src/utils/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
@@ -15,6 +16,9 @@ import { useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function Settings() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
+    const styles = createStyles(colors);
     const { group, groupId, members, balances, currentMember, loading, setLoading, refreshGroup } = useGroup();
     const admin = currentMember?.is_owner;
     const [toast, setToast] = useState(null);
@@ -140,7 +144,7 @@ export default function Settings() {
                         <Ionicons name={group?.icon || 'people-outline'} size={20} color={colors.primary} />
                     </View>
                     <View style={styles.mainInfo}>
-                        <Text>Group icon</Text>
+                        <Text style={styles.cardText}>Group icon</Text>
                         <Text style={styles.oldValue}>{group?.icon}</Text>
                     </View>
                     <View>
@@ -152,7 +156,7 @@ export default function Settings() {
                         <Ionicons name='create-outline' size={20} color={colors.primary} />
                     </View>
                     <View style={styles.mainInfo}>
-                        <Text>Name</Text>
+                        <Text style={styles.cardText}>Name</Text>
                         <Text style={styles.oldValue}>{group?.name}</Text>
                     </View>
                     <View>
@@ -164,7 +168,7 @@ export default function Settings() {
                         <Ionicons name='cash-outline' size={20} color={colors.primary} />
                     </View>
                     <View style={styles.mainInfo}>
-                        <Text>Currency</Text>
+                        <Text style={styles.cardText}>Currency</Text>
                         <Text style={styles.oldValue}>{group?.currency} {'(' + currencies[group?.currency] + ')'}</Text>
                     </View>
                     <View>
@@ -176,7 +180,7 @@ export default function Settings() {
                         <Ionicons name='share-social-outline' size={20} color={colors.primary} />
                     </View>
                     <View style={styles.mainInfo}>
-                        <Text>Invite code</Text>
+                        <Text style={styles.cardText}>Invite code</Text>
                         <Text style={styles.oldValue}>{group?.invite_code}</Text>
                     </View>
                     <View>
@@ -186,7 +190,7 @@ export default function Settings() {
                 {admin && (
                     <Pressable style={styles.cardSettings} onPress={openInviteCodeSheet}>
                         <View style={styles.mainInfo}>
-                            <Text>Regenerate invite code</Text>
+                            <Text style={styles.cardText}>Regenerate invite code</Text>
                             <Text style={styles.oldValue}>Replace the current invite code</Text>
                         </View>
                         <View>
@@ -289,7 +293,7 @@ export default function Settings() {
                 <View style={styles.sheet} >
                     <View style={{flex:1}} >
                         <Text style={commonStyle.label}>Regenerate invite code?</Text>
-                        <Text>The current invite code will no longer work for new members. {'\n'}This action cannot be undone.</Text>
+                        <Text style={styles.sheetText}>The current invite code will no longer work for new members. {'\n'}This action cannot be undone.</Text>
                     </View>
                     <Pressable  style={commonStyle.btn} onPress={handleRegenerateInviteCode}>
                         <Text style={commonStyle.btnText}>Regenerate code</Text>
@@ -307,7 +311,7 @@ export default function Settings() {
                 <View style={styles.sheet} >
                     <View style={{flex:1}} >
                         <Text style={commonStyle.label}>Remove {removingMember?.name}?</Text>
-                        <Text>Are you sure you want to remove {removingMember?.name} from the group? {'\n'}
+                        <Text style={styles.sheetText}>Are you sure you want to remove {removingMember?.name} from the group? {'\n'}
                             This member will no longer have access to the group. Expenses and payments will remain in the group history.</Text>
                     </View>
                     <Pressable style={styles.dangerBtn} onPress={handleRemoveMember}>
@@ -326,7 +330,7 @@ export default function Settings() {
                 <View style={styles.sheet} >
                     <View style={{flex:1}} >
                         <Text style={commonStyle.label}>Leave the group?</Text>
-                        <Text>Are you sure you want to leave the group? {'\n'}
+                        <Text style={styles.sheetText}>Are you sure you want to leave the group? {'\n'}
                             This operation can't be undone.</Text>
                     </View>
                     <Pressable style={styles.dangerBtn} onPress={handleLeaveGroup}>
@@ -412,10 +416,11 @@ export default function Settings() {
                             Regenerate invite code?
                         </Text>
 
-                        <Text>
+                        <Text style={styles.sheetText}>
                             The current invite code will no longer work for new members.
                             {'\n'}
                             This action cannot be undone.
+                            {'\n'}
                         </Text>
                     </View>
 
@@ -452,11 +457,12 @@ export default function Settings() {
                             Remove {removingMember?.name}?
                         </Text>
 
-                        <Text>
+                        <Text style={styles.sheetText}>
                             Are you sure you want to remove {removingMember?.name} from the group?
                             {'\n'}
                             This member will no longer have access to the group.
                             Expenses and payments will remain in the group history.
+                            {'\n'}
                         </Text>
                     </View>
 
@@ -493,10 +499,11 @@ export default function Settings() {
                             Leave the group?
                         </Text>
 
-                        <Text>
+                        <Text style={styles.sheetText}>
                             Are you sure you want to leave the group?
                             {'\n'}
                             This operation can't be undone.
+                            {'\n'}
                         </Text>
                     </View>
 
@@ -526,7 +533,7 @@ export default function Settings() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     cardSettings: {
         paddingHorizontal: sp[1],
         paddingVertical: sp.md,
@@ -538,8 +545,9 @@ const styles = StyleSheet.create({
         // marginBottom: sp.half
     },
     oldValue: {
-        fontWeight: 600,
-        fontSize: 16
+        fontWeight: "600",
+        fontSize: 16,
+        color: colors.textSecondary,
     },
     cardMember: {
         paddingHorizontal: sp[1],
@@ -554,6 +562,7 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 16,
         paddingLeft: sp[1],
+        color: colors.text,
     },
     memberContainer: {
         marginTop: sp[1]
@@ -617,5 +626,11 @@ const styles = StyleSheet.create({
         color: colors.primary,
         fontSize: 14,
         fontWeight: '600',
+    },
+    cardText: {
+        color: colors.text,
+    },
+    sheetText: {
+        color: colors.text,
     },
 })

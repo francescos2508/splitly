@@ -1,8 +1,8 @@
 // common style
-import { colors, sp } from "@/src/constants/constants";
+import { sp } from "@/src/constants/constants";
 import { Platform, StyleSheet } from "react-native";
 
-export const commonStyle = StyleSheet.create({
+export const createCommonStyle = (colors) => StyleSheet.create({
     container: {
         flex: 1,
         paddingBottom: sp[1],
@@ -23,6 +23,7 @@ export const commonStyle = StyleSheet.create({
         // color: colors['text'],
         fontSize: 20,
         fontWeight: "700",
+        color: colors.text,
     },
     body: {
         flex: 1,
@@ -59,7 +60,7 @@ export const commonStyle = StyleSheet.create({
         marginTop: sp.half
     },
     inlineBtnText: {
-        fontWeight: 600,
+        fontWeight: "600",
         color: colors.primary,
     },
     footer: {
@@ -76,13 +77,14 @@ export const commonStyle = StyleSheet.create({
         fontWeight: "600",
         // marginBottom: sp['half'],
         marginBottom: sp['half'],
+        color: colors.text,
     },
     input: {
         height: 40,
         width: '100%',
         borderWidth: 1,
         borderColor: colors.border,
-        backgroundColor: colors.input,
+        backgroundColor: colors.surface,
         borderRadius: 20,
         paddingHorizontal: sp[1],
         marginBottom: sp[1],
@@ -93,7 +95,8 @@ export const commonStyle = StyleSheet.create({
         // textAlign: 'center',
         marginTop: sp.half,
         marginBottom: sp.half,
-        fontWeight: 700,
+        fontWeight: "700",
+        color: colors.text,
     },
     rowBasic: {
         flexDirection: 'row',

@@ -1,8 +1,11 @@
-import { categoryColors, colors, sp } from '@/src/constants/constants';
+import { categoryColors, sp } from '@/src/constants/constants';
+import { useTheme } from '@/src/context/ThemeContext';
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { fmtNum, lightColor, parseDate } from "../utils/utils";
 
 export default function CardExpense({ expense, paid_by_member, groupCurrency = '€', onPress }) {
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
     if (!expense) return;
     if (!expense.category) expense.category = 'Generic';
     const catColor = categoryColors[expense.category];
@@ -26,7 +29,7 @@ export default function CardExpense({ expense, paid_by_member, groupCurrency = '
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     cardExpense: {
         marginBottom: sp.half,
         paddingLeft: sp.half,
@@ -47,6 +50,7 @@ const styles = StyleSheet.create({
     description: {
         fontSize: 16,
         fontWeight: '600',
+        color: colors.text,
     },
     metainfo: {
         fontSize: 13,
@@ -55,8 +59,9 @@ const styles = StyleSheet.create({
     },
     amount: {
         fontSize: 16,
-        fontWeight: 600,
-        textAlign: 'right'
+        fontWeight: "600",
+        textAlign: 'right',
+        color: colors.text,
     },
     labelCat: {
         fontSize: 12,

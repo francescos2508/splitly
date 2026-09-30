@@ -1,9 +1,11 @@
-import { colors } from '@/src/constants/constants';
+import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text } from 'react-native';
 
 export default function Toast({ message, onHide, time = 2000 }) {
+    const { colors } = useTheme();
+    const styles = createStyles(colors);
     const translateY = useRef(new Animated.Value(30)).current;
     const opacity = useRef(new Animated.Value(0)).current;
 
@@ -26,13 +28,13 @@ export default function Toast({ message, onHide, time = 2000 }) {
     }, [])
     return (
         <Animated.View style={[ styles.toast, { opacity, transform: [{translateY}] } ]}>
-            <Ionicons name="checkmark-circle" size={18} color="white" />
+            <Ionicons name="checkmark-circle" size={18} color={colors.white} />
             <Text style={styles.text}>{message}</Text>
         </Animated.View>
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
     toast: {
         position: 'absolute',
         bottom: 60,
@@ -48,6 +50,6 @@ const styles = StyleSheet.create({
     },
     text: {
         color: colors.white,
-        fontWeight: 600
+        fontWeight: "600"
     }
 });

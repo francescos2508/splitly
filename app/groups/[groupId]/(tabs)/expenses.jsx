@@ -1,12 +1,15 @@
-import { useGroup } from '@/backend/src/context/GroupContext';
 import CardExpense from '@/src/components/CardExpense';
 import { currencies } from '@/src/constants/constants';
-import { commonStyle } from '@/src/styles/common';
+import { useGroup } from '@/src/context/GroupContext';
+import { useTheme } from '@/src/context/ThemeContext';
+import { createCommonStyle } from "@/src/styles/common";
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 
 export default function Expenses() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
     const {groupId, group, expenses, allMembers} = useGroup();
 
     return (
@@ -39,7 +42,3 @@ export default function Expenses() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    
-});
