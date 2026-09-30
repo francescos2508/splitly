@@ -1,3 +1,4 @@
+import { useTheme } from '@/src/context/ThemeContext';
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -5,11 +6,13 @@ import { joinGroup } from "../../src/api/api";
 import AppInput from "../../src/components/AppInput";
 import Loader from "../../src/components/Loader";
 import { saveMemberToken } from "../../src/storage/auth";
-import { commonStyle } from "../../src/styles/common";
+import { createCommonStyle } from "../../src/styles/common";
 
 
 
 export default function JoinGroup() {
+    const { colors } = useTheme();
+    const commonStyle = createCommonStyle(colors);
     const [inviteCode, setInviteCode] = useState('');
     const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(null);

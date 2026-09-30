@@ -145,11 +145,13 @@ export const createStyles = (colors) => StyleSheet.create({
         fontSize: 22,
         fontWeight: "600",
         marginBottom: sp[1],
+        color: colors.text
     },
     emptyText: {
         textAlign: "center",
         fontSize: 16,
         marginBottom: sp[2],
+        color: colors.text
     },
 
     groupCard: {
