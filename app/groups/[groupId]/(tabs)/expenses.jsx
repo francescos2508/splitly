@@ -4,7 +4,7 @@ import { useGroup } from '@/src/context/GroupContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import { createCommonStyle } from "@/src/styles/common";
 import { router } from 'expo-router';
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 
 export default function Expenses() {
@@ -20,7 +20,8 @@ export default function Expenses() {
             <View style={commonStyle.body}>
                 <Text style={commonStyle.sectionTitle}>Expenses</Text>
                 <ScrollView >
-                    {expenses.map((expense) => {
+                    {expenses.length > 0 ? (
+                        expenses.map((expense) => {
                         const memb = allMembers.find(x => x.id === expense.paid_by_member_id);
 
                         return (
@@ -31,7 +32,11 @@ export default function Expenses() {
                                 onPress={() => router.push(`/groups/${groupId}/new-expense?expenseId=${expense.id}`)}
                             />
                         );
-                    })}
+                    })) : (
+                        <View style={commonStyle.emptySection}>
+                            <Text style={commonStyle.emptyText}>No expenses yet</Text>
+                        </View>
+                    )}
                 </ScrollView>
             </View>
             <View style={commonStyle.footer}>

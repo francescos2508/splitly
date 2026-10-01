@@ -10,7 +10,7 @@ import { createCommonStyle } from "@/src/styles/common";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import { deleteExpense } from "../../../src/api/api";
 import { lightColor } from "../../../src/utils/utils";
 
@@ -94,6 +94,7 @@ export default function NewExpense() {
         // setNewExpense(exp);
         setNewExpense({
             ...exp,
+            expense_date: new Date(exp.expense_date),
             amount: exp.amount.toString(),
             participants: exp.expense_participants.map(p => ({
                 memberId: p.member.id,
@@ -259,25 +260,30 @@ export default function NewExpense() {
                             animationType="fade"
                             onRequestClose={() => setShowParticipants(false)}
                         >
-                            <Pressable
-                                style={styles.overlay}
-                                onPress={() => setShowParticipants(false)}
-                            >
+                            <View style={styles.overlay}>
+                                <Pressable
+                                    style={StyleSheet.absoluteFill}
+                                    onPress={() => setShowParticipants(false)}
+                                />
                                 <View style={styles.modal}>
                                     <Text style={styles.modalTitle}>
                                         {hasRemovedMembers ? 'Participants' : 'Split between'}
                                     </Text>
-                                    {participantMembers.map((member) => {
-                                        const selected = newExpense.participants?.some(p => p.memberId === member.id);
-                                        return (
-                                        <Pressable style={styles.cardParticipant} key={member.id} 
-                                            onPress={() => !hasRemovedMembers && toggleParticipant(member.id)}
-                                        >
-                                            <Ionicons name={selected ? "checkbox" : "square-outline"} size={24} color={hasRemovedMembers ? lightColor(colors.primary) : colors.primary} />
-                                            <Text style={styles.participantName}>{member.name}</Text>
-                                        </Pressable>
-                                        )
-                                    })}
+                                    <FlatList
+                                        data={participantMembers}
+                                        keyExtractor={p => p.id}
+                                        renderItem={({item: member}) => {
+                                            const selected = newExpense.participants?.some(p => p.memberId === member.id);
+                                            return (
+                                            <Pressable style={styles.cardParticipant} 
+                                                onPress={() => !hasRemovedMembers && toggleParticipant(member.id)}
+                                            >
+                                                <Ionicons name={selected ? "checkbox" : "square-outline"} size={24} color={hasRemovedMembers ? lightColor(colors.primary) : colors.primary} />
+                                                <Text style={styles.participantName}>{member.name}</Text>
+                                            </Pressable>
+                                            )
+                                        }}
+                                    />
                                     <Pressable
                                         style={commonStyle.btn2}
                                         onPress={() => setShowParticipants(false)}
@@ -285,7 +291,7 @@ export default function NewExpense() {
                                         <Text style={commonStyle.btn2Text}>Done</Text>
                                     </Pressable>
                                 </View>
-                            </Pressable>
+                            </View>
                         </Modal>
                     </View>
 
@@ -367,6 +373,7 @@ const createStyles = (colors) => StyleSheet.create({
         borderRadius: 20,
         paddingVertical: sp[2],
         maxHeight: "60%",
+        overflow: "hidden",
     },
     modalTitle: {
         fontSize: 18,

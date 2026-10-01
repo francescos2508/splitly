@@ -47,7 +47,7 @@ export default function Settings() {
         removeMemberSheetRef.current?.present();
     }
     const openLeaveGroupSheet = () => {
-        if (admin) {
+        if (admin && members.length > 1) {
             alert('You can\'t leave the group while you\'re the admin');
             return;
         }
@@ -242,106 +242,10 @@ export default function Settings() {
             </ScrollView>
 
             <View style={commonStyle.footer}>
-                {/* <Pressable onPress={ () => router.back() } style={commonStyle.btn}>
-                    <Text style={commonStyle.btnText}>Done</Text>
-                </Pressable> */}
-
                 {toast && (<Toast message={toast} onHide={() => setToast(null)} />)}
             </View>
 
-            {/* <BottomSheetModal ref={nameSheetRef} snapPoints={['40%']} enablePanDownToClose enableDynamicSizing={false} 
-                keyboardBehavior='interactive' keyboardBlurBehavior='restore'
-                backdropComponent={(props) => (<BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior='close' />)}
-            >
-                <View style={styles.sheet} >
-                    <Pressable style={{flex:1}} onPress={Keyboard.dismiss}>
-                        <Text style={commonStyle.label}>Group name</Text>
-                        <BottomSheetTextInput style={commonStyle.input} value={groupName} onChangeText={setGroupName} placeholder='Group name' />
-                    </Pressable>
-                    <Pressable  style={commonStyle.btn} onPress={() => handleSaveGroupSettings('name', groupName, nameSheetRef)}>
-                        <Text style={commonStyle.btnText}>Save</Text>
-                    </Pressable>
-                </View>
-            </BottomSheetModal> */}
-
-            {/* <BottomSheetModal ref={currencySheetRef} snapPoints={['40%']} enablePanDownToClose enableDynamicSizing={false} 
-                keyboardBehavior='interactive' keyboardBlurBehavior='restore'
-                backdropComponent={(props) => (<BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior='close' />)}
-            >
-                <View style={styles.sheet} >
-                    <View style={{flex:1}} onPress={Keyboard.dismiss}>
-                        <Text style={commonStyle.label}>Choose currency</Text>
-                        {currencyOptions.map( (item) => {
-                            const selected = group?.currency === item.value;
-                            return (
-                                <Pressable key={item.value} style={styles.option} onPress={() => handleSaveGroupSettings('currency', item.value, currencySheetRef)}>
-                                    <Text style={[styles.optionText, selected && {fontWeight: '700'}]}>
-                                        {item.label}
-                                    </Text>
-                                    {selected && ( <Ionicons name="checkmark-outline" size={20} color={colors.text} /> )}
-                                </Pressable>
-                                )
-                        })}
-                    </View>
-                </View>
-            </BottomSheetModal> */}
-
-            {/* <BottomSheetModal ref={inviteCodeSheetRef} snapPoints={['40%']} enablePanDownToClose enableDynamicSizing={false} 
-                keyboardBehavior='interactive' keyboardBlurBehavior='restore'
-                backdropComponent={(props) => (<BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior='close' />)}
-            >
-                <View style={styles.sheet} >
-                    <View style={{flex:1}} >
-                        <Text style={commonStyle.label}>Regenerate invite code?</Text>
-                        <Text style={styles.sheetText}>The current invite code will no longer work for new members. {'\n'}This action cannot be undone.</Text>
-                    </View>
-                    <Pressable  style={commonStyle.btn} onPress={handleRegenerateInviteCode}>
-                        <Text style={commonStyle.btnText}>Regenerate code</Text>
-                    </Pressable>
-                    <Pressable  style={commonStyle.btn2} onPress={() => inviteCodeSheetRef.current?.dismiss()}>
-                        <Text style={commonStyle.btn2Text}>Cancel</Text>
-                    </Pressable>
-                </View>
-            </BottomSheetModal> */}
-
-            {/* <BottomSheetModal ref={removeMemberSheetRef} snapPoints={['40%']} enablePanDownToClose enableDynamicSizing={false} 
-                keyboardBehavior='interactive' keyboardBlurBehavior='restore'
-                backdropComponent={(props) => (<BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior='close' />)}
-            >
-                <View style={styles.sheet} >
-                    <View style={{flex:1}} >
-                        <Text style={commonStyle.label}>Remove {removingMember?.name}?</Text>
-                        <Text style={styles.sheetText}>Are you sure you want to remove {removingMember?.name} from the group? {'\n'}
-                            This member will no longer have access to the group. Expenses and payments will remain in the group history.</Text>
-                    </View>
-                    <Pressable style={styles.dangerBtn} onPress={handleRemoveMember}>
-                        <Text style={styles.dangerBtnTxt}>Remove</Text>
-                    </Pressable>
-                    <Pressable style={commonStyle.btn2} onPress={() => {if (loading) return; removeMemberSheetRef.current?.dismiss()}}>
-                        <Text style={commonStyle.btn2Text}>Cancel</Text>
-                    </Pressable>
-                </View>
-            </BottomSheetModal> */}
-
-            {/* <BottomSheetModal ref={leaveGroupSheetRef} snapPoints={['40%']} enablePanDownToClose enableDynamicSizing={false} 
-                keyboardBehavior='interactive' keyboardBlurBehavior='restore'
-                backdropComponent={(props) => (<BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior='close' />)}
-            >
-                <View style={styles.sheet} >
-                    <View style={{flex:1}} >
-                        <Text style={commonStyle.label}>Leave the group?</Text>
-                        <Text style={styles.sheetText}>Are you sure you want to leave the group? {'\n'}
-                            This operation can't be undone.</Text>
-                    </View>
-                    <Pressable style={styles.dangerBtn} onPress={handleLeaveGroup}>
-                        <Text style={styles.dangerBtnTxt}>Leave</Text>
-                    </Pressable>
-                    <Pressable style={commonStyle.btn2} onPress={() => {if (loading) return; leaveGroupSheetRef.current?.dismiss()}}>
-                        <Text style={commonStyle.btn2Text}>Cancel</Text>
-                    </Pressable>
-                </View>
-            </BottomSheetModal> */}
-            <AdaptiveSheet ref={nameSheetRef} snapPoints={['40%']}>
+            <AdaptiveSheet ref={nameSheetRef}>
                 <View style={styles.sheet}>
                     <View style={{ flex: 1 }}>
                         <Text style={commonStyle.label}>Group name</Text>
@@ -363,7 +267,7 @@ export default function Settings() {
                 </View>
             </AdaptiveSheet>
 
-            <AdaptiveSheet ref={currencySheetRef} snapPoints={['40%']}>
+            <AdaptiveSheet ref={currencySheetRef}>
                 <View style={styles.sheet}>
                     <View style={{ flex: 1 }}>
                         <Text style={commonStyle.label}>Choose currency</Text>
@@ -408,8 +312,7 @@ export default function Settings() {
 
             <AdaptiveSheet
                 ref={inviteCodeSheetRef}
-                snapPoints={['40%']}
-            >
+ì            >
                 <View style={styles.sheet}>
                     <View style={{ flex: 1 }}>
                         <Text style={commonStyle.label}>
@@ -449,7 +352,6 @@ export default function Settings() {
 
             <AdaptiveSheet
                 ref={removeMemberSheetRef}
-                snapPoints={['40%']}
             >
                 <View style={styles.sheet}>
                     <View style={{ flex: 1 }}>
@@ -491,7 +393,6 @@ export default function Settings() {
 
             <AdaptiveSheet
                 ref={leaveGroupSheetRef}
-                snapPoints={['40%']}
             >
                 <View style={styles.sheet}>
                     <View style={{ flex: 1 }}>

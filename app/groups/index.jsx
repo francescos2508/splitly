@@ -69,12 +69,10 @@ export default function myGroups() {
                     <View style={commonStyle.header}>
                         <Text style={commonStyle.title}>Your Groups</Text>
                     </View>
-                    <ScrollView style={commonStyle.body}>
-                        <View style={styles.emptyBody}>
-                            <Text style={styles.emptyTitle}>No groups yet</Text>
-                            <Text style={styles.emptyText}>Create a group or join one to start splitting expenses.</Text>
-                        </View>
-                    </ScrollView>
+                    <View style={styles.emptyBody}>
+                        <Text style={styles.emptyTitle}>You don't have any groups yet</Text>
+                        <Text style={styles.emptyText}>Create a group or join one to start splitting expenses.</Text>
+                    </View>
                 </View>
             ) : (
                 <ScrollView style={commonStyle.body}>
@@ -136,13 +134,13 @@ export default function myGroups() {
 
 export const createStyles = (colors) => StyleSheet.create({
     emptyBody: {
-        flex: 1,
         justifyContent: "center",
         alignItems: "center",
         // marginBottom: sp[5],
+        paddingHorizontal: sp[1]
     },
     emptyTitle: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: "600",
         marginBottom: sp[1],
         color: colors.text
@@ -153,7 +151,6 @@ export const createStyles = (colors) => StyleSheet.create({
         marginBottom: sp[2],
         color: colors.text
     },
-
     groupCard: {
         // padding: sp[1],
         // borderRadius: 20,

@@ -91,8 +91,8 @@ export default function Members() {
                                 })}
                             </View>
                         ) : (
-                            <View style={styles.emptySection}>
-                                <Text style={styles.emptyText}>No payments to settle</Text>
+                            <View style={commonStyle.emptySection}>
+                                <Text style={commonStyle.emptyText}>No payments to settle</Text>
                             </View>
                         )}
                     </View>
@@ -116,8 +116,8 @@ export default function Members() {
                             })}
                         </View>
                     ) : (
-                        <View style={styles.emptySection}>
-                            <Text style={styles.emptyText}>No payments to settle</Text>
+                        <View style={commonStyle.emptySection}>
+                            <Text style={commonStyle.emptyText}>No other payments</Text>
                         </View>
                     )}
 
@@ -271,13 +271,5 @@ const createStyles = (colors) => StyleSheet.create({
         marginHorizontal: sp['half'],
         fontWeight: "700",
         fontSize: 16,
-    },
-    emptySection: {
-        paddingVertical: sp[1],
-        alignItems: 'center',
-    },
-    emptyText: {
-        color: colors.textMuted,
-        fontSize: 14,
     },
 });

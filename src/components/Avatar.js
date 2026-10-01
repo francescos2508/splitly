@@ -2,7 +2,7 @@ import { sp } from '@/src/constants/constants';
 import { useTheme } from '@/src/context/ThemeContext';
 import { StyleSheet, Text, View } from "react-native";
 
-export default function Avatar({color, inits, height = sp[2], width = sp[2]}) {
+export default function Avatar({color = '#6D6875', inits, height = sp[2], width = sp[2]}) {
     const { colors } = useTheme();
     const styles = createStyles(colors);
     return (
@@ -13,7 +13,7 @@ export default function Avatar({color, inits, height = sp[2], width = sp[2]}) {
 }
 const createStyles = (colors) => StyleSheet.create({
     avatar: {
-        borderRadius: '100%',
+        borderRadius: 999,
         justifyContent: "center",
         alignItems: "center",
         marginRight: sp.half

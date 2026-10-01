@@ -560,14 +560,16 @@ router.patch('/:groupId/members/leave', authorizeGroup, async (req, res) => {
     const memberId = req.member.id;
 
     try {
-        // authenticated member has to be the one is leaving the group
-        if (req.member.id !== memberId) {
-            return res.status(403).json({
-                error: "You are not allowed to leave as this member"
-            });
-        }
+        const { data: members, error: membersError} = await supabase
+            .from('group_members')
+            .select('id, name')
+            .eq('group_id', groupId)
+            .eq('is_active', true);
 
-        if (req.member.is_owner) {
+        if (membersError) throw membersError; 
+
+        // admins can leave the group only if they're last member
+        if (req.member.is_owner && members.length > 1) {
             return res.status(400).json({
                 error: "Group admin cannot leave the group"
             });

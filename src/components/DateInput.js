@@ -95,7 +95,7 @@ export default function DateInput({ value, label, onChange }) {
                                 <DateTimePicker
                                     value={date}
                                     mode="date"
-                                    display="inline"
+                                    display={Platform.OS === 'ios' ? 'inline' : 'default'}
                                     onChange={(event, selectedDate) => {
                                         setShowPicker(false);
 

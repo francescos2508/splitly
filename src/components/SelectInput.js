@@ -113,6 +113,7 @@ const createStyles = (colors) => StyleSheet.create({
         borderRadius: 20,
         paddingVertical: sp[2],
         maxHeight: "60%",
+        overflow: "hidden",
     },
     modalTitle: {
         fontSize: 18,

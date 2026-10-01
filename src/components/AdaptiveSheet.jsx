@@ -65,7 +65,7 @@ const AdaptiveSheet = forwardRef(({ children, snapPoints = ['40%', '70%']}, ref)
             ref={bottomSheetRef}
             snapPoints={snapPoints}
             enablePanDownToClose
-            keyboardBehavior='interactive'
+            keyboardBehavior='fillParent'
             keyboardBlurBehavior='restore'
             enableDynamicSizing={false}
             backgroundStyle={{ backgroundColor: colors.surface }}

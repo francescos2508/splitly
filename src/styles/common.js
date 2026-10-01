@@ -60,6 +60,7 @@ export const createCommonStyle = (colors) => StyleSheet.create({
         marginTop: sp.half
     },
     inlineBtnText: {
+        fontSize: 12,
         fontWeight: "600",
         color: colors.primary,
     },
@@ -107,5 +108,13 @@ export const createCommonStyle = (colors) => StyleSheet.create({
         position: 'absolute',
         left: sp[1],
         zIndex: 1,
+    },
+    emptySection: {
+        paddingVertical: sp[1],
+        alignItems: 'center',
+    },
+    emptyText: {
+        color: colors.textMuted,
+        fontSize: 14,
     },
 })
