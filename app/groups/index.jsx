@@ -69,9 +69,9 @@ export default function myGroups() {
                     <View style={commonStyle.header}>
                         <Text style={commonStyle.title}>Your Groups</Text>
                     </View>
-                    <View style={styles.emptyBody}>
-                        <Text style={styles.emptyTitle}>You don't have any groups yet</Text>
-                        <Text style={styles.emptyText}>Create a group or join one to start splitting expenses.</Text>
+                    <View style={commonStyle.emptySection}>
+                        <Text style={commonStyle.emptyTitleText}>You don't have any groups yet</Text>
+                        <Text style={commonStyle.emptyText}>Create a group or join one to start splitting expenses.</Text>
                     </View>
                 </View>
             ) : (
@@ -139,24 +139,8 @@ export const createStyles = (colors) => StyleSheet.create({
         // marginBottom: sp[5],
         paddingHorizontal: sp[1]
     },
-    emptyTitle: {
-        fontSize: 20,
-        fontWeight: "600",
-        marginBottom: sp[1],
-        color: colors.text
-    },
-    emptyText: {
-        textAlign: "center",
-        fontSize: 16,
-        marginBottom: sp[2],
-        color: colors.text
-    },
     groupCard: {
-        // padding: sp[1],
-        // borderRadius: 20,
         marginBottom: sp.md,
-        // borderLeftWidth: 2,
-        // borderLeftColor: colors.primary,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between'
@@ -192,9 +176,6 @@ export const createStyles = (colors) => StyleSheet.create({
         fontSize: 16
     },
     groupIcon: {
-        // position: 'absolute',
-        // width: 60,
-        // alignItems: 'center',
         backgroundColor: colors.primaryLight,
         borderRadius: 20,
         padding: sp[1],

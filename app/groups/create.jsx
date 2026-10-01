@@ -1,6 +1,7 @@
 import { currencyOptions } from '@/src/constants/constants';
 import { useTheme } from '@/src/context/ThemeContext';
 import { createCommonStyle } from '@/src/styles/common';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from "react";
 import { Pressable, Text, View } from 'react-native';
@@ -23,6 +24,9 @@ export default function CreateGroup() {
     return (
         <View style={commonStyle.container}>
             <View style={commonStyle.header}>
+                <Pressable style={commonStyle.headerBack} onPress={() => router.back()}>
+                    <Ionicons name="chevron-back" size={20} color={colors.primary} />
+                </Pressable>
                 <Text style={commonStyle.title}>Create Group</Text>
             </View>
             <View style={commonStyle.body}>

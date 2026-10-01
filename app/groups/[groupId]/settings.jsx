@@ -54,7 +54,7 @@ export default function Settings() {
         const bal = balances.find(x => x.id === currentMember.id);
         const isSettled = !bal || Math.abs(bal.balance) < 0.01;
         if (!isSettled) {
-            alert('It\'s not possible to remove from the group a member that is not settled up');
+            alert('It\'s not possible to leave the group if you aren\'t settled up');
             return;
         }
         leaveGroupSheetRef.current?.present();

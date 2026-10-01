@@ -113,6 +113,12 @@ export const createCommonStyle = (colors) => StyleSheet.create({
         paddingVertical: sp[1],
         alignItems: 'center',
     },
+    emptyTitleText: {
+        color: colors.textMuted,
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: sp.half
+    },
     emptyText: {
         color: colors.textMuted,
         fontSize: 14,

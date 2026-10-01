@@ -7,7 +7,7 @@ import {
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-const AdaptiveSheet = forwardRef(({ children, snapPoints = ['40%', '70%']}, ref) => {
+const AdaptiveSheet = forwardRef(({ children, snapPoints = ['40%']}, ref) => {
     const { colors } = useTheme();
     const styles = createStyles(colors);
     const bottomSheetRef = useRef(null);

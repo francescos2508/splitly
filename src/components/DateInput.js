@@ -96,7 +96,7 @@ export default function DateInput({ value, label, onChange }) {
                                     value={date}
                                     mode="date"
                                     display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                                    onChange={(event, selectedDate) => {
+                                    onValueChange={(event, selectedDate) => {
                                         setShowPicker(false);
 
                                         if (selectedDate) {
