@@ -16,9 +16,6 @@ export default function Root({ children }: PropsWithChildren) {
                 />
                 {/* style to avoid select text like i am in safari */}
                 <style>{`
-                :root {
-                    --background: #F7F7FA;      /* colors.background */
-                }
 
                     * {
                         -webkit-user-select: none;
@@ -26,7 +23,7 @@ export default function Root({ children }: PropsWithChildren) {
                         -webkit-touch-callout: none;
                          -webkit-tap-highlight-color: transparent;
                     }
-                    html, body { overscroll-behavior: none; background-color: var(--background); }
+                    html, body { overscroll-behavior: none; background-color: transparent; }
                     input, textarea { -webkit-user-select: text; user-select: text; outline: none }
                     /* bottombar */
                     @media (display-mode: standalone) {
