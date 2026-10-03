@@ -2,7 +2,7 @@ import { sp } from '@/src/constants/constants';
 import { useTheme } from '@/src/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Modal,
     Platform,
@@ -36,6 +36,10 @@ export default function DateInput({ value, label, onChange }) {
         setDate(newDate);
         onChange?.(newDate);
     };
+
+    useEffect(() => {
+        if (value) setDate(value);
+    }, [value]);
 
     return (
         <View>

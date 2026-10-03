@@ -59,8 +59,8 @@ export default function NewExpense() {
         paidBy: []
     });
     const splitTypeOptions = [
-        { label: 'equal', value: 'equal', onPress: () => updExpense('split_type', 'equal') , selected: newExpense.split_type === 'equal'},
-        { label: 'custom', value: 'custom', onPress: () => updExpense('split_type', 'custom') , selected: newExpense.split_type === 'custom' },
+        { label: 'equal', value: 'equal', onPress: () => updExpense('split_type', 'equal') , selected: newExpense.split_type === 'equal', disabled: hasRemovedMembers},
+        { label: 'custom', value: 'custom', onPress: () => updExpense('split_type', 'custom') , selected: newExpense.split_type === 'custom', disabled: hasRemovedMembers },
     ];
     // all id of removed members
     const removedIds = allMembers.filter(x => !x.is_active).map(x => x.id);
@@ -103,6 +103,7 @@ export default function NewExpense() {
         const exp = expenses.find(x => x.id === expenseId);
         if (!exp) return;
         // setNewExpense(exp);
+        console.log(exp.expense_date);
         setNewExpense({
             ...exp,
             expense_date: new Date(exp.expense_date),

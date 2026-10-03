@@ -16,7 +16,7 @@ export default function OptionSelector({ options }) {
         <View style={styles.selectorCont}>
             {options.map((option) => {
                 return (
-                    <Pressable style={[styles.selectorBtn, { backgroundColor: option.selected ? colors.primaryDark : 'transparent' }]} onPress={option.onPress} key={option.label}>
+                    <Pressable style={[styles.selectorBtn, { backgroundColor: option.selected ? colors.primaryDark : 'transparent' }]} onPress={option.onPress} key={option.label} disabled={option.disabled}>
                         <Text style={styles.selectorText}>{option.label}</Text>
                     </Pressable>
                 )
