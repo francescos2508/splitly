@@ -501,7 +501,6 @@ const createStyles = (colors) => StyleSheet.create({
     },
     sheet: {
         padding: sp[1],
-        // gap: 20,
         flex: 1,
         justifyContent: 'space-between',
     },

@@ -53,10 +53,10 @@ function calculateExpenseParticipants(amount, splitType, participants) {
     }
 
     if (splitType === 'custom') {
-        const invalidShare = participants.some(item =>
-            !Number.isFinite(Number(item.shareAmount)) ||
-            Number(item.shareAmount) <= 0
-        );
+        const invalidShare = participants.some(item => {
+            const shareAmount = Number(item.shareAmount);
+            return !Number.isFinite(shareAmount) || shareAmount <= 0;
+        });
 
         if (invalidShare) throw new Error('Invalid participant share');
 

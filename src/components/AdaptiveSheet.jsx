@@ -7,22 +7,24 @@ import {
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-const AdaptiveSheet = forwardRef(({ children, snapPoints = ['40%']}, ref) => {
+const AdaptiveSheet = forwardRef(({ children, snapPoints = ['40%'], forceModal = false}, ref) => {
     const { colors } = useTheme();
     const styles = createStyles(colors);
     const bottomSheetRef = useRef(null);
     const [visible, setVisible] = useState(false);
 
+    const useModal = Platform.OS === 'web' || forceModal;
+
     useImperativeHandle(ref, () => ({
         present: () => {
-            if (Platform.OS === 'web') {
+            if (useModal) {
                 setVisible(true);
             } else {
                 bottomSheetRef.current?.present();
             }
         },
         dismiss: () => {
-            if (Platform.OS === 'web') {
+            if (useModal) {
                 setVisible(false);
             } else {
                 bottomSheetRef.current?.dismiss();
@@ -31,14 +33,14 @@ const AdaptiveSheet = forwardRef(({ children, snapPoints = ['40%']}, ref) => {
     }));
 
     const handleClose = () => {
-        if (Platform.OS === 'web') {
+        if (useModal) {
             setVisible(false);
         } else {
             bottomSheetRef.current?.dismiss();
         }
     };
 
-    if (Platform.OS === 'web') {
+    if (useModal) {
         return (
             <Modal
                 visible={visible}
@@ -99,7 +101,8 @@ const createStyles = (colors) => StyleSheet.create({
         backgroundColor: colors.surface,
         borderRadius: 20,
         padding: 20,
-        minHeight: 200,
+        paddingTop: 40,
+        // minHeight: 200,
     },
     content: {
         flex: 1,
