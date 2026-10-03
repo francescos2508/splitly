@@ -123,12 +123,12 @@ export default function NewExpense() {
             if (newExpense.split_type === 'custom') {
                 const total = Number(String(amount).replace(',', '.')) || 0;
                 let totalAssigned = 0;
-                newExpense.participants?.forEach(x => totalAssigned += Number(x.share_amount) || 0);
+                newExpense.participants?.forEach(x => totalAssigned += Number(String(x.share_amount).replace(',', '.')) || 0);
                 const isok = Number(totalAssigned.toFixed(2)) === Number(total.toFixed(2));
                 if (!isok) throw new Error('Participants amount does not match expense amount');
             }
             const participantsData = newExpense.participants.map((part) => {
-                const shareAmount = Number(part.share_amount);
+                const shareAmount = Number(String(part.share_amount).replace(',', '.'));
                 if (!Number.isFinite(shareAmount) || shareAmount <= 0) throw new Error('Invalid amount for one or more participants');
                 return {...part, share_amount: shareAmount};
             })
@@ -275,7 +275,7 @@ export default function NewExpense() {
                                                 value={
                                                     newExpense.split_type === 'equal'
                                                         ? equalAmount
-                                                        : Number(part.share_amount) || 0
+                                                        : Number(part.share_amount.replace(',', '.')) || 0
                                                 }
                                                 editable={
                                                     newExpense.split_type === 'custom' &&
@@ -365,7 +365,7 @@ function CustomSplitSummary({ amount, participants }) {
     const currency = currencies[group.currency];
     
     let totalAssigned = 0;
-    participants?.forEach(x => totalAssigned += Number(x.share_amount) || 0);
+    participants?.forEach(x => totalAssigned += Number(String(x.share_amount).replace(',', '.')) || 0);
 
     const isok = Number(totalAssigned.toFixed(2)) === Number(total.toFixed(2)); 
     const pendent = Number(total) - Number(totalAssigned); 
