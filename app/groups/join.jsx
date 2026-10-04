@@ -11,10 +11,10 @@ import { createCommonStyle } from "../../src/styles/common";
 
 
 
-export default function JoinGroup() {
+export default function JoinGroup({ initialInviteCode }) {
     const { colors } = useTheme();
     const commonStyle = createCommonStyle(colors);
-    const [inviteCode, setInviteCode] = useState('');
+    const [inviteCode, setInviteCode] = useState(initialInviteCode || '');
     const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(null);
 
@@ -44,7 +44,7 @@ export default function JoinGroup() {
             </View>
             <View style={commonStyle.body}>
                 <Text style={commonStyle.label}>Insert invite code</Text>
-                <AppInput style={commonStyle.input} autoCapitalize="characters" value={inviteCode} onChangeText={setInviteCode} placeholder="Invite code" />
+                <AppInput style={commonStyle.input} autoCapitalize="characters" value={inviteCode} disabled={!!initialInviteCode} onChangeText={setInviteCode} placeholder="Invite code" />
                 
                 <Text style={commonStyle.label}>Join group as </Text>
                 <AppInput style={commonStyle.input} value={username} onChangeText={setUsername} placeholder="Join group as" />

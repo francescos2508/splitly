@@ -64,6 +64,7 @@ export default function Settings() {
         await Clipboard.setStringAsync(code);
         showToast('Copied!');
     };
+    const invitePhrase = 'Click the link below to join the Splitly group '+group?.name+'\n'+'https://splitly-f.onrender.com/join/'+group?.invite_code;
     const handleSaveGroupSettings = async (field, newVal, sheetRef) => {
         if (loading) return;
         try {
@@ -175,7 +176,8 @@ export default function Settings() {
                         <Ionicons name='chevron-forward' size={20} color={colors.primary} />
                     </View>
                 </Pressable>
-                <Pressable style={styles.cardSettings} onPress={() => copyInviteCode(group?.invite_code)}>
+                {/* <Pressable style={styles.cardSettings} onPress={() => copyInviteCode(group?.invite_code)}> */}
+                <Pressable style={styles.cardSettings} onPress={() => copyInviteCode(invitePhrase)}>
                     <View style={styles.iconView}>
                         <Ionicons name='share-social-outline' size={20} color={colors.primary} />
                     </View>
@@ -187,6 +189,18 @@ export default function Settings() {
                         <Ionicons name='copy-outline' size={20} color={colors.primary} />
                     </View>
                 </Pressable>
+                {/* <Pressable style={styles.cardSettings} onPress={() => copyInviteCode('https://splitly-f.onrender.com/join/'+group?.invite_code)}>
+                    <View style={styles.iconView}>
+                        <Ionicons name='share-social-outline' size={20} color={colors.primary} />
+                    </View>
+                    <View style={styles.mainInfo}>
+                        <Text style={styles.cardText}>Click to copy invite link</Text>
+                        <Text style={styles.oldValue}>{group?.invite_code}</Text>
+                    </View>
+                    <View>
+                        <Ionicons name='copy-outline' size={20} color={colors.primary} />
+                    </View>
+                </Pressable> */}
                 {admin && (
                     <Pressable style={styles.cardSettings} onPress={openInviteCodeSheet}>
                         <View style={styles.mainInfo}>
@@ -312,7 +326,7 @@ export default function Settings() {
 
             <AdaptiveSheet
                 ref={inviteCodeSheetRef}
-ì            >
+            >
                 <View style={styles.sheet}>
                     <View style={{ flex: 1 }}>
                         <Text style={commonStyle.label}>
