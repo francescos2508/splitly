@@ -21,7 +21,7 @@ export default function NewExpense() {
     const { colors } = useTheme();
     const commonStyle = createCommonStyle(colors);
     const styles = createStyles(colors);
-    const { allMembers, members, expenses, loading, currentMember, setLoading, refreshGroup } = useGroup();
+    const { allMembers, members, expenses, loading, group, setLoading, refreshGroup } = useGroup();
     const { groupId, expenseId } = useLocalSearchParams();
     const isEditing = !!expenseId;
     const [newExpense, setNewExpense] = useState({
@@ -58,16 +58,16 @@ export default function NewExpense() {
         ],
         paidBy: []
     });
-    const splitTypeOptions = [
-        { label: 'equal', value: 'equal', onPress: () => updExpense('split_type', 'equal') , selected: newExpense.split_type === 'equal', disabled: hasRemovedMembers},
-        { label: 'custom', value: 'custom', onPress: () => updExpense('split_type', 'custom') , selected: newExpense.split_type === 'custom', disabled: hasRemovedMembers },
-    ];
     // all id of removed members
     const removedIds = allMembers.filter(x => !x.is_active).map(x => x.id);
     // flag 
     const hasRemovedMembers = removedIds.includes(newExpense.paid_by_member_id) || newExpense.participants.some(x => removedIds.includes(x.memberId));
     // to view everything correct even though there are removed members
     const participantMembers = hasRemovedMembers ? allMembers : members;
+    const splitTypeOptions = [
+        { label: 'equal', value: 'equal', onPress: () => updExpense('split_type', 'equal') , selected: newExpense.split_type === 'equal', disabled: hasRemovedMembers},
+        { label: 'custom', value: 'custom', onPress: () => updExpense('split_type', 'custom') , selected: newExpense.split_type === 'custom', disabled: hasRemovedMembers },
+    ];
 
     const updExpense = (field, val) => {
         setNewExpense((prev) => {
@@ -226,7 +226,7 @@ export default function NewExpense() {
                                 placeholder='Amount'
                                 value={newExpense.amount}
                                 onChangeText={(value) => updExpense('amount', value)}
-                                suffix={currencies[groupId.currency]}
+                                suffix={currencies[group.currency]}
                                 editable={!hasRemovedMembers}
                             />
                         </View>
