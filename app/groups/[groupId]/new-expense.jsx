@@ -121,6 +121,12 @@ export default function NewExpense() {
         try {
             const amount = Number(newExpense.amount.replace(',', '.'));
             if (!Number.isFinite(amount) || amount <= 0) throw new Error('Invalid amount');
+            const participantsData = newExpense.split_type === 'custom' ? newExpense.participants.map((part) => {
+                const memb = allMembers.find(x => x.id === part.memberId);
+                const shareAmount = Number(String(part.share_amount).replace(',', '.'));
+                if (!Number.isFinite(shareAmount) || shareAmount <= 0) throw new Error(`Invalid amount for participant ${memb?.name}`);
+                return {...part, share_amount: shareAmount};
+            }) : newExpense.participants;
             if (newExpense.split_type === 'custom') {
                 const total = Number(String(amount).replace(',', '.')) || 0;
                 let totalAssigned = 0;
@@ -128,11 +134,6 @@ export default function NewExpense() {
                 const isok = Number(totalAssigned.toFixed(2)) === Number(total.toFixed(2));
                 if (!isok) throw new Error('Participants amount does not match expense amount');
             }
-            const participantsData = newExpense.participants.map((part) => {
-                const shareAmount = Number(String(part.share_amount).replace(',', '.'));
-                if (!Number.isFinite(shareAmount) || shareAmount <= 0) throw new Error('Invalid amount for one or more participants');
-                return {...part, share_amount: shareAmount};
-            })
             const expenseData = { ...newExpense, amount, participants: participantsData };
             if (isEditing) {
                 const res = await updateExpense(expenseId, expenseData);
