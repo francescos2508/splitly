@@ -5,18 +5,41 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL;
 console.log("API_URL:", API_URL);
 import { getMemberToken } from "../storage/auth";
 
+// async function apiFetch(endpoint, options = {}) {
+//     const token = await getMemberToken();
+//     const headers = { ...options.headers, };
+
+//     if (token) headers.Authorization = `Bearer ${token}`;
+//     // console.log("AUTH HEADER:", headers.Authorization);
+
+//     return fetch(`${API_URL}${endpoint}`, {
+//         ...options,
+//         headers,
+//     });
+// }
+
 async function apiFetch(endpoint, options = {}) {
     const token = await getMemberToken();
-    const headers = { ...options.headers, };
+    const headers = { ...options.headers };
 
     if (token) headers.Authorization = `Bearer ${token}`;
-    // console.log("AUTH HEADER:", headers.Authorization);
-    alert('TODELETE dentro apiFetch prima della fetch');
 
-    return fetch(`${API_URL}${endpoint}`, {
-        ...options,
-        headers,
-    });
+    console.log("API REQUEST:", `${API_URL}${endpoint}`);
+    console.log("TOKEN EXISTS:", !!token);
+
+    try {
+        const response = await fetch(`${API_URL}${endpoint}`, {
+            ...options,
+            headers,
+        });
+
+        alert(`HTTP STATUS: ${response.status}`);
+        return response;
+
+    } catch (error) {
+        alert(`FETCH ERROR: ${error.message}`);
+        throw error;
+    }
 }
 
 export async function loadCurrentMember(groupId) {
