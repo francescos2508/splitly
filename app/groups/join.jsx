@@ -29,6 +29,8 @@ export default function JoinGroup({ initialInviteCode }) {
             console.error("JOIN ERROR:", error);
             alert(error.message);
             setLoading(false);
+        } finally {
+            setLoading(false);
         }
     }
 

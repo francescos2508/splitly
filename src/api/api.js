@@ -5,41 +5,17 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL;
 console.log("API_URL:", API_URL);
 import { getMemberToken } from "../storage/auth";
 
-// async function apiFetch(endpoint, options = {}) {
-//     const token = await getMemberToken();
-//     const headers = { ...options.headers, };
-
-//     if (token) headers.Authorization = `Bearer ${token}`;
-//     // console.log("AUTH HEADER:", headers.Authorization);
-
-//     return fetch(`${API_URL}${endpoint}`, {
-//         ...options,
-//         headers,
-//     });
-// }
-
 async function apiFetch(endpoint, options = {}) {
     const token = await getMemberToken();
-    const headers = { ...options.headers };
+    const headers = { ...options.headers, };
 
     if (token) headers.Authorization = `Bearer ${token}`;
+    // console.log("AUTH HEADER:", headers.Authorization);
 
-    console.log("API REQUEST:", `${API_URL}${endpoint}`);
-    console.log("TOKEN EXISTS:", !!token);
-
-    try {
-        const response = await fetch(`${API_URL}${endpoint}`, {
-            ...options,
-            headers,
-        });
-
-        alert(`HTTP STATUS: ${response.status}`);
-        return response;
-
-    } catch (error) {
-        alert(`FETCH ERROR: ${error.message}`);
-        throw error;
-    }
+    return fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        headers,
+    });
 }
 
 export async function loadCurrentMember(groupId) {
@@ -100,9 +76,8 @@ export async function regenerateInviteCode(groupId) {
 export async function joinGroup(inviteCode, username) {
     inviteCode = inviteCode.toUpperCase();
     console.log("Calling API:", `${API_URL}/groups/${inviteCode}/join`);
-    alert(`API URL: ${API_URL}`);
     // const response = await fetch(`${API_URL}/groups/${inviteCode}/join`, {
-    const response = await apiFetch(`${API_URL}/groups/${inviteCode}/join`, {
+    const response = await apiFetch(`/groups/${inviteCode}/join`, {
         method: 'POST',
         body: JSON.stringify({userName: username}),
         headers: {
