@@ -98,9 +98,9 @@ export async function regenerateInviteCode(groupId) {
 }
 
 export async function joinGroup(inviteCode, username) {
-    alert('TODELETE entrando in join');
     inviteCode = inviteCode.toUpperCase();
     console.log("Calling API:", `${API_URL}/groups/${inviteCode}/join`);
+    alert(`API URL: ${API_URL}`);
     // const response = await fetch(`${API_URL}/groups/${inviteCode}/join`, {
     const response = await apiFetch(`${API_URL}/groups/${inviteCode}/join`, {
         method: 'POST',
