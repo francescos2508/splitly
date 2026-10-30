@@ -26,7 +26,7 @@ export default function JoinGroup({ initialInviteCode }) {
             setLoading(false);
             if (res && res.group) router.replace(`/groups/${res.group.id}`)
         } catch (error) {
-            // console.error(error);
+            console.error("JOIN ERROR:", error);
             alert(error.message);
             setLoading(false);
         }

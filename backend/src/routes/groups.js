@@ -153,6 +153,7 @@ router.post('/:inviteCode/join', async (req, res) => {
     const { inviteCode } = req.params;
     const { userName } = req.body;
 
+    console.log('joining group '+inviteCode);
     
     try {
         // check memberToken
