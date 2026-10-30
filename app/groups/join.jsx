@@ -22,7 +22,6 @@ export default function JoinGroup({ initialInviteCode }) {
         try {
             setLoading(true);
             const res = await joinGroup(inviteCode.toUpperCase(), username);
-            alert('TODELETE tra joinGroup e saveMemberToken');
             if (res && res.member) await saveMemberToken(res?.member.member_token);
             setLoading(false);
             if (res && res.group) router.replace(`/groups/${res.group.id}`)
