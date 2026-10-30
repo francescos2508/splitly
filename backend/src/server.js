@@ -7,13 +7,14 @@ const expensesRouter = require("./routes/expenses");
 const paymentsRouter = require("./routes/payments");
 const app = express();
 
-app.use(cors({
-    origin: [
-        "http://localhost:8081",
-        "http://192.168.0.15:3000",
-        "https://splitly-f.onrender.com",
-    ]
-}));
+// app.use(cors({
+//     origin: [
+//         "http://localhost:8081",
+//         "http://192.168.0.15:3000",
+//         "https://splitly-f.onrender.com",
+//     ]
+// }));
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
