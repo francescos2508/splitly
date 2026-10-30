@@ -11,6 +11,7 @@ async function apiFetch(endpoint, options = {}) {
 
     if (token) headers.Authorization = `Bearer ${token}`;
     // console.log("AUTH HEADER:", headers.Authorization);
+    alert('TODELETE dentro apiFetch prima della fetch');
 
     return fetch(`${API_URL}${endpoint}`, {
         ...options,
